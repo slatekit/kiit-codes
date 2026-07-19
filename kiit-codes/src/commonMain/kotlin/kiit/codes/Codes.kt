@@ -19,17 +19,18 @@ package kiit.codes
  * directly; only the four categories under each are fixed/closed (see [Status]).
  *
  * Numeric code ranges (conceptual grouping only — see the NOTE on [Status.code]):
- *   200000-200099 Succeeded     200100-200199 Pending
- *   200200-200299 Filtered      200300-200399 Information
- *   400000-400099 Denied        400100-400199 Invalid
- *   500000-500099 Errored       500100-500199 Unserviceable
+ *   200000-200999 Succeeded     201000-201999 Pending
+ *   202000-202999 Filtered      203000-203999 Information
+ *   400000-400999 Denied        401000-401999 Invalid
+ *   402000-402999 Errored       403000-403999 Unserved
  *
  * Uniqueness of every code in this registry is enforced at object-init time (see the `init`
  * block below) — a duplicate code will fail loudly the first time [Codes] is touched, rather
- * than silently producing a wrong HTTP mapping.
+ * than silently producing a wrong HTTP mapping. So is every code falling inside its own
+ * category's documented range above.
  */
 object Codes {
-    // ---- Succeeded (200000-200099) ----
+    // ---- Succeeded (200000-200999) ----
     val SUCCESS = Passed.Succeeded("SUCCESS", 200001, "Success")
     val CREATED = Passed.Succeeded("CREATED", 200002, "Created")
     val UPDATED = Passed.Succeeded("UPDATED", 200003, "Updated")
@@ -38,46 +39,46 @@ object Codes {
     val DELETED = Passed.Succeeded("DELETED", 200006, "Deleted")
     val HANDLED = Passed.Succeeded("HANDLED", 200007, "Handled") // e.g. a silent OK, similar to HTTP 204
 
-    // ---- Pending (200100-200199) ----
-    val PENDING = Passed.Pending("PENDING", 200101, "Pending")
-    val QUEUED = Passed.Pending("QUEUED", 200102, "Queued")
-    val CONFIRM = Passed.Pending("CONFIRM", 200103, "Confirm")
+    // ---- Pending (201000-201999) ----
+    val PENDING = Passed.Pending("PENDING", 201001, "Pending")
+    val QUEUED = Passed.Pending("QUEUED", 201002, "Queued")
+    val CONFIRM = Passed.Pending("CONFIRM", 201003, "Confirm")
 
-    // ---- Filtered (200200-200299) ----
-    val SKIPPED = Passed.Filtered("SKIPPED", 200201, "Skipped") // not processed at all
-    val DISCARDED = Passed.Filtered("DISCARDED", 200202, "Discarded") // processed, result thrown away
+    // ---- Filtered (202000-202999) ----
+    val SKIPPED = Passed.Filtered("SKIPPED", 202001, "Skipped") // not processed at all
+    val DISCARDED = Passed.Filtered("DISCARDED", 202002, "Discarded") // processed, result thrown away
 
-    // ---- Information (200300-200399) ----
-    val HELP = Passed.Information("HELP", 200301, "Help")
-    val ABOUT = Passed.Information("ABOUT", 200302, "About")
-    val VERSION = Passed.Information("VERSION", 200303, "Version")
-    val EXIT = Passed.Information("EXIT", 200304, "Exiting")
+    // ---- Information (203000-203999) ----
+    val HELP = Passed.Information("HELP", 203001, "Help")
+    val ABOUT = Passed.Information("ABOUT", 203002, "About")
+    val VERSION = Passed.Information("VERSION", 203003, "Version")
+    val EXIT = Passed.Information("EXIT", 203004, "Exiting")
 
-    // ---- Denied (400000-400099) — security / access-control ----
+    // ---- Denied (400000-400999) — security / access-control ----
     val DENIED = Failed.Denied("DENIED", 400001, "Denied")
     val UNAUTHENTICATED = Failed.Denied("UNAUTHENTICATED", 400002, "Unauthenticated")
     val UNAUTHORIZED = Failed.Denied("UNAUTHORIZED", 400003, "Unauthorized")
 
-    // ---- Invalid (400100-400199) — bad input ----
-    val BAD_REQUEST = Failed.Invalid("BAD_REQUEST", 400101, "Bad request") // e.g. malformed JSON
-    val INVALID = Failed.Invalid("INVALID", 400102, "Invalid") // e.g. well-formed but invalid values
-    val NOT_FOUND = Failed.Invalid("NOT_FOUND", 400103, "Not found") // e.g. resource/endpoint not found
+    // ---- Invalid (401000-401999) — bad input ----
+    val BAD_REQUEST = Failed.Invalid("BAD_REQUEST", 401001, "Bad request") // e.g. malformed JSON
+    val INVALID = Failed.Invalid("INVALID", 401002, "Invalid") // e.g. well-formed but invalid values
+    val NOT_FOUND = Failed.Invalid("NOT_FOUND", 401003, "Not found") // e.g. resource/endpoint not found
 
-    // ---- Errored (500000-500099) — known, expected business-rule failure ----
-    val MISSING = Failed.Errored("MISSING", 500001, "Missing item") // e.g. domain model not found
-    val FORBIDDEN = Failed.Errored("FORBIDDEN", 500002, "Forbidden")
-    val CONFLICT = Failed.Errored("CONFLICT", 500003, "Conflict")
-    val DEPRECATED = Failed.Errored("DEPRECATED", 500004, "Deprecated")
-    val ERRORED = Failed.Errored("ERRORED", 500005, "Errored") // general purpose use
+    // ---- Errored (402000-402999) — known, expected business-rule failure ----
+    val MISSING = Failed.Errored("MISSING", 402001, "Missing item") // e.g. domain model not found
+    val FORBIDDEN = Failed.Errored("FORBIDDEN", 402002, "Forbidden")
+    val CONFLICT = Failed.Errored("CONFLICT", 402003, "Conflict")
+    val DEPRECATED = Failed.Errored("DEPRECATED", 402004, "Deprecated")
+    val ERRORED = Failed.Errored("ERRORED", 402005, "Errored") // general purpose use
 
-    // ---- Unserviceable (500100-500199) — valid & permitted, can't be serviced right now ----
-    val UNIMPLEMENTED = Failed.Unserviceable("UNIMPLEMENTED", 500101, "Not implemented")
-    val UNSUPPORTED = Failed.Unserviceable("UNSUPPORTED", 500102, "Not supported")
-    val TIMEOUT = Failed.Unserviceable("TIMEOUT", 500103, "Timeout")
-    val RATE_LIMITED = Failed.Unserviceable("RATE_LIMITED", 500104, "Rate limited")
-    val UNREACHABLE = Failed.Unserviceable("UNREACHABLE", 500105, "Unreachable") // e.g. dependency down
-    val UNDER_MAINTENANCE = Failed.Unserviceable("UNDER_MAINTENANCE", 500106, "Under maintenance")
-    val UNEXPECTED = Failed.Unserviceable("UNEXPECTED", 500107, "Unexpected") // unhandled/uncaught path
+    // ---- Unserved (403000-403999) — valid & permitted, can't be serviced right now ----
+    val UNIMPLEMENTED = Failed.Unserved("UNIMPLEMENTED", 403001, "Not implemented")
+    val UNSUPPORTED = Failed.Unserved("UNSUPPORTED", 403002, "Not supported")
+    val TIMEOUT = Failed.Unserved("TIMEOUT", 403003, "Timeout")
+    val RATE_LIMITED = Failed.Unserved("RATE_LIMITED", 403004, "Rate limited")
+    val UNREACHABLE = Failed.Unserved("UNREACHABLE", 403005, "Unreachable") // e.g. dependency down
+    val UNDER_MAINTENANCE = Failed.Unserved("UNDER_MAINTENANCE", 403006, "Under maintenance")
+    val UNEXPECTED = Failed.Unserved("UNEXPECTED", 403007, "Unexpected") // unhandled/uncaught path
 
     /** All built-in codes. Used for reverse lookups — see [CodesToHttp], [CompositeLookup]. */
     val all: List<Status> =
@@ -99,7 +100,25 @@ object Codes {
             val dupes = all.groupBy { it.code }.filterValues { it.size > 1 }.keys
             "Duplicate Status codes detected in Codes registry: $dupes"
         }
+        val outOfRange = all.filterNot { it.code in categoryRange(it) }
+        check(outOfRange.isEmpty()) {
+            val offenders = outOfRange.map { "${it.name}=${it.code}" }
+            "Status codes outside their documented category range: $offenders"
+        }
     }
+
+    /** The documented numeric range for [status]'s category — see the range table above. */
+    private fun categoryRange(status: Status): IntRange =
+        when (status) {
+            is Passed.Succeeded -> 200000..200999
+            is Passed.Pending -> 201000..201999
+            is Passed.Filtered -> 202000..202999
+            is Passed.Information -> 203000..203999
+            is Failed.Denied -> 400000..400999
+            is Failed.Invalid -> 401000..401999
+            is Failed.Errored -> 402000..402999
+            is Failed.Unserved -> 403000..403999
+        }
 
     /** Looks up a built-in [Status] by its internal registry code (e.g. 400001). Null if unknown. */
     fun statusForCode(code: Int): Status? = byCode[code]
@@ -126,7 +145,7 @@ interface CodeLookup {
  *
  * Category -> HTTP default:
  *   Succeeded / Filtered / Information -> 200      Pending -> 202
- *   Denied -> 401      Invalid -> 400      Errored -> 500      Unserviceable -> 503
+ *   Denied -> 401      Invalid -> 400      Errored -> 500      Unserved -> 503
  *
  * Individual codes can differ from their category's default via [overrides] (e.g. CREATED -> 201,
  * NOT_FOUND -> 404). [toStatus] is derived from [toCode] rather than a separately maintained
@@ -148,7 +167,7 @@ open class CodesToHttp(
             is Failed.Denied -> 401
             is Failed.Invalid -> 400
             is Failed.Errored -> 500
-            is Failed.Unserviceable -> 503
+            is Failed.Unserved -> 503
         }
     }
 

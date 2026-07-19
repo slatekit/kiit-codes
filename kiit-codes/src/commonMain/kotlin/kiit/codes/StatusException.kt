@@ -19,7 +19,7 @@ package kiit.codes
  *         is Failed.Denied         -> // handle auth failure
  *         is Failed.Invalid        -> // handle bad input
  *         is Failed.Errored        -> // handle known business-rule failure
- *         is Failed.Unserviceable  -> // handle capacity / timeout / unimplemented / unexpected
+ *         is Failed.Unserved  -> // handle capacity / timeout / unimplemented / unexpected
  *         is Passed                -> // n/a — Passed statuses aren't normally thrown
  *     }
  * }

@@ -113,7 +113,7 @@ class CodesToHttpTest {
         assertEquals(500, http.toCode(Codes.ERRORED))
     }
 
-    @Test fun categoryDefaultUnserviceable() {
+    @Test fun categoryDefaultUnserved() {
         assertEquals(503, http.toCode(Codes.UNREACHABLE))
         assertEquals(503, http.toCode(Codes.UNDER_MAINTENANCE))
     }

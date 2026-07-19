@@ -59,9 +59,9 @@ class StatusExceptionTest {
     }
 
     @Test
-    fun worksWithUnserviceableStatus() {
+    fun worksWithUnservedStatus() {
         val ex = StatusException(Codes.UNREACHABLE)
         assertEquals(Codes.UNREACHABLE.message, ex.message)
-        assertTrue(ex.status is Failed.Unserviceable)
+        assertTrue(ex.status is Failed.Unserved)
     }
 }
