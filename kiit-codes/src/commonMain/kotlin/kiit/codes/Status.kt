@@ -24,7 +24,7 @@ package kiit.codes
  *
  *   Status  = Passed     | Failed
  *   Passed  = Succeeded  | Pending | Filtered | Information
- *   Failed  = Denied     | Invalid | Errored  | Unserviceable
+ *   Failed  = Denied     | Invalid | Errored  | Unserved
  *
  * NOTE: [code] ranges are grouped conceptually the way HTTP groups 2xx/4xx/5xx, but this is a
  * conceptual similarity only — [code] is NOT a literal HTTP status. Always convert via a
@@ -93,17 +93,17 @@ sealed interface Status {
             return if (msg == null) base else base.copyMessage(msg) as T
         }
 
-        /** Returns the lowercase category discriminant for a status, e.g. "denied", "errored". */
+        /** Returns the category discriminant for a status, e.g. "Denied", "Errored". */
         fun toType(status: Status): String =
             when (status) {
-                is Passed.Succeeded -> "succeeded"
-                is Passed.Pending -> "pending"
-                is Passed.Filtered -> "filtered"
-                is Passed.Information -> "information"
-                is Failed.Denied -> "denied"
-                is Failed.Invalid -> "invalid"
-                is Failed.Errored -> "errored"
-                is Failed.Unserviceable -> "unserviceable"
+                is Passed.Succeeded -> "Succeeded"
+                is Passed.Pending -> "Pending"
+                is Passed.Filtered -> "Filtered"
+                is Passed.Information -> "Information"
+                is Failed.Denied -> "Denied"
+                is Failed.Invalid -> "Invalid"
+                is Failed.Errored -> "Errored"
+                is Failed.Unserved -> "Unserved"
             }
     }
 }
@@ -155,7 +155,7 @@ sealed class Passed : Status {
 
 /**
  * Parent sealed type for all failure statuses (success = false for every subtype).
- * Subtypes: [Denied], [Invalid], [Errored], [Unserviceable].
+ * Subtypes: [Denied], [Invalid], [Errored], [Unserved].
  */
 sealed class Failed : Status {
     final override val success: Boolean get() = false
@@ -174,14 +174,14 @@ sealed class Failed : Status {
      * to what was sent — capacity, timeout, an unimplemented/unsupported capability, planned
      * maintenance, or a genuinely unexpected/unhandled failure (see [Codes.UNEXPECTED]).
      */
-    data class Unserviceable(override val name: String, override val code: Int, override val message: String) : Failed()
+    data class Unserved(override val name: String, override val code: Int, override val message: String) : Failed()
 
     override fun copyAll(msg: String, code: Int): Status =
         when (this) {
             is Denied -> copy(code = code, message = msg)
             is Invalid -> copy(code = code, message = msg)
             is Errored -> copy(code = code, message = msg)
-            is Unserviceable -> copy(code = code, message = msg)
+            is Unserved -> copy(code = code, message = msg)
         }
 
     override fun copyMessage(msg: String): Status =
@@ -189,6 +189,6 @@ sealed class Failed : Status {
             is Denied -> copy(message = msg)
             is Invalid -> copy(message = msg)
             is Errored -> copy(message = msg)
-            is Unserviceable -> copy(message = msg)
+            is Unserved -> copy(message = msg)
         }
 }
