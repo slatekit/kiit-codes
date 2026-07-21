@@ -33,20 +33,35 @@ sealed class Err {
     /**
      * Default Error implementation to represent an error with message and optional throwable
      */
-    data class ErrorInfo(override val msg: String, override val cause: Throwable? = null, override val ref: Any? = null) : Err()
+    data class ErrorInfo(
+        override val msg: String,
+        override val cause: Throwable? = null,
+        override val ref: Any? = null,
+    ) : Err()
 
     /**
      * Error implementation to represent an error on a specific field
      * @param field: Name of the field causing the error e.g. "email"
      * @param value: Value of the field causing the error e.g. "some_invalid_value"
      */
-    data class ErrorField(val field: String, val value: String, override val msg: String, override val cause: Throwable? = null, override val ref: Any? = null) : Err()
+    data class ErrorField(
+        val field: String,
+        val value: String,
+        override val msg: String,
+        override val cause: Throwable? = null,
+        override val ref: Any? = null,
+    ) : Err()
 
     /**
      * Error implementation to store list of errors
      * @param errors: List of all the errors
      */
-    data class ErrorList(val errors: List<Err>, override val msg: String, override val cause: Throwable? = null, override val ref: Any? = null) : Err()
+    data class ErrorList(
+        val errors: List<Err>,
+        override val msg: String,
+        override val cause: Throwable? = null,
+        override val ref: Any? = null,
+    ) : Err()
 
     /**
      * Provides easy ways to build the Err type from various sources such as strings, exceptions, field errors

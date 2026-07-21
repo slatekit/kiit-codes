@@ -25,7 +25,8 @@ object StatusConstants {
  * a background job step, an API request, or a CLI command.
  *
  * Shape (maps directly to JSON / API error responses):
- *   { "name": "TOKEN_EXPIRED", "group": "Denied", "origin": "kiit", "message": "Session token expired", "success": false }
+ *   { "name": "TOKEN_EXPIRED", "group": "Denied", "origin": "kiit",
+ *     "message": "Session token expired", "success": false }
  *
  * Hierarchy. Categories are closed/sealed and fixed by design, to enforce a consistent taxonomy
  * across every consumer. Individual codes *within* a category are open — create new domain codes
@@ -102,10 +103,18 @@ sealed class Passed : Status {
         }
 
     /** Operation's primary purpose completed (e.g. a value was created, fetched, updated). */
-    data class Succeeded(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
+    data class Succeeded(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
     /** Operation accepted but not yet fully processed (e.g. queued, waiting, confirmed). */
-    data class Pending(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
+    data class Pending(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
     /**
      * Item was excluded from the operation's normal output. Covers both:
@@ -114,13 +123,21 @@ sealed class Passed : Status {
      * The distinction is carried by [name], not by separate types — see [Codes.SKIPPED]
      * and [Codes.DISCARDED].
      */
-    data class Filtered(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
+    data class Filtered(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
     /**
      * Informational / metadata response — no primary operation was performed.
      * E.g. HELP, ABOUT, VERSION output from a CLI command.
      */
-    data class Information(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
+    data class Information(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
     override fun copyAll(msg: String, origin: String): Status =
         when (this) {
@@ -155,20 +172,36 @@ sealed class Failed : Status {
         }
 
     /** Security / access-control failure — the caller is not permitted to perform this action. */
-    data class Denied(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
+    data class Denied(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
     /** The request as given cannot be satisfied — malformed input, invalid values, or not found. */
-    data class Invalid(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
+    data class Invalid(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
     /** A known, expected business-rule failure — understood and handled by the caller. */
-    data class Errored(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
+    data class Errored(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
     /**
      * The request is valid and permitted, but cannot be serviced right now for reasons unrelated
      * to what was sent — capacity, timeout, an unimplemented/unsupported capability, planned
      * maintenance, or a genuinely unexpected/unhandled failure (see [Codes.UNEXPECTED]).
      */
-    data class Unserved(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
+    data class Unserved(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
     override fun copyAll(msg: String, origin: String): Status =
         when (this) {
