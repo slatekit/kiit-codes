@@ -52,7 +52,7 @@ class StatusExceptionTest {
 
     @Test
     fun worksWithCustomStatus() {
-        val custom = Failed.Errored("RATE_LIMITED", 500199, "Rate limited")
+        val custom = Failed.Errored("RATE_LIMITED", "Rate limited")
         val ex = StatusException(custom)
         assertEquals("Rate limited", ex.message)
         assertSame(custom, ex.status)
