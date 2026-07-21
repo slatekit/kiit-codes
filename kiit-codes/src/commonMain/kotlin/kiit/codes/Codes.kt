@@ -17,58 +17,58 @@ package kiit.codes
  * Using this is optional — they're provided as sensible defaults and for kiit-result builder
  * methods. Custom domain codes can be created by constructing any [Passed] or [Failed] subtype
  * directly; only the four categories under each are fixed/closed (see [Status]). Every entry in
- * this registry has [Status.origin] == "kiit".
+ * this registry has [Status.origin] == [StatusConstants.KIIT].
  */
 object Codes {
     // ---- Succeeded ----
-    val SUCCESS = Passed.Succeeded("SUCCESS", "Success", origin = "kiit")
-    val CREATED = Passed.Succeeded("CREATED", "Created", origin = "kiit")
-    val UPDATED = Passed.Succeeded("UPDATED", "Updated", origin = "kiit")
-    val FETCHED = Passed.Succeeded("FETCHED", "Fetched", origin = "kiit")
-    val PATCHED = Passed.Succeeded("PATCHED", "Patched", origin = "kiit")
-    val DELETED = Passed.Succeeded("DELETED", "Deleted", origin = "kiit")
-    val HANDLED = Passed.Succeeded("HANDLED", "Handled", origin = "kiit") // e.g. a silent OK, similar to HTTP 204
+    val SUCCESS = Passed.Succeeded("SUCCESS", "Success", origin = StatusConstants.KIIT)
+    val CREATED = Passed.Succeeded("CREATED", "Created", origin = StatusConstants.KIIT)
+    val UPDATED = Passed.Succeeded("UPDATED", "Updated", origin = StatusConstants.KIIT)
+    val FETCHED = Passed.Succeeded("FETCHED", "Fetched", origin = StatusConstants.KIIT)
+    val PATCHED = Passed.Succeeded("PATCHED", "Patched", origin = StatusConstants.KIIT)
+    val DELETED = Passed.Succeeded("DELETED", "Deleted", origin = StatusConstants.KIIT)
+    val HANDLED = Passed.Succeeded("HANDLED", "Handled", origin = StatusConstants.KIIT) // e.g. a silent OK, similar to HTTP 204
 
     // ---- Pending ----
-    val PENDING = Passed.Pending("PENDING", "Pending", origin = "kiit")
-    val QUEUED = Passed.Pending("QUEUED", "Queued", origin = "kiit")
-    val CONFIRM = Passed.Pending("CONFIRM", "Confirm", origin = "kiit")
+    val PENDING = Passed.Pending("PENDING", "Pending", origin = StatusConstants.KIIT)
+    val QUEUED = Passed.Pending("QUEUED", "Queued", origin = StatusConstants.KIIT)
+    val CONFIRM = Passed.Pending("CONFIRM", "Confirm", origin = StatusConstants.KIIT)
 
     // ---- Filtered ----
-    val SKIPPED = Passed.Filtered("SKIPPED", "Skipped", origin = "kiit") // not processed at all
-    val DISCARDED = Passed.Filtered("DISCARDED", "Discarded", origin = "kiit") // processed, result thrown away
+    val SKIPPED = Passed.Filtered("SKIPPED", "Skipped", origin = StatusConstants.KIIT) // not processed at all
+    val DISCARDED = Passed.Filtered("DISCARDED", "Discarded", origin = StatusConstants.KIIT) // processed, result thrown away
 
     // ---- Information ----
-    val HELP = Passed.Information("HELP", "Help", origin = "kiit")
-    val ABOUT = Passed.Information("ABOUT", "About", origin = "kiit")
-    val VERSION = Passed.Information("VERSION", "Version", origin = "kiit")
-    val EXIT = Passed.Information("EXIT", "Exiting", origin = "kiit")
+    val HELP = Passed.Information("HELP", "Help", origin = StatusConstants.KIIT)
+    val ABOUT = Passed.Information("ABOUT", "About", origin = StatusConstants.KIIT)
+    val VERSION = Passed.Information("VERSION", "Version", origin = StatusConstants.KIIT)
+    val EXIT = Passed.Information("EXIT", "Exiting", origin = StatusConstants.KIIT)
 
     // ---- Denied — security / access-control ----
-    val DENIED = Failed.Denied("DENIED", "Denied", origin = "kiit")
-    val UNAUTHENTICATED = Failed.Denied("UNAUTHENTICATED", "Unauthenticated", origin = "kiit")
-    val UNAUTHORIZED = Failed.Denied("UNAUTHORIZED", "Unauthorized", origin = "kiit")
+    val DENIED = Failed.Denied("DENIED", "Denied", origin = StatusConstants.KIIT)
+    val UNAUTHENTICATED = Failed.Denied("UNAUTHENTICATED", "Unauthenticated", origin = StatusConstants.KIIT)
+    val UNAUTHORIZED = Failed.Denied("UNAUTHORIZED", "Unauthorized", origin = StatusConstants.KIIT)
 
     // ---- Invalid — bad input ----
-    val BAD_REQUEST = Failed.Invalid("BAD_REQUEST", "Bad request", origin = "kiit") // e.g. malformed JSON
-    val INVALID = Failed.Invalid("INVALID", "Invalid", origin = "kiit") // e.g. well-formed but invalid values
-    val NOT_FOUND = Failed.Invalid("NOT_FOUND", "Not found", origin = "kiit") // e.g. resource/endpoint not found
+    val BAD_REQUEST = Failed.Invalid("BAD_REQUEST", "Bad request", origin = StatusConstants.KIIT) // e.g. malformed JSON
+    val INVALID = Failed.Invalid("INVALID", "Invalid", origin = StatusConstants.KIIT) // e.g. well-formed but invalid values
+    val NOT_FOUND = Failed.Invalid("NOT_FOUND", "Not found", origin = StatusConstants.KIIT) // e.g. resource/endpoint not found
 
     // ---- Errored — known, expected business-rule failure ----
-    val MISSING = Failed.Errored("MISSING", "Missing item", origin = "kiit") // e.g. domain model not found
-    val FORBIDDEN = Failed.Errored("FORBIDDEN", "Forbidden", origin = "kiit")
-    val CONFLICT = Failed.Errored("CONFLICT", "Conflict", origin = "kiit")
-    val DEPRECATED = Failed.Errored("DEPRECATED", "Deprecated", origin = "kiit")
-    val ERRORED = Failed.Errored("ERRORED", "Errored", origin = "kiit") // general purpose use
+    val MISSING = Failed.Errored("MISSING", "Missing item", origin = StatusConstants.KIIT) // e.g. domain model not found
+    val FORBIDDEN = Failed.Errored("FORBIDDEN", "Forbidden", origin = StatusConstants.KIIT)
+    val CONFLICT = Failed.Errored("CONFLICT", "Conflict", origin = StatusConstants.KIIT)
+    val DEPRECATED = Failed.Errored("DEPRECATED", "Deprecated", origin = StatusConstants.KIIT)
+    val ERRORED = Failed.Errored("ERRORED", "Errored", origin = StatusConstants.KIIT) // general purpose use
 
     // ---- Unserved — valid & permitted, can't be serviced right now ----
-    val UNIMPLEMENTED = Failed.Unserved("UNIMPLEMENTED", "Not implemented", origin = "kiit")
-    val UNSUPPORTED = Failed.Unserved("UNSUPPORTED", "Not supported", origin = "kiit")
-    val TIMEOUT = Failed.Unserved("TIMEOUT", "Timeout", origin = "kiit")
-    val RATE_LIMITED = Failed.Unserved("RATE_LIMITED", "Rate limited", origin = "kiit")
-    val UNREACHABLE = Failed.Unserved("UNREACHABLE", "Unreachable", origin = "kiit") // e.g. dependency down
-    val UNDER_MAINTENANCE = Failed.Unserved("UNDER_MAINTENANCE", "Under maintenance", origin = "kiit")
-    val UNEXPECTED = Failed.Unserved("UNEXPECTED", "Unexpected", origin = "kiit") // unhandled/uncaught path
+    val UNIMPLEMENTED = Failed.Unserved("UNIMPLEMENTED", "Not implemented", origin = StatusConstants.KIIT)
+    val UNSUPPORTED = Failed.Unserved("UNSUPPORTED", "Not supported", origin = StatusConstants.KIIT)
+    val TIMEOUT = Failed.Unserved("TIMEOUT", "Timeout", origin = StatusConstants.KIIT)
+    val RATE_LIMITED = Failed.Unserved("RATE_LIMITED", "Rate limited", origin = StatusConstants.KIIT)
+    val UNREACHABLE = Failed.Unserved("UNREACHABLE", "Unreachable", origin = StatusConstants.KIIT) // e.g. dependency down
+    val UNDER_MAINTENANCE = Failed.Unserved("UNDER_MAINTENANCE", "Under maintenance", origin = StatusConstants.KIIT)
+    val UNEXPECTED = Failed.Unserved("UNEXPECTED", "Unexpected", origin = StatusConstants.KIIT) // unhandled/uncaught path
 
     /** All built-in codes. Used for reverse lookups — see [CodesToHttp], [CompositeLookup]. */
     val all: List<Status> =
