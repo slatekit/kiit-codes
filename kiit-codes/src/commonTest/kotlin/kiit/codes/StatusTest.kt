@@ -57,12 +57,12 @@ class StatusTest {
     // -------------------------------------------------------------------------
 
     @Test fun originDefaultsToCustom() {
-        assertEquals("custom", Passed.Succeeded("S", "S").origin)
-        assertEquals("custom", Failed.Denied("D", "D").origin)
+        assertEquals(StatusConstants.CUSTOM, Passed.Succeeded("S", "S").origin)
+        assertEquals(StatusConstants.CUSTOM, Failed.Denied("D", "D").origin)
     }
 
     @Test fun originIsOverridable() {
-        assertEquals("kiit", Passed.Succeeded("S", "S", origin = "kiit").origin)
+        assertEquals(StatusConstants.KIIT, Passed.Succeeded("S", "S", origin = StatusConstants.KIIT).origin)
     }
 
     // -------------------------------------------------------------------------
@@ -87,7 +87,7 @@ class StatusTest {
 
     @Test
     fun copyMessageOnSucceeded() {
-        val s = Passed.Succeeded("SUCCESS", "Success", origin = "kiit")
+        val s = Passed.Succeeded("SUCCESS", "Success", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
         assertEquals(s.name, copy.name)
@@ -97,7 +97,7 @@ class StatusTest {
 
     @Test
     fun copyMessageOnPending() {
-        val s = Passed.Pending("PENDING", "Pending", origin = "kiit")
+        val s = Passed.Pending("PENDING", "Pending", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
         assertEquals(s.origin, copy.origin)
@@ -105,14 +105,14 @@ class StatusTest {
 
     @Test
     fun copyMessageOnFiltered() {
-        val s = Passed.Filtered("SKIPPED", "Skipped", origin = "kiit")
+        val s = Passed.Filtered("SKIPPED", "Skipped", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
     }
 
     @Test
     fun copyMessageOnInformation() {
-        val s = Passed.Information("HELP", "Help", origin = "kiit")
+        val s = Passed.Information("HELP", "Help", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
         assertTrue(copy.success)
@@ -120,7 +120,7 @@ class StatusTest {
 
     @Test
     fun copyMessageOnDenied() {
-        val s = Failed.Denied("DENIED", "Denied", origin = "kiit")
+        val s = Failed.Denied("DENIED", "Denied", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
         assertFalse(copy.success)
@@ -128,21 +128,21 @@ class StatusTest {
 
     @Test
     fun copyMessageOnInvalid() {
-        val s = Failed.Invalid("INVALID", "Invalid", origin = "kiit")
+        val s = Failed.Invalid("INVALID", "Invalid", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
     }
 
     @Test
     fun copyMessageOnErrored() {
-        val s = Failed.Errored("ERRORED", "Errored", origin = "kiit")
+        val s = Failed.Errored("ERRORED", "Errored", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
     }
 
     @Test
     fun copyMessageOnUnserved() {
-        val s = Failed.Unserved("UNEXPECTED", "Unexpected", origin = "kiit")
+        val s = Failed.Unserved("UNEXPECTED", "Unexpected", origin = StatusConstants.KIIT)
         val copy = s.copyMessage("Custom")
         assertEquals("Custom", copy.message)
         assertFalse(copy.success)
@@ -154,7 +154,7 @@ class StatusTest {
 
     @Test
     fun copyAllOnSucceeded() {
-        val s = Passed.Succeeded("SUCCESS", "Success", origin = "kiit")
+        val s = Passed.Succeeded("SUCCESS", "Success", origin = StatusConstants.KIIT)
         val copy = s.copyAll("Custom", "external")
         assertEquals("Custom", copy.message)
         assertEquals("external", copy.origin)
@@ -163,7 +163,7 @@ class StatusTest {
 
     @Test
     fun copyAllOnDenied() {
-        val s = Failed.Denied("DENIED", "Denied", origin = "kiit")
+        val s = Failed.Denied("DENIED", "Denied", origin = StatusConstants.KIIT)
         val copy = s.copyAll("Custom", "external")
         assertEquals("Custom", copy.message)
         assertEquals("external", copy.origin)
@@ -172,7 +172,7 @@ class StatusTest {
 
     @Test
     fun copyAllOnUnserved() {
-        val s = Failed.Unserved("TIMEOUT", "Timeout", origin = "kiit")
+        val s = Failed.Unserved("TIMEOUT", "Timeout", origin = StatusConstants.KIIT)
         val copy = s.copyAll("Custom", "external")
         assertEquals("Custom", copy.message)
         assertEquals("external", copy.origin)

@@ -16,7 +16,7 @@ class CodesTest {
     @Test
     fun successHasCorrectValues() {
         assertEquals("SUCCESS", Codes.SUCCESS.name)
-        assertEquals("kiit", Codes.SUCCESS.origin)
+        assertEquals(StatusConstants.KIIT, Codes.SUCCESS.origin)
         assertEquals("Success", Codes.SUCCESS.message)
         assertTrue(Codes.SUCCESS.success)
     }
@@ -24,7 +24,7 @@ class CodesTest {
     @Test
     fun deniedHasCorrectValues() {
         assertEquals("DENIED", Codes.DENIED.name)
-        assertEquals("kiit", Codes.DENIED.origin)
+        assertEquals(StatusConstants.KIIT, Codes.DENIED.origin)
         assertFalse(Codes.DENIED.success)
     }
 
@@ -45,7 +45,7 @@ class CodesTest {
 
     @Test
     fun everyBuiltInCodeHasKiitOrigin() {
-        assertTrue(Codes.all.all { it.origin == "kiit" })
+        assertTrue(Codes.all.all { it.origin == StatusConstants.KIIT })
     }
 }
 
