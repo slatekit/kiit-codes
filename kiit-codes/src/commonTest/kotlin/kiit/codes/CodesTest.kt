@@ -16,7 +16,7 @@ class CodesTest {
     @Test
     fun successHasCorrectValues() {
         assertEquals("SUCCESS", Codes.SUCCESS.name)
-        assertEquals(200001, Codes.SUCCESS.code)
+        assertEquals(StatusConstants.KIIT, Codes.SUCCESS.origin)
         assertEquals("Success", Codes.SUCCESS.message)
         assertTrue(Codes.SUCCESS.success)
     }
@@ -24,16 +24,15 @@ class CodesTest {
     @Test
     fun deniedHasCorrectValues() {
         assertEquals("DENIED", Codes.DENIED.name)
-        assertEquals(400001, Codes.DENIED.code)
+        assertEquals(StatusConstants.KIIT, Codes.DENIED.origin)
         assertFalse(Codes.DENIED.success)
     }
 
     @Test
-    fun skippedAndDiscardedHaveDistinctCodesAndSuccessTrue() {
-        // Regression test for the original bug: FILTERED and IGNORED both = 200204.
+    fun skippedAndDiscardedHaveDistinctNamesAndSuccessTrue() {
         assertTrue(Codes.SKIPPED.success)
         assertTrue(Codes.DISCARDED.success)
-        assertNotEqualsCode(Codes.SKIPPED, Codes.DISCARDED)
+        assertTrue(Codes.SKIPPED.name != Codes.DISCARDED.name)
     }
 
     @Test
@@ -45,27 +44,8 @@ class CodesTest {
     }
 
     @Test
-    fun registryHasNoDuplicateCodes() {
-        // Codes' init block already enforces this the moment the object is touched (which every
-        // test in this file does) — this test just names the invariant explicitly for clarity.
-        val codes = Codes.all.map { it.code }
-        assertEquals(codes.size, codes.toSet().size, "Duplicate codes found in Codes.all: $codes")
-    }
-
-    @Test
-    fun statusForCodeReturnsMatchForKnownInternalCode() {
-        val status = Codes.statusForCode(Codes.SUCCESS.code)
-        assertNotNull(status)
-        assertEquals(Codes.SUCCESS.name, status.name)
-    }
-
-    @Test
-    fun statusForCodeReturnsNullForUnknownCode() {
-        assertNull(Codes.statusForCode(999999))
-    }
-
-    private fun assertNotEqualsCode(a: Status, b: Status) {
-        assertTrue(a.code != b.code, "Expected distinct codes but both were ${a.code}")
+    fun everyBuiltInCodeHasKiitOrigin() {
+        assertTrue(Codes.all.all { it.origin == StatusConstants.KIIT })
     }
 }
 
@@ -156,13 +136,12 @@ class CodesToHttpTest {
 
     /**
      * A custom, unregistered status still resolves via its category's default rather than a
-     * guessed/literal fallback — this replaces the old (buggy) behavior of returning the
-     * status's own internal code as if it were a valid HTTP code.
+     * guessed/literal fallback.
      */
     @Test
     fun toCodeFallsBackToCategoryDefaultForCustomStatus() {
-        val custom = Failed.Errored("CUSTOM", 700123, "Custom error")
-        assertEquals(500, http.toCode(custom)) // Errored's category default, not 700123
+        val custom = Failed.Errored("CUSTOM", "Custom error")
+        assertEquals(500, http.toCode(custom)) // Errored's category default
     }
 
     // -------------------------------------------------------------------------
@@ -191,7 +170,7 @@ class CodesToHttpTest {
 }
 
 class CompositeLookupTest {
-    private val customCode = Failed.Errored("PAYMENT_DECLINED", 700123, "Payment declined")
+    private val customCode = Failed.Errored("PAYMENT_DECLINED", "Payment declined")
     private val lookup = CompositeLookup(base = CodesToHttp(), extensions = mapOf(customCode to 402))
 
     @Test

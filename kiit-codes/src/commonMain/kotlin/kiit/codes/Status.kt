@@ -11,12 +11,22 @@
  */
 package kiit.codes
 
+/** Well-known [Status.origin] values. */
+object StatusConstants {
+    /** Origin for every built-in [Codes] entry. */
+    const val KIIT = "kiit"
+
+    /** Default origin for consumer/custom statuses that don't specify one explicitly. */
+    const val CUSTOM = "custom"
+}
+
 /**
  * Platform-agnostic status type describing the outcome of any operation — a service call,
  * a background job step, an API request, or a CLI command.
  *
  * Shape (maps directly to JSON / API error responses):
- *   { "name": "TOKEN_EXPIRED", "code": 400009, "message": "Session token expired", "success": false }
+ *   { "name": "TOKEN_EXPIRED", "group": "Denied", "origin": "kiit",
+ *     "message": "Session token expired", "success": false }
  *
  * Hierarchy. Categories are closed/sealed and fixed by design, to enforce a consistent taxonomy
  * across every consumer. Individual codes *within* a category are open — create new domain codes
@@ -25,11 +35,6 @@ package kiit.codes
  *   Status  = Passed     | Failed
  *   Passed  = Succeeded  | Pending | Filtered | Information
  *   Failed  = Denied     | Invalid | Errored  | Unserved
- *
- * NOTE: [code] ranges are grouped conceptually the way HTTP groups 2xx/4xx/5xx, but this is a
- * conceptual similarity only — [code] is NOT a literal HTTP status. Always convert via a
- * [CodeLookup] implementation such as [CodesToHttp] to obtain a real HTTP status code; never
- * infer one from the numeric prefix.
  */
 sealed interface Status {
     /**
@@ -39,9 +44,11 @@ sealed interface Status {
     val name: String
 
     /**
-     * Numeric code. Grouped by category by convention (see [Codes]) but NOT a literal HTTP code.
+     * Origin of this status, e.g. [StatusConstants.KIIT] for every built-in [Codes] entry.
+     * Consumer/custom subtypes default to [StatusConstants.CUSTOM] rather than silently inheriting
+     * [StatusConstants.KIIT], so a status can never accidentally misrepresent where it came from.
      */
-    val code: Int
+    val origin: String
 
     /**
      * Human-readable, constant description — never constructed from runtime data. Per-instance /
@@ -57,31 +64,16 @@ sealed interface Status {
      */
     val success: Boolean
 
-    /** Returns a copy of this status with an updated [msg], preserving name and code. */
+    /** The category discriminant, e.g. "Denied", "Errored" — see the hierarchy above. */
+    val group: String
+
+    /** Returns a copy of this status with an updated [msg], preserving name, origin, and group. */
     fun copyMessage(msg: String): Status
 
-    /** Returns a copy of this status with an updated [msg] and [code], preserving name. */
-    fun copyAll(msg: String, code: Int): Status
+    /** Returns a copy of this status with an updated [msg] and [origin], preserving name and group. */
+    fun copyAll(msg: String, origin: String): Status
 
     companion object {
-        /**
-         * Returns a copy of [defaultStatus] with [msg] and/or [code] overridden, or the original
-         * instance unchanged if neither override actually differs from the default. A null or
-         * blank [msg] is treated as "no message override" (so it can be safely omitted by callers
-         * without extra null-handling).
-         */
-        @Suppress("UNCHECKED_CAST")
-        fun <T : Status> ofCode(msg: String?, code: Int?, defaultStatus: T): T {
-            val resolvedMsg = msg.takeUnless { it.isNullOrEmpty() } ?: defaultStatus.message
-            val resolvedCode = code ?: defaultStatus.code
-
-            return if (resolvedMsg == defaultStatus.message && resolvedCode == defaultStatus.code) {
-                defaultStatus
-            } else {
-                defaultStatus.copyAll(resolvedMsg, resolvedCode) as T
-            }
-        }
-
         /**
          * Resolves a status from an optional [msg] override and an optional [rawStatus] override,
          * falling back to [status] when neither is supplied. [rawStatus], if present, is used as
@@ -92,19 +84,6 @@ sealed interface Status {
             val base = rawStatus ?: status
             return if (msg == null) base else base.copyMessage(msg) as T
         }
-
-        /** Returns the category discriminant for a status, e.g. "Denied", "Errored". */
-        fun toType(status: Status): String =
-            when (status) {
-                is Passed.Succeeded -> "Succeeded"
-                is Passed.Pending -> "Pending"
-                is Passed.Filtered -> "Filtered"
-                is Passed.Information -> "Information"
-                is Failed.Denied -> "Denied"
-                is Failed.Invalid -> "Invalid"
-                is Failed.Errored -> "Errored"
-                is Failed.Unserved -> "Unserved"
-            }
     }
 }
 
@@ -115,33 +94,57 @@ sealed interface Status {
 sealed class Passed : Status {
     final override val success: Boolean get() = true
 
+    final override val group: String
+        get() = when (this) {
+            is Succeeded -> "Succeeded"
+            is Pending -> "Pending"
+            is Filtered -> "Filtered"
+            is Information -> "Information"
+        }
+
     /** Operation's primary purpose completed (e.g. a value was created, fetched, updated). */
-    data class Succeeded(override val name: String, override val code: Int, override val message: String) : Passed()
+    data class Succeeded(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
     /** Operation accepted but not yet fully processed (e.g. queued, waiting, confirmed). */
-    data class Pending(override val name: String, override val code: Int, override val message: String) : Passed()
+    data class Pending(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
     /**
      * Item was excluded from the operation's normal output. Covers both:
      *   - not processed at all (e.g. SKIPPED — screened out before any work happened), and
      *   - processed, then its result was deliberately discarded (e.g. DISCARDED).
-     * The distinction is carried by [name]/[code], not by separate types — see [Codes.SKIPPED]
+     * The distinction is carried by [name], not by separate types — see [Codes.SKIPPED]
      * and [Codes.DISCARDED].
      */
-    data class Filtered(override val name: String, override val code: Int, override val message: String) : Passed()
+    data class Filtered(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
     /**
      * Informational / metadata response — no primary operation was performed.
      * E.g. HELP, ABOUT, VERSION output from a CLI command.
      */
-    data class Information(override val name: String, override val code: Int, override val message: String) : Passed()
+    data class Information(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Passed()
 
-    override fun copyAll(msg: String, code: Int): Status =
+    override fun copyAll(msg: String, origin: String): Status =
         when (this) {
-            is Succeeded -> copy(code = code, message = msg)
-            is Pending -> copy(code = code, message = msg)
-            is Filtered -> copy(code = code, message = msg)
-            is Information -> copy(code = code, message = msg)
+            is Succeeded -> copy(message = msg, origin = origin)
+            is Pending -> copy(message = msg, origin = origin)
+            is Filtered -> copy(message = msg, origin = origin)
+            is Information -> copy(message = msg, origin = origin)
         }
 
     override fun copyMessage(msg: String): Status =
@@ -160,28 +163,52 @@ sealed class Passed : Status {
 sealed class Failed : Status {
     final override val success: Boolean get() = false
 
+    final override val group: String
+        get() = when (this) {
+            is Denied -> "Denied"
+            is Invalid -> "Invalid"
+            is Errored -> "Errored"
+            is Unserved -> "Unserved"
+        }
+
     /** Security / access-control failure — the caller is not permitted to perform this action. */
-    data class Denied(override val name: String, override val code: Int, override val message: String) : Failed()
+    data class Denied(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
     /** The request as given cannot be satisfied — malformed input, invalid values, or not found. */
-    data class Invalid(override val name: String, override val code: Int, override val message: String) : Failed()
+    data class Invalid(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
     /** A known, expected business-rule failure — understood and handled by the caller. */
-    data class Errored(override val name: String, override val code: Int, override val message: String) : Failed()
+    data class Errored(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
     /**
      * The request is valid and permitted, but cannot be serviced right now for reasons unrelated
      * to what was sent — capacity, timeout, an unimplemented/unsupported capability, planned
      * maintenance, or a genuinely unexpected/unhandled failure (see [Codes.UNEXPECTED]).
      */
-    data class Unserved(override val name: String, override val code: Int, override val message: String) : Failed()
+    data class Unserved(
+        override val name: String,
+        override val message: String,
+        override val origin: String = StatusConstants.CUSTOM,
+    ) : Failed()
 
-    override fun copyAll(msg: String, code: Int): Status =
+    override fun copyAll(msg: String, origin: String): Status =
         when (this) {
-            is Denied -> copy(code = code, message = msg)
-            is Invalid -> copy(code = code, message = msg)
-            is Errored -> copy(code = code, message = msg)
-            is Unserved -> copy(code = code, message = msg)
+            is Denied -> copy(message = msg, origin = origin)
+            is Invalid -> copy(message = msg, origin = origin)
+            is Errored -> copy(message = msg, origin = origin)
+            is Unserved -> copy(message = msg, origin = origin)
         }
 
     override fun copyMessage(msg: String): Status =
