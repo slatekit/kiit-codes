@@ -11,6 +11,15 @@
  */
 package kiit.codes
 
+/** Well-known [Status.origin] values. */
+object StatusConstants {
+    /** Origin for every built-in [Codes] entry. */
+    const val KIIT = "kiit"
+
+    /** Default origin for consumer/custom statuses that don't specify one explicitly. */
+    const val CUSTOM = "custom"
+}
+
 /**
  * Platform-agnostic status type describing the outcome of any operation — a service call,
  * a background job step, an API request, or a CLI command.
@@ -34,9 +43,9 @@ sealed interface Status {
     val name: String
 
     /**
-     * Provenance of this status, e.g. "kiit" for every built-in [Codes] entry. Consumer/custom
-     * subtypes default to "custom" rather than silently inheriting "kiit", so a status can never
-     * accidentally misrepresent where it came from.
+     * Origin of this status, e.g. [StatusConstants.KIIT] for every built-in [Codes] entry.
+     * Consumer/custom subtypes default to [StatusConstants.CUSTOM] rather than silently inheriting
+     * [StatusConstants.KIIT], so a status can never accidentally misrepresent where it came from.
      */
     val origin: String
 
@@ -93,10 +102,10 @@ sealed class Passed : Status {
         }
 
     /** Operation's primary purpose completed (e.g. a value was created, fetched, updated). */
-    data class Succeeded(override val name: String, override val message: String, override val origin: String = "custom") : Passed()
+    data class Succeeded(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
 
     /** Operation accepted but not yet fully processed (e.g. queued, waiting, confirmed). */
-    data class Pending(override val name: String, override val message: String, override val origin: String = "custom") : Passed()
+    data class Pending(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
 
     /**
      * Item was excluded from the operation's normal output. Covers both:
@@ -105,13 +114,13 @@ sealed class Passed : Status {
      * The distinction is carried by [name], not by separate types — see [Codes.SKIPPED]
      * and [Codes.DISCARDED].
      */
-    data class Filtered(override val name: String, override val message: String, override val origin: String = "custom") : Passed()
+    data class Filtered(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
 
     /**
      * Informational / metadata response — no primary operation was performed.
      * E.g. HELP, ABOUT, VERSION output from a CLI command.
      */
-    data class Information(override val name: String, override val message: String, override val origin: String = "custom") : Passed()
+    data class Information(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Passed()
 
     override fun copyAll(msg: String, origin: String): Status =
         when (this) {
@@ -146,20 +155,20 @@ sealed class Failed : Status {
         }
 
     /** Security / access-control failure — the caller is not permitted to perform this action. */
-    data class Denied(override val name: String, override val message: String, override val origin: String = "custom") : Failed()
+    data class Denied(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
 
     /** The request as given cannot be satisfied — malformed input, invalid values, or not found. */
-    data class Invalid(override val name: String, override val message: String, override val origin: String = "custom") : Failed()
+    data class Invalid(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
 
     /** A known, expected business-rule failure — understood and handled by the caller. */
-    data class Errored(override val name: String, override val message: String, override val origin: String = "custom") : Failed()
+    data class Errored(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
 
     /**
      * The request is valid and permitted, but cannot be serviced right now for reasons unrelated
      * to what was sent — capacity, timeout, an unimplemented/unsupported capability, planned
      * maintenance, or a genuinely unexpected/unhandled failure (see [Codes.UNEXPECTED]).
      */
-    data class Unserved(override val name: String, override val message: String, override val origin: String = "custom") : Failed()
+    data class Unserved(override val name: String, override val message: String, override val origin: String = StatusConstants.CUSTOM) : Failed()
 
     override fun copyAll(msg: String, origin: String): Status =
         when (this) {
