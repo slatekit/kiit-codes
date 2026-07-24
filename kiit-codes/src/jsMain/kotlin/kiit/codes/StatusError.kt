@@ -9,22 +9,22 @@ package kiit.codes
  *
  * TypeScript usage:
  * ```ts
- * import { DeniedError, Codes } from '@kiit/codes'
+ * import { RestrictedError, Codes } from '@kiit/codes'
  *
- * throw new DeniedError(Codes.UNAUTHORIZED)
+ * throw new RestrictedError(Codes.UNAUTHORIZED)
  *
  * try { ... } catch (e) {
- *     if (e instanceof DeniedError) { console.log(e.status.name) }
+ *     if (e instanceof RestrictedError) { console.log(e.status.name) }
  * }
  * ```
  */
 @JsExport
-@JsName("DeniedError")
-class DeniedError(
-    status: Failed.Denied,
+@JsName("RestrictedError")
+class RestrictedError(
+    status: Failed.Restricted,
     errors: List<Err> = emptyList(),
     cause: Throwable? = null,
-) : StatusException.DeniedException(status, errors, cause)
+) : StatusException.RestrictedException(status, errors, cause)
 
 @JsExport
 @JsName("InvalidError")
@@ -35,12 +35,12 @@ class InvalidError(
 ) : StatusException.InvalidException(status, errors, cause)
 
 @JsExport
-@JsName("ErroredError")
-class ErroredError(
-    status: Failed.Errored,
+@JsName("RejectedError")
+class RejectedError(
+    status: Failed.Rejected,
     errors: List<Err> = emptyList(),
     cause: Throwable? = null,
-) : StatusException.ErroredException(status, errors, cause)
+) : StatusException.RejectedException(status, errors, cause)
 
 @JsExport
 @JsName("UnservedError")

@@ -19,9 +19,9 @@ package kiit.codes
  * directly; only the four categories under each are fixed/closed (see [Status]). Every entry in
  * this registry has [Status.origin] == [StatusConstants.KIIT].
  *
- * Uniqueness of every entry is enforced over `(origin, name)` at object-init time — a collision
- * fails loudly the first time [Codes] is touched, rather than silently producing a wrong lookup
- * later. This is scoped to `(origin, name)`, not `name` alone, so a consumer's own custom codes
+ * Uniqueness of every entry's [Status.id] is enforced at object-init time — a collision fails
+ * loudly the first time [Codes] is touched, rather than silently producing a wrong lookup later.
+ * [Status.id] is scoped to `origin.name`, not `name` alone, so a consumer's own custom codes
  * (with their own [Status.origin]) can never collide with a built-in one.
  */
 object Codes {
@@ -52,11 +52,11 @@ object Codes {
     val VERSION = Passed.Information("VERSION", "Version", origin = StatusConstants.KIIT)
     val EXIT = Passed.Information("EXIT", "Exiting", origin = StatusConstants.KIIT)
 
-    // ---- Denied — security / access-control ----
-    val DENIED = Failed.Denied("DENIED", "Denied", origin = StatusConstants.KIIT)
-    val UNAUTHENTICATED = Failed.Denied("UNAUTHENTICATED", "Unauthenticated", origin = StatusConstants.KIIT)
-    val UNAUTHORIZED = Failed.Denied("UNAUTHORIZED", "Unauthorized", origin = StatusConstants.KIIT)
-    val FORBIDDEN = Failed.Denied("FORBIDDEN", "Forbidden", origin = StatusConstants.KIIT)
+    // ---- Restricted — security / access-control ----
+    val RESTRICTED = Failed.Restricted("RESTRICTED", "Restricted", origin = StatusConstants.KIIT)
+    val UNAUTHENTICATED = Failed.Restricted("UNAUTHENTICATED", "Unauthenticated", origin = StatusConstants.KIIT)
+    val UNAUTHORIZED = Failed.Restricted("UNAUTHORIZED", "Unauthorized", origin = StatusConstants.KIIT)
+    val FORBIDDEN = Failed.Restricted("FORBIDDEN", "Forbidden", origin = StatusConstants.KIIT)
 
     // ---- Invalid — bad input ----
     val BAD_REQUEST = Failed.Invalid("BAD_REQUEST", "Bad request", origin = StatusConstants.KIIT) // e.g. malformed JSON
@@ -67,11 +67,11 @@ object Codes {
     // e.g. permanently removed, was here before
     val REMOVED = Failed.Invalid("REMOVED", "Removed", origin = StatusConstants.KIIT)
 
-    // ---- Errored — known, expected business-rule failure ----
+    // ---- Rejected — known, expected business-rule failure ----
     // e.g. domain model not found
-    val MISSING = Failed.Errored("MISSING", "Missing item", origin = StatusConstants.KIIT)
-    val CONFLICT = Failed.Errored("CONFLICT", "Conflict", origin = StatusConstants.KIIT)
-    val ERRORED = Failed.Errored("ERRORED", "Errored", origin = StatusConstants.KIIT) // general purpose use
+    val MISSING = Failed.Rejected("MISSING", "Missing item", origin = StatusConstants.KIIT)
+    val CONFLICT = Failed.Rejected("CONFLICT", "Conflict", origin = StatusConstants.KIIT)
+    val REJECTED = Failed.Rejected("REJECTED", "Rejected", origin = StatusConstants.KIIT) // general purpose use
 
     // ---- Unserved — valid & permitted, can't be serviced right now ----
     val UNIMPLEMENTED = Failed.Unserved("UNIMPLEMENTED", "Not implemented", origin = StatusConstants.KIIT)
@@ -91,14 +91,14 @@ object Codes {
             PENDING, QUEUED, CONFIRM,
             SKIPPED, DISCARDED,
             HELP, ABOUT, VERSION, EXIT,
-            DENIED, UNAUTHENTICATED, UNAUTHORIZED, FORBIDDEN,
+            RESTRICTED, UNAUTHENTICATED, UNAUTHORIZED, FORBIDDEN,
             BAD_REQUEST, INVALID, NOT_FOUND, REMOVED,
-            MISSING, CONFLICT, ERRORED,
+            MISSING, CONFLICT, REJECTED,
             UNIMPLEMENTED, UNSUPPORTED, TIMEOUT, RATE_LIMITED, UNREACHABLE, UNDER_MAINTENANCE, UNEXPECTED,
         )
 
     init {
-        val duplicates = all.groupBy { it.origin to it.name }.filterValues { it.size > 1 }.keys
+        val duplicates = all.groupBy { it.id }.filterValues { it.size > 1 }.keys
         check(duplicates.isEmpty()) { "Duplicate Status codes detected in Codes registry: $duplicates" }
     }
 }
@@ -129,7 +129,7 @@ interface CodeLookup {
  *
  * Category -> HTTP default:
  *   Succeeded / Filtered / Information -> 200      Pending -> 202
- *   Denied -> 401      Invalid -> 400      Errored -> 500      Unserved -> 503
+ *   Restricted -> 401  Invalid -> 400   Rejected -> 500        Unserved -> 503
  *
  * Individual codes can differ from their category's default via [overrides] (e.g. CREATED -> 201,
  * NOT_FOUND -> 404). [toStatus] is derived from [toCode] and is lossy — see its own doc.
@@ -147,9 +147,9 @@ open class CodesToHttp(
             is Passed.Pending -> 202
             is Passed.Filtered -> 200
             is Passed.Information -> 200
-            is Failed.Denied -> 401
+            is Failed.Restricted -> 401
             is Failed.Invalid -> 400
-            is Failed.Errored -> 500
+            is Failed.Rejected -> 500
             is Failed.Unserved -> 503
         }
     }
@@ -208,7 +208,7 @@ open class CodesToHttp(
  * correctly for custom statuses that aren't part of the [Codes.all] registry.
  *
  * ```kotlin
- * val MY_DOMAIN_CODE = Failed.Errored("PAYMENT_DECLINED", "Payment declined")
+ * val MY_DOMAIN_CODE = Failed.Rejected("PAYMENT_DECLINED", "Payment declined")
  * val lookup = CompositeLookup(CodesToHttp(), mapOf(MY_DOMAIN_CODE to 402))
  * ```
  */

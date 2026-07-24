@@ -12,8 +12,8 @@ import kotlin.test.fail
 
 class StatusExceptionTest {
     @Test
-    fun deniedExceptionExposesItsStatus() {
-        val ex = StatusException.DeniedException(Codes.UNAUTHORIZED)
+    fun restrictedExceptionExposesItsStatus() {
+        val ex = StatusException.RestrictedException(Codes.UNAUTHORIZED)
         assertSame(Codes.UNAUTHORIZED, ex.status)
     }
 
@@ -24,8 +24,8 @@ class StatusExceptionTest {
     }
 
     @Test
-    fun erroredExceptionExposesItsStatus() {
-        val ex = StatusException.ErroredException(Codes.CONFLICT)
+    fun rejectedExceptionExposesItsStatus() {
+        val ex = StatusException.RejectedException(Codes.CONFLICT)
         assertSame(Codes.CONFLICT, ex.status)
     }
 
@@ -37,7 +37,7 @@ class StatusExceptionTest {
 
     @Test
     fun defaultErrorsWrapTheStatusSingly() {
-        val ex = StatusException.DeniedException(Codes.UNAUTHORIZED)
+        val ex = StatusException.RestrictedException(Codes.UNAUTHORIZED)
         assertEquals(1, ex.errors.size)
         assertEquals(Codes.UNAUTHORIZED.message, ex.errors.single().msg)
     }
@@ -52,7 +52,7 @@ class StatusExceptionTest {
     @Test
     fun causePropagatesToThrowableCause() {
         val root = IllegalStateException("root")
-        val ex = StatusException.ErroredException(Codes.CONFLICT, cause = root)
+        val ex = StatusException.RejectedException(Codes.CONFLICT, cause = root)
         assertSame(root, ex.cause)
     }
 
@@ -73,9 +73,9 @@ class StatusExceptionTest {
         // Exhaustive `when` with no `else` — fails to compile if a subtype is missing.
         val label =
             when (caught) {
-                is StatusException.DeniedException -> "denied"
+                is StatusException.RestrictedException -> "restricted"
                 is StatusException.InvalidException -> "invalid"
-                is StatusException.ErroredException -> "errored"
+                is StatusException.RejectedException -> "rejected"
                 is StatusException.UnservedException -> "unserved"
             }
         assertEquals("invalid", label)
@@ -86,8 +86,8 @@ class StatusExceptionTest {
         assertFailsWith<StatusException.InvalidException> {
             try {
                 throw StatusException.InvalidException(Codes.BAD_REQUEST)
-            } catch (e: StatusException.DeniedException) {
-                fail("DeniedException catch block should not run for an InvalidException")
+            } catch (e: StatusException.RestrictedException) {
+                fail("RestrictedException catch block should not run for an InvalidException")
             }
         }
     }
@@ -97,9 +97,9 @@ class StatusExceptionTest {
     // -------------------------------------------------------------------------
 
     @Test
-    fun toExceptionOnDeniedProducesDeniedException() {
+    fun toExceptionOnRestrictedProducesRestrictedException() {
         val ex = Codes.UNAUTHORIZED.toException()
-        assertEquals(StatusException.DeniedException::class, ex::class)
+        assertEquals(StatusException.RestrictedException::class, ex::class)
     }
 
     @Test
@@ -109,9 +109,9 @@ class StatusExceptionTest {
     }
 
     @Test
-    fun toExceptionOnErroredProducesErroredException() {
+    fun toExceptionOnRejectedProducesRejectedException() {
         val ex = Codes.CONFLICT.toException()
-        assertEquals(StatusException.ErroredException::class, ex::class)
+        assertEquals(StatusException.RejectedException::class, ex::class)
     }
 
     @Test
