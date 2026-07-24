@@ -177,7 +177,8 @@ open class CodesToHttp(
                 Codes.CONFLICT to 409,
                 Codes.UNIMPLEMENTED to 501,
                 Codes.UNSUPPORTED to 501,
-                Codes.TIMEOUT to 408,
+                // deadline exceeded waiting on something else, not a slow client (408)
+                Codes.TIMEOUT to 504,
                 Codes.RATE_LIMITED to 429,
                 Codes.UNEXPECTED to 500,
             )

@@ -149,7 +149,7 @@ class CodesToHttpTest {
     }
 
     @Test fun overrideTimeout() {
-        assertEquals(408, http.toCode(Codes.TIMEOUT))
+        assertEquals(504, http.toCode(Codes.TIMEOUT))
     }
 
     @Test fun overrideRateLimited() {
@@ -237,9 +237,9 @@ class CodesToHttpTest {
      */
     @Test
     fun toStatusStaysInSyncWithCustomOverridesNotJustDefaults() {
-        val custom = CodesToHttp(overrides = mapOf(Codes.TIMEOUT to 504))
-        assertSame(Codes.TIMEOUT, custom.toStatus(504))
-        assertNull(custom.toStatus(408)) // TIMEOUT no longer resolves to 408 for this instance
+        val custom = CodesToHttp(overrides = mapOf(Codes.TIMEOUT to 599))
+        assertSame(Codes.TIMEOUT, custom.toStatus(599))
+        assertNull(custom.toStatus(504)) // TIMEOUT no longer resolves to 504 for this instance
     }
 }
 
