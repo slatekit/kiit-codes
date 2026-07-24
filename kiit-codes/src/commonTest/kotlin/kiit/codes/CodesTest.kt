@@ -47,6 +47,12 @@ class CodesTest {
     fun everyBuiltInCodeHasKiitOrigin() {
         assertTrue(Codes.all.all { it.origin == StatusConstants.KIIT })
     }
+
+    @Test
+    fun everyBuiltInCodeIsUniqueByOriginAndName() {
+        val keys = Codes.all.map { it.origin to it.name }
+        assertEquals(keys.size, keys.toSet().size)
+    }
 }
 
 // =================================================================================================
