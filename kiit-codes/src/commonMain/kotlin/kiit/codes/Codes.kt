@@ -78,7 +78,7 @@ object Codes {
     val UNSUPPORTED = Failed.Unserved("UNSUPPORTED", "Not supported", origin = StatusConstants.KIIT)
     val TIMEOUT = Failed.Unserved("TIMEOUT", "Timeout", origin = StatusConstants.KIIT)
     val RATE_LIMITED = Failed.Unserved("RATE_LIMITED", "Rate limited", origin = StatusConstants.KIIT)
-    // e.g. dependency down
+    // e.g. dependency down; shares Unserved's 503 default with UNDER_MAINTENANCE deliberately
     val UNREACHABLE = Failed.Unserved("UNREACHABLE", "Unreachable", origin = StatusConstants.KIIT)
     val UNDER_MAINTENANCE = Failed.Unserved("UNDER_MAINTENANCE", "Under maintenance", origin = StatusConstants.KIIT)
     // unhandled/uncaught path
@@ -175,6 +175,7 @@ open class CodesToHttp(
                 Codes.MISSING to 404,
                 Codes.FORBIDDEN to 403,
                 Codes.CONFLICT to 409,
+                // share 501 deliberately — HTTP has no separate "unsupported" code
                 Codes.UNIMPLEMENTED to 501,
                 Codes.UNSUPPORTED to 501,
                 // deadline exceeded waiting on something else, not a slow client (408)

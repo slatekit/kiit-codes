@@ -3,6 +3,7 @@ package kiit.codes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -197,6 +198,21 @@ class CodesToHttpTest {
     // -------------------------------------------------------------------------
     // toStatus — deterministic canonical choice for codes shared by multiple statuses
     // -------------------------------------------------------------------------
+
+    /**
+     * Spells out the lossy round trip directly: converting UPDATED forward and back doesn't
+     * return UPDATED. toStatus(toCode(x)) == x does not generally hold — see toStatus's doc.
+     */
+    @Test
+    fun httpRoundTripDoesNotPreserveTheOriginalStatus() {
+        val original = Codes.UPDATED
+        val code = http.toCode(original)
+        val restored = http.toStatus(code)
+
+        assertEquals(200, code)
+        assertSame(Codes.SUCCESS, restored)
+        assertNotEquals<Status?>(original, restored)
+    }
 
     /**
      * Six built-in statuses resolve to 200. Pins the canonical winner so this can't silently
