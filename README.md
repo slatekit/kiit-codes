@@ -17,21 +17,23 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 
 ## 📚 Table of Contents
 
-- [ℹ️ About](#ℹ️-about)
-- [🧩 The problem](#-the-problem)
-- [💡 The idea](#-the-idea)
-- [🚀 Quick start](#-quick-start)
-- [🧠 Core concepts](#-core-concepts)
-- [📖 Built-in codes](#-built-in-codes)
-- [🌐 HTTP conversion](#-http-conversion)
-- [🧾 Err & Checked](#-err--checked)
-- [⚠️ Exceptions](#️-exceptions)
-- [🛠️ Use cases](#️-use-cases)
-- [✅ When to use this](#-when-to-use-this-and-when-not-to)
-- [📦 Requirements](#-requirements)
-- [🗺️ Roadmap](#️-roadmap)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+| | Section | Description |
+|---|---|---|
+| ℹ️ | [About](#ℹ️-about) | What kiit.codes is |
+| 🧩 | [The problem](#-the-problem) | Why exceptions/booleans fall short |
+| 💡 | [The idea](#-the-idea) | Closed taxonomy, open codes |
+| 🚀 | [Quick start](#-quick-start) | Install & first examples |
+| 🧠 | [Core concepts](#-core-concepts) | `Status`/`Passed`/`Failed` hierarchy |
+| 📖 | [Built-in codes](#-built-in-codes) | The `Codes` registry |
+| 🌐 | [HTTP conversion](#-http-conversion) | `Status` ↔ HTTP codes |
+| 🧾 | [Err & Checked](#-err--checked) | Validation detail & accumulation |
+| ⚠️ | [Exceptions](#️-exceptions) | Sealed `StatusException` |
+| 🛠️ | [Use cases](#️-use-cases) | Where this fits |
+| ✅ | [When to use this](#-when-to-use-this-and-when-not-to) | Good fit vs. not |
+| 📦 | [Requirements](#-requirements) | Platforms & dependencies |
+| 🗺️ | [Roadmap](#️-roadmap) | What's next |
+| 🤝 | [Contributing](#-contributing) | How to contribute |
+| 📄 | [License](#-license) | License |
 
 ---
 
