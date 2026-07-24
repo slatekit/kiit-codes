@@ -13,6 +13,14 @@
 package kiit.codes
 
 /**
+ * Capability interface for any type that carries a list of [Err]. Implemented by [Checked] so a
+ * validation-style result can be worked with generically alongside other error-carrying types.
+ */
+interface HasErrors {
+    val errors: List<Err>
+}
+
+/**
  * Err is an error representation for use with `Result`/`Outcome`-style types and can be
  * created from
  * 1. simple strings

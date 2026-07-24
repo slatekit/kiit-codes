@@ -36,7 +36,8 @@ object Codes {
     val CONFIRM = Passed.Pending("CONFIRM", "Confirm", origin = StatusConstants.KIIT)
 
     // ---- Filtered ----
-    val SKIPPED = Passed.Filtered("SKIPPED", "Skipped", origin = StatusConstants.KIIT) // not processed at all
+    // not processed at all
+    val SKIPPED = Passed.Filtered("SKIPPED", "Skipped", origin = StatusConstants.KIIT)
     // processed, result thrown away
     val DISCARDED = Passed.Filtered("DISCARDED", "Discarded", origin = StatusConstants.KIIT)
 
@@ -55,7 +56,6 @@ object Codes {
     val BAD_REQUEST = Failed.Invalid("BAD_REQUEST", "Bad request", origin = StatusConstants.KIIT) // e.g. malformed JSON
     // e.g. well-formed but invalid values
     val INVALID = Failed.Invalid("INVALID", "Invalid", origin = StatusConstants.KIIT)
-
     // e.g. resource/endpoint not found
     val NOT_FOUND = Failed.Invalid("NOT_FOUND", "Not found", origin = StatusConstants.KIIT)
 

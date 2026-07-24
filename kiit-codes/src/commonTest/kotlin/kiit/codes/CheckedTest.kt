@@ -40,43 +40,72 @@ class CheckedTest {
         }
     }
 
+    @Test
+    fun isValidIsTrueForSuccessFalseForFailure() {
+        assertTrue(Checked.success().isValid)
+        assertTrue(!Checked.failure(Codes.BAD_REQUEST, listOf(Err.of("bad field"))).isValid)
+    }
+
+    @Test
+    fun implementsHasErrors() {
+        val checked = Checked.failure(Codes.BAD_REQUEST, listOf(Err.of("bad field")))
+        val hasErrors: HasErrors = checked
+        assertEquals(checked.errors, hasErrors.errors)
+    }
+
     // -------------------------------------------------------------------------
-    // combine
+    // collect
     // -------------------------------------------------------------------------
 
     @Test
-    fun combineWithNoChecksSucceeds() {
-        val result = combine()
+    fun collectWithNoChecksSucceeds() {
+        val result = collect()
         assertSame(Codes.SUCCESS, result.status)
         assertTrue(result.errors.isEmpty())
     }
 
     @Test
-    fun combineWithAllPassingChecksSucceeds() {
-        val result = combine(Checked.success(), Checked.success(Codes.CREATED))
+    fun collectWithAllPassingChecksSucceeds() {
+        val result = collect(Checked.success(), Checked.success(Codes.CREATED))
         assertSame(Codes.SUCCESS, result.status)
         assertTrue(result.errors.isEmpty())
     }
 
     @Test
-    fun combineWithOneFailurePoolsItsErrors() {
+    fun collectWithOneFailurePoolsItsErrors() {
         val errors = listOf(Err.of("bad field"))
-        val result = combine(Checked.success(), Checked.failure(Codes.BAD_REQUEST, errors))
+        val result = collect(Checked.success(), Checked.failure(Codes.BAD_REQUEST, errors))
         assertEquals(Codes.INVALID, result.status)
         assertEquals(errors, result.errors)
     }
 
     @Test
-    fun combineWithMultipleFailuresPoolsAllErrorsInOrder() {
+    fun collectWithMultipleFailuresPoolsAllErrorsInOrder() {
         val firstErrors = listOf(Err.of("first"))
         val secondErrors = listOf(Err.of("second"), Err.of("third"))
         val result =
-            combine(
+            collect(
                 Checked.failure(Codes.BAD_REQUEST, firstErrors),
                 Checked.success(),
                 Checked.failure(Codes.NOT_FOUND, secondErrors),
             )
         assertEquals(Codes.INVALID, result.status)
         assertEquals(firstErrors + secondErrors, result.errors)
+    }
+
+    @Test
+    fun collectOverListBehavesIdenticallyToVararg() {
+        val firstErrors = listOf(Err.of("first"))
+        val secondErrors = listOf(Err.of("second"), Err.of("third"))
+        val checks =
+            listOf(
+                Checked.failure(Codes.BAD_REQUEST, firstErrors),
+                Checked.success(),
+                Checked.failure(Codes.NOT_FOUND, secondErrors),
+            )
+        val fromList = collect(checks)
+        val fromVararg = collect(*checks.toTypedArray())
+        assertEquals(fromVararg.status, fromList.status)
+        assertEquals(fromVararg.errors, fromList.errors)
     }
 }

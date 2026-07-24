@@ -2,10 +2,9 @@ package kiit.codes
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
-import kotlin.test.assertTrue
+import kotlin.test.fail
 
 // =================================================================================================
 // StatusExceptionTest
@@ -13,55 +12,118 @@ import kotlin.test.assertTrue
 
 class StatusExceptionTest {
     @Test
-    fun messageComesFromStatus() {
-        val ex = StatusException(Codes.UNAUTHORIZED)
-        assertEquals(Codes.UNAUTHORIZED.message, ex.message)
+    fun deniedExceptionExposesItsStatus() {
+        val ex = StatusException.DeniedException(Codes.UNAUTHORIZED)
+        assertSame(Codes.UNAUTHORIZED, ex.status)
     }
 
     @Test
-    fun statusPropertyIsExactInstance() {
-        val ex = StatusException(Codes.TIMEOUT)
+    fun invalidExceptionExposesItsStatus() {
+        val ex = StatusException.InvalidException(Codes.BAD_REQUEST)
+        assertSame(Codes.BAD_REQUEST, ex.status)
+    }
+
+    @Test
+    fun erroredExceptionExposesItsStatus() {
+        val ex = StatusException.ErroredException(Codes.CONFLICT)
+        assertSame(Codes.CONFLICT, ex.status)
+    }
+
+    @Test
+    fun unservedExceptionExposesItsStatus() {
+        val ex = StatusException.UnservedException(Codes.TIMEOUT)
         assertSame(Codes.TIMEOUT, ex.status)
     }
 
     @Test
-    fun causeIsNullByDefault() {
-        val ex = StatusException(Codes.INVALID)
-        assertNull(ex.cause)
+    fun defaultErrorsWrapTheStatusSingly() {
+        val ex = StatusException.DeniedException(Codes.UNAUTHORIZED)
+        assertEquals(1, ex.errors.size)
+        assertEquals(Codes.UNAUTHORIZED.message, ex.errors.single().msg)
     }
 
     @Test
-    fun causeIsChainedWhenProvided() {
+    fun explicitErrorsAreStoredInsteadOfTheDefault() {
+        val errors = listOf(Err.of("bad field"))
+        val ex = StatusException.InvalidException(Codes.BAD_REQUEST, errors)
+        assertEquals(errors, ex.errors)
+    }
+
+    @Test
+    fun causePropagatesToThrowableCause() {
         val root = IllegalStateException("root")
-        val ex = StatusException(Codes.ERRORED, cause = root)
+        val ex = StatusException.ErroredException(Codes.CONFLICT, cause = root)
         assertSame(root, ex.cause)
     }
 
     @Test
-    fun canBeCaughtAsException() {
-        val caught =
+    fun messageComesFromCheckedStatus() {
+        val ex = StatusException.UnservedException(Codes.UNREACHABLE)
+        assertEquals(ex.checked.status.message, ex.message)
+    }
+
+    @Test
+    fun catchingAsSealedBaseNarrowsExhaustively() {
+        val caught: StatusException =
             try {
-                throw StatusException(Codes.NOT_FOUND)
-                null
+                throw StatusException.InvalidException(Codes.BAD_REQUEST)
             } catch (e: StatusException) {
                 e
             }
-        assertNotNull(caught)
-        assertEquals(Codes.NOT_FOUND.name, caught.status.name)
+        // Exhaustive `when` with no `else` — fails to compile if a subtype is missing.
+        val label =
+            when (caught) {
+                is StatusException.DeniedException -> "denied"
+                is StatusException.InvalidException -> "invalid"
+                is StatusException.ErroredException -> "errored"
+                is StatusException.UnservedException -> "unserved"
+            }
+        assertEquals("invalid", label)
     }
 
     @Test
-    fun worksWithCustomStatus() {
-        val custom = Failed.Errored("RATE_LIMITED", "Rate limited")
-        val ex = StatusException(custom)
-        assertEquals("Rate limited", ex.message)
-        assertSame(custom, ex.status)
+    fun narrowCatchDoesNotCatchMismatchedSubtype() {
+        assertFailsWith<StatusException.InvalidException> {
+            try {
+                throw StatusException.InvalidException(Codes.BAD_REQUEST)
+            } catch (e: StatusException.DeniedException) {
+                fail("DeniedException catch block should not run for an InvalidException")
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Failed.toException
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun toExceptionOnDeniedProducesDeniedException() {
+        val ex = Codes.UNAUTHORIZED.toException()
+        assertEquals(StatusException.DeniedException::class, ex::class)
     }
 
     @Test
-    fun worksWithUnservedStatus() {
-        val ex = StatusException(Codes.UNREACHABLE)
-        assertEquals(Codes.UNREACHABLE.message, ex.message)
-        assertTrue(ex.status is Failed.Unserved)
+    fun toExceptionOnInvalidProducesInvalidException() {
+        val ex = Codes.BAD_REQUEST.toException()
+        assertEquals(StatusException.InvalidException::class, ex::class)
+    }
+
+    @Test
+    fun toExceptionOnErroredProducesErroredException() {
+        val ex = Codes.CONFLICT.toException()
+        assertEquals(StatusException.ErroredException::class, ex::class)
+    }
+
+    @Test
+    fun toExceptionOnUnservedProducesUnservedException() {
+        val ex = Codes.TIMEOUT.toException()
+        assertEquals(StatusException.UnservedException::class, ex::class)
+    }
+
+    @Test
+    fun toExceptionPropagatesExplicitErrors() {
+        val errors = listOf(Err.of("bad field"))
+        val ex = Codes.BAD_REQUEST.toException(errors)
+        assertEquals(errors, ex.errors)
     }
 }
