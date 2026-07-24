@@ -56,6 +56,7 @@ object Codes {
     val DENIED = Failed.Denied("DENIED", "Denied", origin = StatusConstants.KIIT)
     val UNAUTHENTICATED = Failed.Denied("UNAUTHENTICATED", "Unauthenticated", origin = StatusConstants.KIIT)
     val UNAUTHORIZED = Failed.Denied("UNAUTHORIZED", "Unauthorized", origin = StatusConstants.KIIT)
+    val FORBIDDEN = Failed.Denied("FORBIDDEN", "Forbidden", origin = StatusConstants.KIIT)
 
     // ---- Invalid — bad input ----
     val BAD_REQUEST = Failed.Invalid("BAD_REQUEST", "Bad request", origin = StatusConstants.KIIT) // e.g. malformed JSON
@@ -63,13 +64,13 @@ object Codes {
     val INVALID = Failed.Invalid("INVALID", "Invalid", origin = StatusConstants.KIIT)
     // e.g. resource/endpoint not found
     val NOT_FOUND = Failed.Invalid("NOT_FOUND", "Not found", origin = StatusConstants.KIIT)
+    // e.g. permanently removed, was here before
+    val REMOVED = Failed.Invalid("REMOVED", "Removed", origin = StatusConstants.KIIT)
 
     // ---- Errored — known, expected business-rule failure ----
     // e.g. domain model not found
     val MISSING = Failed.Errored("MISSING", "Missing item", origin = StatusConstants.KIIT)
-    val FORBIDDEN = Failed.Errored("FORBIDDEN", "Forbidden", origin = StatusConstants.KIIT)
     val CONFLICT = Failed.Errored("CONFLICT", "Conflict", origin = StatusConstants.KIIT)
-    val DEPRECATED = Failed.Errored("DEPRECATED", "Deprecated", origin = StatusConstants.KIIT)
     val ERRORED = Failed.Errored("ERRORED", "Errored", origin = StatusConstants.KIIT) // general purpose use
 
     // ---- Unserved — valid & permitted, can't be serviced right now ----
@@ -90,9 +91,9 @@ object Codes {
             PENDING, QUEUED, CONFIRM,
             SKIPPED, DISCARDED,
             HELP, ABOUT, VERSION, EXIT,
-            DENIED, UNAUTHENTICATED, UNAUTHORIZED,
-            BAD_REQUEST, INVALID, NOT_FOUND,
-            MISSING, FORBIDDEN, CONFLICT, DEPRECATED, ERRORED,
+            DENIED, UNAUTHENTICATED, UNAUTHORIZED, FORBIDDEN,
+            BAD_REQUEST, INVALID, NOT_FOUND, REMOVED,
+            MISSING, CONFLICT, ERRORED,
             UNIMPLEMENTED, UNSUPPORTED, TIMEOUT, RATE_LIMITED, UNREACHABLE, UNDER_MAINTENANCE, UNEXPECTED,
         )
 
@@ -114,7 +115,12 @@ interface CodeLookup {
     /** Converts a [Status] to the target protocol's code. */
     fun toCode(status: Status): Int
 
-    /** Converts a target protocol [code] to a matching [Status], or null if there is no match. */
+    /**
+     * Converts a target protocol [code] to a matching [Status], or null if there is no match.
+     * The forward direction is typically many-to-one, so this is inherently lossy — it returns
+     * *a* status that resolves to [code], not necessarily the specific one a caller originally
+     * had in hand.
+     */
     fun toStatus(code: Int): Status?
 }
 
@@ -126,8 +132,7 @@ interface CodeLookup {
  *   Denied -> 401      Invalid -> 400      Errored -> 500      Unserved -> 503
  *
  * Individual codes can differ from their category's default via [overrides] (e.g. CREATED -> 201,
- * NOT_FOUND -> 404). [toStatus] is derived from [toCode] rather than a separately maintained
- * reverse table, so the two directions can never drift out of sync with each other.
+ * NOT_FOUND -> 404). [toStatus] is derived from [toCode] and is lossy — see its own doc.
  *
  * Clients needing additional/custom codes should compose with [CompositeLookup] rather than
  * subclassing this type directly — see [CompositeLookup] for why.
@@ -150,12 +155,14 @@ open class CodesToHttp(
     }
 
     /**
-     * Reverse lookup, derived from [toCode] over the built-in [Codes.all] registry. Note this
-     * only finds statuses registered in [Codes] — a caller's own custom [Status] instances that
-     * were never added to that registry won't be found here even if they'd resolve to [code]
-     * via [toCode]. Use [CompositeLookup] if you need custom statuses to also be reverse-lookupable.
+     * Reverse lookup, derived from [toCode] so it can't drift out of sync with a custom
+     * [overrides] map. Lossy by nature (many statuses can share one code); ties are broken
+     * deterministically via [CANONICAL_PREFERENCE] rather than [Codes.all]'s declaration order.
+     * Only finds statuses registered in [Codes] — see [CompositeLookup] for custom ones.
      */
-    override fun toStatus(code: Int): Status? = Codes.all.firstOrNull { toCode(it) == code }
+    override fun toStatus(code: Int): Status? =
+        CANONICAL_PREFERENCE.firstOrNull { toCode(it) == code }
+            ?: Codes.all.firstOrNull { toCode(it) == code }
 
     companion object {
         val DEFAULT_OVERRIDES: Map<Status, Int> =
@@ -164,15 +171,28 @@ open class CodesToHttp(
                 Codes.HANDLED to 204,
                 Codes.CONFIRM to 200,
                 Codes.NOT_FOUND to 404,
-                Codes.MISSING to 400,
+                Codes.REMOVED to 410,
+                Codes.MISSING to 404,
                 Codes.FORBIDDEN to 403,
                 Codes.CONFLICT to 409,
-                Codes.DEPRECATED to 426,
                 Codes.UNIMPLEMENTED to 501,
                 Codes.UNSUPPORTED to 501,
                 Codes.TIMEOUT to 408,
                 Codes.RATE_LIMITED to 429,
                 Codes.UNEXPECTED to 500,
+            )
+
+        /**
+         * One canonical winner per HTTP code that more than one built-in [Status] can resolve
+         * to via [toCode] (under [DEFAULT_OVERRIDES] or a category default) — see [toStatus].
+         */
+        private val CANONICAL_PREFERENCE: List<Status> =
+            listOf(
+                Codes.SUCCESS, Codes.CREATED, Codes.HANDLED, Codes.PENDING,
+                Codes.UNAUTHENTICATED, Codes.FORBIDDEN,
+                Codes.INVALID, Codes.NOT_FOUND, Codes.REMOVED,
+                Codes.CONFLICT, Codes.TIMEOUT, Codes.RATE_LIMITED,
+                Codes.UNIMPLEMENTED, Codes.UNDER_MAINTENANCE, Codes.UNEXPECTED,
             )
     }
 }

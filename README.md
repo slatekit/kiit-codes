@@ -225,9 +225,9 @@ The `Codes` object provides a standard registry — using it is optional, and yo
 | Pending | `PENDING`, `QUEUED`, `CONFIRM` |
 | Filtered | `SKIPPED` (not processed), `DISCARDED` (processed, result thrown away) |
 | Information | `HELP`, `ABOUT`, `VERSION`, `EXIT` |
-| Denied | `DENIED`, `UNAUTHENTICATED`, `UNAUTHORIZED` |
-| Invalid | `BAD_REQUEST`, `INVALID`, `NOT_FOUND` |
-| Errored | `MISSING`, `FORBIDDEN`, `CONFLICT`, `DEPRECATED`, `ERRORED` |
+| Denied | `DENIED`, `UNAUTHENTICATED`, `UNAUTHORIZED`, `FORBIDDEN` |
+| Invalid | `BAD_REQUEST`, `INVALID`, `NOT_FOUND`, `REMOVED` |
+| Errored | `MISSING`, `CONFLICT`, `ERRORED` |
 | Unserved | `UNIMPLEMENTED`, `UNSUPPORTED`, `TIMEOUT`, `RATE_LIMITED`, `UNREACHABLE`, `UNDER_MAINTENANCE`, `UNEXPECTED` |
 
 Every built-in code's `origin` is `"kiit"`. Custom codes should supply their own, a module or team name, rather than relying on a default, so uniqueness only has to hold within your own `origin`, not globally:
@@ -240,12 +240,14 @@ Uniqueness over `(origin, name)` is enforced at object-init time, a collision fa
 
 ## 🌐 HTTP conversion
 
-`CodesToHttp` maps `Status` to HTTP status codes: a compiler-exhaustive category default (`Succeeded` → 200, `Denied` → 401, etc.), layered with a small overrides table, keyed by `Status` instance, for the handful of codes that differ (`CREATED` → 201, `NOT_FOUND` → 404). `toStatus` is derived from `toCode`, so the two directions can never drift apart.
+`CodesToHttp` maps `Status` to HTTP status codes: a compiler-exhaustive category default (`Succeeded` → 200, `Denied` → 401, etc.), layered with a small overrides table, keyed by `Status` instance, for the handful of codes that differ (`CREATED` → 201, `NOT_FOUND` → 404). `toStatus` is derived from `toCode`, so the two directions can never drift out of sync — but the mapping is many-to-one (six different `Passed` codes all resolve to `200`), so `toStatus` is inherently lossy. It returns a deterministic canonical status for a given code, not necessarily the specific one you originally converted.
 
 ```kotlin
 val http = CodesToHttp()
-http.toStatus(404)?.name   // "NOT_FOUND"
-http.toStatus(999)         // null — unrecognized code, no guessed fallback
+http.toStatus(404)?.name           // "NOT_FOUND" — deterministic even though MISSING also maps to 404
+http.toCode(Codes.UPDATED)         // 200
+http.toStatus(200)?.name           // "SUCCESS", not "UPDATED" — lossy, not a round trip
+http.toStatus(999)                 // null — unrecognized code, no guessed fallback
 ```
 
 `CompositeLookup` composes a base lookup with your own extensions, also keyed by `Status` instance so custom, unregistered statuses are reverse-lookupable too:
