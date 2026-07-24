@@ -3,6 +3,7 @@ package kiit.codes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -26,6 +27,18 @@ class CodesTest {
         assertEquals("DENIED", Codes.DENIED.name)
         assertEquals(StatusConstants.KIIT, Codes.DENIED.origin)
         assertFalse(Codes.DENIED.success)
+    }
+
+    @Test
+    fun forbiddenIsDenied() {
+        // Access-control outcome, not a business-rule failure — see Codes.kt for the reasoning.
+        assertTrue(Codes.FORBIDDEN is Failed.Denied)
+    }
+
+    @Test
+    fun removedIsInvalid() {
+        // A more specific, permanent variant of NOT_FOUND — same category.
+        assertTrue(Codes.REMOVED is Failed.Invalid)
     }
 
     @Test
@@ -124,12 +137,20 @@ class CodesToHttpTest {
         assertEquals(403, http.toCode(Codes.FORBIDDEN))
     }
 
+    @Test fun overrideRemoved() {
+        assertEquals(410, http.toCode(Codes.REMOVED))
+    }
+
+    @Test fun overrideMissing() {
+        assertEquals(404, http.toCode(Codes.MISSING))
+    }
+
     @Test fun overrideConflict() {
         assertEquals(409, http.toCode(Codes.CONFLICT))
     }
 
     @Test fun overrideTimeout() {
-        assertEquals(408, http.toCode(Codes.TIMEOUT))
+        assertEquals(504, http.toCode(Codes.TIMEOUT))
     }
 
     @Test fun overrideRateLimited() {
@@ -172,6 +193,69 @@ class CodesToHttpTest {
         val status = http.toStatus(404)
         assertNotNull(status)
         assertEquals(Codes.NOT_FOUND.name, status.name)
+    }
+
+    // -------------------------------------------------------------------------
+    // toStatus — deterministic canonical choice for codes shared by multiple statuses
+    // -------------------------------------------------------------------------
+
+    /**
+     * Spells out the lossy round trip directly: converting UPDATED forward and back doesn't
+     * return UPDATED. toStatus(toCode(x)) == x does not generally hold — see toStatus's doc.
+     */
+    @Test
+    fun httpRoundTripDoesNotPreserveTheOriginalStatus() {
+        val original = Codes.UPDATED
+        val code = http.toCode(original)
+        val restored = http.toStatus(code)
+
+        assertEquals(200, code)
+        assertSame(Codes.SUCCESS, restored)
+        assertNotEquals<Status?>(original, restored)
+    }
+
+    /**
+     * Six built-in statuses resolve to 200. Pins the canonical winner so this can't silently
+     * change if [Codes.all]'s declaration order ever shifts.
+     */
+    @Test
+    fun toStatus200ResolvesToSuccessNotOtherSharedStatuses() {
+        assertSame(Codes.SUCCESS, http.toStatus(200))
+    }
+
+    /** NOT_FOUND and MISSING both resolve to 404 as of the MISSING remap; NOT_FOUND wins. */
+    @Test
+    fun toStatus404ResolvesToNotFoundNotMissing() {
+        assertSame(Codes.NOT_FOUND, http.toStatus(404))
+    }
+
+    /** ERRORED and UNEXPECTED both resolve to 500; UNEXPECTED wins. */
+    @Test
+    fun toStatus500ResolvesToUnexpectedNotErrored() {
+        assertSame(Codes.UNEXPECTED, http.toStatus(500))
+    }
+
+    /** UNIMPLEMENTED and UNSUPPORTED both resolve to 501; UNIMPLEMENTED wins. */
+    @Test
+    fun toStatus501ResolvesToUnimplementedNotUnsupported() {
+        assertSame(Codes.UNIMPLEMENTED, http.toStatus(501))
+    }
+
+    /** DENIED, UNAUTHENTICATED, and UNAUTHORIZED all resolve to 401; UNAUTHENTICATED wins. */
+    @Test
+    fun toStatus401ResolvesToUnauthenticatedNotDeniedOrUnauthorized() {
+        assertSame(Codes.UNAUTHENTICATED, http.toStatus(401))
+    }
+
+    /**
+     * The canonical tie-breaking is still derived from this instance's own [CodesToHttp.toCode],
+     * not a fixed table — a custom [overrides] map changes both directions together.
+     */
+    @Test
+    fun toStatusStaysInSyncWithCustomOverridesNotJustDefaults() {
+        val custom = CodesToHttp(overrides = mapOf(Codes.TIMEOUT to 599))
+        assertSame(Codes.TIMEOUT, custom.toStatus(599))
+        assertNull(custom.toStatus(504)) // TIMEOUT no longer resolves to 504 for this instance
     }
 }
 
