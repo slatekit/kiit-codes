@@ -4,6 +4,7 @@ import kiit.codes.Codes
 import kiit.codes.Failed
 import kiit.codes.Status
 import kiit.codes.StatusException
+import kiit.codes.toException
 
 data class User(val id: String, val email: String)
 
@@ -34,6 +35,6 @@ class UserService {
     /** Throws [StatusException] instead of returning [Status] — for callers that need an exception. */
     fun requireAuthorized(id: String, requesterId: String) {
         val status = authorize(id, requesterId)
-        if (status is Failed) throw StatusException(status)
+        if (status is Failed) throw status.toException()
     }
 }
