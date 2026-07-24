@@ -19,21 +19,21 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 
 | | Section | Description |
 |---|---|---|
-| ℹ️ | [About](#ℹ️-about) | What kiit.codes is |
-| 🧩 | [The problem](#-the-problem) | Why exceptions/booleans fall short |
-| 💡 | [The idea](#-the-idea) | Closed taxonomy, open codes |
-| 🚀 | [Quick start](#-quick-start) | Install & first examples |
-| 🧠 | [Core concepts](#-core-concepts) | `Status`/`Passed`/`Failed` hierarchy |
-| 📖 | [Built-in codes](#-built-in-codes) | The `Codes` registry |
-| 🌐 | [HTTP conversion](#-http-conversion) | `Status` ↔ HTTP codes |
-| 🧾 | [Err & Checked](#-err--checked) | Validation detail & accumulation |
-| ⚠️ | [Exceptions](#️-exceptions) | Sealed `StatusException` |
-| 🛠️ | [Use cases](#️-use-cases) | Where this fits |
-| ✅ | [When to use this](#-when-to-use-this-and-when-not-to) | Good fit vs. not |
-| 📦 | [Requirements](#-requirements) | Platforms & dependencies |
-| 🗺️ | [Roadmap](#️-roadmap) | What's next |
-| 🤝 | [Contributing](#-contributing) | How to contribute |
-| 📄 | [License](#-license) | License |
+| ℹ️ | [About](#ℹ️-about) | What kiit.codes is and the taxonomy + exception model it provides |
+| 🧩 | [The problem](#-the-problem) | Why exceptions, raw booleans, and borrowed HTTP codes don't compose well |
+| 💡 | [The idea](#-the-idea) | A closed taxonomy of outcomes, layered on top of open, extensible codes |
+| 🚀 | [Quick start](#-quick-start) | Install the library and see status, `Checked`, and exception examples |
+| 🧠 | [Core concepts](#-core-concepts) | The `Status`/`Passed`/`Failed` hierarchy and how the pieces relate |
+| 📖 | [Built-in codes](#-built-in-codes) | The `Codes` registry of common statuses, and how to add your own |
+| 🌐 | [HTTP conversion](#-http-conversion) | Mapping a `Status` to and from a real HTTP status code |
+| 🧾 | [Err & Checked](#-err--checked) | Carrying per-occurrence error detail and reporting every problem at once |
+| ⚠️ | [Exceptions](#️-exceptions) | The sealed `StatusException` family for exception-only call boundaries |
+| 🛠️ | [Use cases](#️-use-cases) | Where this fits — services, APIs, background jobs, logging |
+| ✅ | [When to use this](#-when-to-use-this-and-when-not-to) | Good-fit and not-necessary scenarios, so you can decide quickly |
+| 📦 | [Requirements](#-requirements) | Supported platforms and the (lack of) runtime dependencies |
+| 🗺️ | [Roadmap](#️-roadmap) | Publishing pipelines and CI work planned but not yet done |
+| 🤝 | [Contributing](#-contributing) | How to build, test, and submit changes |
+| 📄 | [License](#-license) | Licensing terms for this project |
 
 ---
 
