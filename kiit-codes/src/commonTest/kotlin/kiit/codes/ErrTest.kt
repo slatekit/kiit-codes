@@ -35,19 +35,19 @@ class ErrTest {
     }
 
     @Test
-    fun ofStatusWithMessageUsesGivenMessageNotStatusMessage() {
-        val err = Err.of(Codes.INVALID, "email must contain @")
-        assertIs<Err.ErrorInfo>(err)
-        assertEquals("email must contain @", err.msg)
-        assertSame(Codes.INVALID, err.ref)
-    }
-
-    @Test
     fun onFieldBuildsErrorField() {
         val err = Err.on("email", "not-an-email", "invalid email") as Err.ErrorField
         assertEquals("email", err.field)
         assertEquals("not-an-email", err.value)
         assertEquals("invalid email", err.msg)
+    }
+
+    @Test
+    fun onFieldWithoutValueDefaultsValueToEmpty() {
+        val err = Err.on("password", "too short") as Err.ErrorField
+        assertEquals("password", err.field)
+        assertEquals("", err.value)
+        assertEquals("too short", err.msg)
     }
 
     @Test

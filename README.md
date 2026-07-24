@@ -266,11 +266,11 @@ lookup.toCode(PAYMENT_DECLINED) // 402
 ```kotlin
 fun validateEmail(email: String): Checked =
     if (email.contains("@")) Checked.success()
-    else Checked.failure(Codes.INVALID, listOf(Err.of(Codes.INVALID, "must contain @")))
+    else Checked.failure(Codes.INVALID, listOf(Err.on("email", "must contain @")))
 
 fun validatePhone(phone: String): Checked =
     if (phone.length >= 10) Checked.success()
-    else Checked.failure(Codes.INVALID, listOf(Err.of(Codes.INVALID, "too short")))
+    else Checked.failure(Codes.INVALID, listOf(Err.on("phone", "too short")))
 
 val result = collect(validateEmail(email), validatePhone(phone))
 if (!result.isValid) {
@@ -319,7 +319,7 @@ class RegistrationException(
 **After:**
 
 ```kotlin
-throw StatusException.InvalidException(Codes.INVALID, listOf(Err.of(Codes.INVALID, "email: already taken")))
+throw StatusException.InvalidException(Codes.INVALID, listOf(Err.on("email", "already taken")))
 ```
 
 If a named class is still useful for framework or crash-tooling reasons that dispatch on exception type specifically, each subtype is `open`, so it's a one-line addition, not a whole class with its own fields and catch logic:

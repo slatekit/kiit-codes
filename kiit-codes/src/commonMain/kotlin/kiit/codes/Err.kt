@@ -84,13 +84,17 @@ sealed class Err {
             return ErrorInfo(status.message)
         }
 
-        /** Builds an [Err] for a [status] with a specific per-occurrence [msg], e.g. field-level detail. */
-        fun of(status: Status, msg: String): Err {
-            return ErrorInfo(msg, ref = status)
-        }
-
         fun on(field: String, value: String, msg: String, ex: Throwable? = null): Err {
             return ErrorField(field, value, msg, ex)
+        }
+
+        /**
+         * Builds an [Err] for a [field] with a specific per-occurrence [msg], without a [value].
+         * Use this instead of [on] when the value itself could be sensitive (e.g. a password or
+         * token) and shouldn't be carried on the error.
+         */
+        fun on(field: String, msg: String, ex: Throwable? = null): Err {
+            return ErrorField(field, "", msg, ex)
         }
 
         fun ex(ex: Throwable): Err {
