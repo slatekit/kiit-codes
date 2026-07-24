@@ -84,6 +84,11 @@ sealed class Err {
             return ErrorInfo(status.message)
         }
 
+        /** Builds an [Err] for a [status] with a specific per-occurrence [msg], e.g. field-level detail. */
+        fun of(status: Status, msg: String): Err {
+            return ErrorInfo(msg, ref = status)
+        }
+
         fun on(field: String, value: String, msg: String, ex: Throwable? = null): Err {
             return ErrorField(field, value, msg, ex)
         }

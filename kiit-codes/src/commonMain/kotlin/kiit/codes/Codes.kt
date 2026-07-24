@@ -18,6 +18,11 @@ package kiit.codes
  * methods. Custom domain codes can be created by constructing any [Passed] or [Failed] subtype
  * directly; only the four categories under each are fixed/closed (see [Status]). Every entry in
  * this registry has [Status.origin] == [StatusConstants.KIIT].
+ *
+ * Uniqueness of every entry is enforced over `(origin, name)` at object-init time — a collision
+ * fails loudly the first time [Codes] is touched, rather than silently producing a wrong lookup
+ * later. This is scoped to `(origin, name)`, not `name` alone, so a consumer's own custom codes
+ * (with their own [Status.origin]) can never collide with a built-in one.
  */
 object Codes {
     // ---- Succeeded ----
@@ -90,6 +95,11 @@ object Codes {
             MISSING, FORBIDDEN, CONFLICT, DEPRECATED, ERRORED,
             UNIMPLEMENTED, UNSUPPORTED, TIMEOUT, RATE_LIMITED, UNREACHABLE, UNDER_MAINTENANCE, UNEXPECTED,
         )
+
+    init {
+        val duplicates = all.groupBy { it.origin to it.name }.filterValues { it.size > 1 }.keys
+        check(duplicates.isEmpty()) { "Duplicate Status codes detected in Codes registry: $duplicates" }
+    }
 }
 
 /**
