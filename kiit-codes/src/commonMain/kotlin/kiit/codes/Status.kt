@@ -25,7 +25,7 @@ object StatusConstants {
  * a background job step, an API request, or a CLI command.
  *
  * Shape (maps directly to JSON / API error responses):
- *   { "name": "TOKEN_EXPIRED", "group": "Denied", "origin": "kiit",
+ *   { "id": "kiit.TOKEN_EXPIRED", "name": "TOKEN_EXPIRED", "group": "Restricted", "origin": "kiit",
  *     "message": "Session token expired", "success": false }
  *
  * Hierarchy. Categories are closed/sealed and fixed by design, to enforce a consistent taxonomy
@@ -34,7 +34,7 @@ object StatusConstants {
  *
  *   Status  = Passed     | Failed
  *   Passed  = Succeeded  | Pending | Filtered | Information
- *   Failed  = Denied     | Invalid | Errored  | Unserved
+ *   Failed  = Restricted | Invalid | Rejected | Unserved
  */
 sealed interface Status {
     /**
@@ -50,6 +50,9 @@ sealed interface Status {
      */
     val origin: String
 
+    /** Stable identity, `"$origin.$name"` — unique across every [Status], usable as a map key. */
+    val id: String get() = "$origin.$name"
+
     /**
      * Human-readable, constant description — never constructed from runtime data. Per-instance /
      * runtime detail (e.g. "field X was invalid because...") belongs on whatever wraps this
@@ -64,11 +67,8 @@ sealed interface Status {
      */
     val success: Boolean
 
-    /** The category discriminant, e.g. "Denied", "Errored" — see the hierarchy above. */
+    /** The category discriminant, e.g. "Restricted", "Rejected" — see the hierarchy above. */
     val group: String
-
-    /** Returns a copy of this status with an updated [msg], preserving name, origin, and group. */
-    fun copyMessage(msg: String): Status
 
     /** Returns a copy of this status with an updated [msg] and [origin], preserving name and group. */
     fun copyAll(msg: String, origin: String): Status
@@ -82,7 +82,7 @@ sealed interface Status {
         @Suppress("UNCHECKED_CAST")
         fun <T : Status> ofStatus(msg: String?, rawStatus: T?, status: T): T {
             val base = rawStatus ?: status
-            return if (msg == null) base else base.copyMessage(msg) as T
+            return if (msg == null) base else base.copyAll(msg, base.origin) as T
         }
     }
 }
@@ -146,33 +146,25 @@ sealed class Passed : Status {
             is Filtered -> copy(message = msg, origin = origin)
             is Information -> copy(message = msg, origin = origin)
         }
-
-    override fun copyMessage(msg: String): Status =
-        when (this) {
-            is Succeeded -> copy(message = msg)
-            is Pending -> copy(message = msg)
-            is Filtered -> copy(message = msg)
-            is Information -> copy(message = msg)
-        }
 }
 
 /**
  * Parent sealed type for all failure statuses (success = false for every subtype).
- * Subtypes: [Denied], [Invalid], [Errored], [Unserved].
+ * Subtypes: [Restricted], [Invalid], [Rejected], [Unserved].
  */
 sealed class Failed : Status {
     final override val success: Boolean get() = false
 
     final override val group: String
         get() = when (this) {
-            is Denied -> "Denied"
+            is Restricted -> "Restricted"
             is Invalid -> "Invalid"
-            is Errored -> "Errored"
+            is Rejected -> "Rejected"
             is Unserved -> "Unserved"
         }
 
     /** Security / access-control failure — the caller is not permitted to perform this action. */
-    data class Denied(
+    data class Restricted(
         override val name: String,
         override val message: String,
         override val origin: String = StatusConstants.CUSTOM,
@@ -186,7 +178,7 @@ sealed class Failed : Status {
     ) : Failed()
 
     /** A known, expected business-rule failure — understood and handled by the caller. */
-    data class Errored(
+    data class Rejected(
         override val name: String,
         override val message: String,
         override val origin: String = StatusConstants.CUSTOM,
@@ -205,17 +197,9 @@ sealed class Failed : Status {
 
     override fun copyAll(msg: String, origin: String): Status =
         when (this) {
-            is Denied -> copy(message = msg, origin = origin)
+            is Restricted -> copy(message = msg, origin = origin)
             is Invalid -> copy(message = msg, origin = origin)
-            is Errored -> copy(message = msg, origin = origin)
+            is Rejected -> copy(message = msg, origin = origin)
             is Unserved -> copy(message = msg, origin = origin)
-        }
-
-    override fun copyMessage(msg: String): Status =
-        when (this) {
-            is Denied -> copy(message = msg)
-            is Invalid -> copy(message = msg)
-            is Errored -> copy(message = msg)
-            is Unserved -> copy(message = msg)
         }
 }

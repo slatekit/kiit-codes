@@ -23,16 +23,16 @@ class CodesTest {
     }
 
     @Test
-    fun deniedHasCorrectValues() {
-        assertEquals("DENIED", Codes.DENIED.name)
-        assertEquals(StatusConstants.KIIT, Codes.DENIED.origin)
-        assertFalse(Codes.DENIED.success)
+    fun restrictedHasCorrectValues() {
+        assertEquals("RESTRICTED", Codes.RESTRICTED.name)
+        assertEquals(StatusConstants.KIIT, Codes.RESTRICTED.origin)
+        assertFalse(Codes.RESTRICTED.success)
     }
 
     @Test
-    fun forbiddenIsDenied() {
+    fun forbiddenIsRestricted() {
         // Access-control outcome, not a business-rule failure — see Codes.kt for the reasoning.
-        assertTrue(Codes.FORBIDDEN is Failed.Denied)
+        assertTrue(Codes.FORBIDDEN is Failed.Restricted)
     }
 
     @Test
@@ -66,6 +66,12 @@ class CodesTest {
         val keys = Codes.all.map { it.origin to it.name }
         assertEquals(keys.size, keys.toSet().size)
     }
+
+    @Test
+    fun everyBuiltInCodeHasAUniqueId() {
+        val ids = Codes.all.map { it.id }
+        assertEquals(ids.size, ids.toSet().size)
+    }
 }
 
 // =================================================================================================
@@ -98,8 +104,8 @@ class CodesToHttpTest {
         assertEquals(200, http.toCode(Codes.ABOUT))
     }
 
-    @Test fun categoryDefaultDenied() {
-        assertEquals(401, http.toCode(Codes.DENIED))
+    @Test fun categoryDefaultRestricted() {
+        assertEquals(401, http.toCode(Codes.RESTRICTED))
         assertEquals(401, http.toCode(Codes.UNAUTHENTICATED))
     }
 
@@ -108,8 +114,8 @@ class CodesToHttpTest {
         assertEquals(400, http.toCode(Codes.INVALID))
     }
 
-    @Test fun categoryDefaultErrored() {
-        assertEquals(500, http.toCode(Codes.ERRORED))
+    @Test fun categoryDefaultRejected() {
+        assertEquals(500, http.toCode(Codes.REJECTED))
     }
 
     @Test fun categoryDefaultUnserved() {
@@ -167,8 +173,8 @@ class CodesToHttpTest {
      */
     @Test
     fun toCodeFallsBackToCategoryDefaultForCustomStatus() {
-        val custom = Failed.Errored("CUSTOM", "Custom error")
-        assertEquals(500, http.toCode(custom)) // Errored's category default
+        val custom = Failed.Rejected("CUSTOM", "Custom error")
+        assertEquals(500, http.toCode(custom)) // Rejected's category default
     }
 
     // -------------------------------------------------------------------------
@@ -229,9 +235,9 @@ class CodesToHttpTest {
         assertSame(Codes.NOT_FOUND, http.toStatus(404))
     }
 
-    /** ERRORED and UNEXPECTED both resolve to 500; UNEXPECTED wins. */
+    /** REJECTED and UNEXPECTED both resolve to 500; UNEXPECTED wins. */
     @Test
-    fun toStatus500ResolvesToUnexpectedNotErrored() {
+    fun toStatus500ResolvesToUnexpectedNotRejected() {
         assertSame(Codes.UNEXPECTED, http.toStatus(500))
     }
 
@@ -241,9 +247,9 @@ class CodesToHttpTest {
         assertSame(Codes.UNIMPLEMENTED, http.toStatus(501))
     }
 
-    /** DENIED, UNAUTHENTICATED, and UNAUTHORIZED all resolve to 401; UNAUTHENTICATED wins. */
+    /** RESTRICTED, UNAUTHENTICATED, and UNAUTHORIZED all resolve to 401; UNAUTHENTICATED wins. */
     @Test
-    fun toStatus401ResolvesToUnauthenticatedNotDeniedOrUnauthorized() {
+    fun toStatus401ResolvesToUnauthenticatedNotRestrictedOrUnauthorized() {
         assertSame(Codes.UNAUTHENTICATED, http.toStatus(401))
     }
 
@@ -260,7 +266,7 @@ class CodesToHttpTest {
 }
 
 class CompositeLookupTest {
-    private val customCode = Failed.Errored("PAYMENT_DECLINED", "Payment declined")
+    private val customCode = Failed.Rejected("PAYMENT_DECLINED", "Payment declined")
     private val lookup = CompositeLookup(base = CodesToHttp(), extensions = mapOf(customCode to 402))
 
     @Test
@@ -277,7 +283,7 @@ class CompositeLookupTest {
 
     @Test
     fun fallsBackToBaseForRegisteredCodes() {
-        assertEquals(401, lookup.toCode(Codes.DENIED))
+        assertEquals(401, lookup.toCode(Codes.RESTRICTED))
         assertSame(Codes.CREATED, lookup.toStatus(201))
     }
 

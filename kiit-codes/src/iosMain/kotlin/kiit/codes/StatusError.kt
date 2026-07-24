@@ -11,7 +11,7 @@ package kiit.codes
  * ```swift
  * do {
  *     try someKotlinApi()
- * } catch let e as DeniedError {
+ * } catch let e as RestrictedError {
  *     print(e.status.name)  // e.g. "UNAUTHORIZED"
  * }
  * ```
@@ -20,12 +20,12 @@ package kiit.codes
  * idiomatic Swift `throws` with no manual NSError casting.
  */
 @OptIn(kotlin.experimental.ExperimentalObjCName::class)
-@ObjCName("DeniedError", swiftName = "DeniedError")
-class DeniedError(
-    status: Failed.Denied,
+@ObjCName("RestrictedError", swiftName = "RestrictedError")
+class RestrictedError(
+    status: Failed.Restricted,
     errors: List<Err> = emptyList(),
     cause: Throwable? = null,
-) : StatusException.DeniedException(status, errors, cause)
+) : StatusException.RestrictedException(status, errors, cause)
 
 @OptIn(kotlin.experimental.ExperimentalObjCName::class)
 @ObjCName("InvalidError", swiftName = "InvalidError")
@@ -36,12 +36,12 @@ class InvalidError(
 ) : StatusException.InvalidException(status, errors, cause)
 
 @OptIn(kotlin.experimental.ExperimentalObjCName::class)
-@ObjCName("ErroredError", swiftName = "ErroredError")
-class ErroredError(
-    status: Failed.Errored,
+@ObjCName("RejectedError", swiftName = "RejectedError")
+class RejectedError(
+    status: Failed.Rejected,
     errors: List<Err> = emptyList(),
     cause: Throwable? = null,
-) : StatusException.ErroredException(status, errors, cause)
+) : StatusException.RejectedException(status, errors, cause)
 
 @OptIn(kotlin.experimental.ExperimentalObjCName::class)
 @ObjCName("UnservedError", swiftName = "UnservedError")

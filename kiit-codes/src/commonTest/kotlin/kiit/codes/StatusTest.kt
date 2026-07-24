@@ -36,16 +36,16 @@ class StatusTest {
     // success flag — Failed subtypes (hoisted onto Failed itself; see Failed.success)
     // -------------------------------------------------------------------------
 
-    @Test fun deniedHasSuccessFalse() {
-        assertFalse(Failed.Denied("D", "D").success)
+    @Test fun restrictedHasSuccessFalse() {
+        assertFalse(Failed.Restricted("R", "R").success)
     }
 
     @Test fun invalidHasSuccessFalse() {
         assertFalse(Failed.Invalid("I", "I").success)
     }
 
-    @Test fun erroredHasSuccessFalse() {
-        assertFalse(Failed.Errored("E", "E").success)
+    @Test fun rejectedHasSuccessFalse() {
+        assertFalse(Failed.Rejected("E", "E").success)
     }
 
     @Test fun unservedHasSuccessFalse() {
@@ -58,7 +58,7 @@ class StatusTest {
 
     @Test fun originDefaultsToCustom() {
         assertEquals(StatusConstants.CUSTOM, Passed.Succeeded("S", "S").origin)
-        assertEquals(StatusConstants.CUSTOM, Failed.Denied("D", "D").origin)
+        assertEquals(StatusConstants.CUSTOM, Failed.Restricted("R", "R").origin)
     }
 
     @Test fun originIsOverridable() {
@@ -75,77 +75,27 @@ class StatusTest {
         assertEquals("Pending", Passed.Pending("P", "P").group)
         assertEquals("Filtered", Passed.Filtered("F", "F").group)
         assertEquals("Information", Passed.Information("N", "N").group)
-        assertEquals("Denied", Failed.Denied("D", "D").group)
+        assertEquals("Restricted", Failed.Restricted("R", "R").group)
         assertEquals("Invalid", Failed.Invalid("I", "I").group)
-        assertEquals("Errored", Failed.Errored("E", "E").group)
+        assertEquals("Rejected", Failed.Rejected("E", "E").group)
         assertEquals("Unserved", Failed.Unserved("U", "U").group)
     }
 
     // -------------------------------------------------------------------------
-    // copyMessage — updates message, preserves name, origin, and group
+    // id — "$origin.$name", derived, usable as a map/lookup key
     // -------------------------------------------------------------------------
 
     @Test
-    fun copyMessageOnSucceeded() {
+    fun idIsOriginDotName() {
+        val s = Failed.Restricted("RESTRICTED", "Restricted", origin = StatusConstants.KIIT)
+        assertEquals("kiit.RESTRICTED", s.id)
+    }
+
+    @Test
+    fun idReflectsUpdatedOriginAfterCopyAll() {
         val s = Passed.Succeeded("SUCCESS", "Success", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-        assertEquals(s.name, copy.name)
-        assertEquals(s.origin, copy.origin)
-        assertTrue(copy.success)
-    }
-
-    @Test
-    fun copyMessageOnPending() {
-        val s = Passed.Pending("PENDING", "Pending", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-        assertEquals(s.origin, copy.origin)
-    }
-
-    @Test
-    fun copyMessageOnFiltered() {
-        val s = Passed.Filtered("SKIPPED", "Skipped", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-    }
-
-    @Test
-    fun copyMessageOnInformation() {
-        val s = Passed.Information("HELP", "Help", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-        assertTrue(copy.success)
-    }
-
-    @Test
-    fun copyMessageOnDenied() {
-        val s = Failed.Denied("DENIED", "Denied", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-        assertFalse(copy.success)
-    }
-
-    @Test
-    fun copyMessageOnInvalid() {
-        val s = Failed.Invalid("INVALID", "Invalid", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-    }
-
-    @Test
-    fun copyMessageOnErrored() {
-        val s = Failed.Errored("ERRORED", "Errored", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-    }
-
-    @Test
-    fun copyMessageOnUnserved() {
-        val s = Failed.Unserved("UNEXPECTED", "Unexpected", origin = StatusConstants.KIIT)
-        val copy = s.copyMessage("Custom")
-        assertEquals("Custom", copy.message)
-        assertFalse(copy.success)
+        val copy = s.copyAll("Custom", "external")
+        assertEquals("external.SUCCESS", copy.id)
     }
 
     // -------------------------------------------------------------------------
@@ -162,8 +112,8 @@ class StatusTest {
     }
 
     @Test
-    fun copyAllOnDenied() {
-        val s = Failed.Denied("DENIED", "Denied", origin = StatusConstants.KIIT)
+    fun copyAllOnRestricted() {
+        val s = Failed.Restricted("RESTRICTED", "Restricted", origin = StatusConstants.KIIT)
         val copy = s.copyAll("Custom", "external")
         assertEquals("Custom", copy.message)
         assertEquals("external", copy.origin)
