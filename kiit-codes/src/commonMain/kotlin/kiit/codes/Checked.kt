@@ -42,11 +42,11 @@ class Checked private constructor(val status: Status, override val errors: List<
 
 /**
  * Collects multiple [checks] into one: passes only if every one of them passed, otherwise fails
- * with [Codes.INVALID] and every error from every failing entry pooled together, in order.
+ * with [Codes.INVALID_VALUE] and every error from every failing entry pooled together, in order.
  */
 fun collect(vararg checks: Checked): Checked {
     val errors = checks.flatMap { it.errors }
-    return if (errors.isEmpty()) Checked.success() else Checked.failure(Codes.INVALID, errors)
+    return if (errors.isEmpty()) Checked.success() else Checked.failure(Codes.INVALID_VALUE, errors)
 }
 
 /** [collect] over a [List] instead of varargs. */

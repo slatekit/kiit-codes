@@ -99,6 +99,30 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
+    // isNeutral — true only for Filtered/Information, false for every other subtype
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun isNeutralIsTrueForFilteredAndInformation() {
+        assertTrue(Passed.Filtered("F", "F").isNeutral)
+        assertTrue(Passed.Information("I", "I").isNeutral)
+    }
+
+    @Test
+    fun isNeutralIsFalseForSucceededAndPending() {
+        assertFalse(Passed.Succeeded("S", "S").isNeutral)
+        assertFalse(Passed.Pending("P", "P").isNeutral)
+    }
+
+    @Test
+    fun isNeutralIsFalseForEveryFailedSubtype() {
+        assertFalse(Failed.Restricted("R", "R").isNeutral)
+        assertFalse(Failed.Invalid("I", "I").isNeutral)
+        assertFalse(Failed.Rejected("E", "E").isNeutral)
+        assertFalse(Failed.Unserved("U", "U").isNeutral)
+    }
+
+    // -------------------------------------------------------------------------
     // copyAll — updates both message and origin, preserves name and group
     // -------------------------------------------------------------------------
 
