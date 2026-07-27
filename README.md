@@ -87,6 +87,8 @@ dependencies {
 **Return a status when the outcome itself is all the detail you need:**
 
 ```kotlin
+import kiit.codes.*
+
 fun authorize(userId: String, requesterId: String): Status =
     if (userId != requesterId) Codes.UNAUTHORIZED else Codes.SUCCESS
 ```
@@ -94,6 +96,8 @@ fun authorize(userId: String, requesterId: String): Status =
 **Branch on the outcome, exhaustively:**
 
 ```kotlin
+import kiit.codes.*
+
 when (val status = authorize(userId, requesterId)) {
     is Passed -> log.info("ok: ${status.name}")
     is Failed -> log.warn("failed: ${status.name} — ${status.message}")
@@ -103,6 +107,8 @@ when (val status = authorize(userId, requesterId)) {
 **Return `Checked` when a failure needs to carry *why*, not just *that*:**
 
 ```kotlin
+import kiit.codes.*
+
 fun createUser(email: String): Checked =
     if (users.containsKey(email)) {
         Checked.failure(Codes.CONFLICT, listOf(Err.on("email", email, "already registered")))
@@ -120,6 +126,8 @@ if (!result.isValid) {
 **Report more than one problem at once with `collect`:**
 
 ```kotlin
+import kiit.codes.*
+
 fun checkEmail(email: String): Checked =
     if (email.contains("@")) Checked.success()
     else Checked.failure(Codes.INVALID_VALUE, listOf(Err.on("email", email, "must contain @")))
@@ -137,6 +145,8 @@ if (!result.isValid) {
 **Throw with structure, catch with structure:**
 
 ```kotlin
+import kiit.codes.*
+
 throw StatusException.RestrictedException(Codes.UNAUTHORIZED)
 
 try {
@@ -149,6 +159,8 @@ try {
 **Convert to HTTP when you need a real status code:**
 
 ```kotlin
+import kiit.codes.*
+
 val http = CodesToHttp()
 http.toCode(Codes.CREATED)      // 201
 http.toCode(Codes.RESTRICTED)   // 401
@@ -219,6 +231,19 @@ graph TD
 | **Checked** | A `Status` plus zero or more `Err`, for reporting every problem found at once instead of stopping at the first one. `collect` combines several `Checked` into one. |
 | **StatusException** | Sealed, carries a `Checked` across a call boundary that can only communicate via exceptions. One subtype per `Failed` category — `RestrictedException`, `InvalidException`, `RejectedException`, `UnservedException`. |
 
+Every current member, by category:
+
+| Category | Members |
+|---|---|
+| Succeeded | `SUCCESS`, `CREATED`, `UPDATED`, `PATCHED`, `FETCHED`, `DELETED`, `HANDLED`, `REFERRED` |
+| Pending | `ACCEPTED`, `QUEUED`, `PROCESSING`, `CONFIRM`, `REDIRECTED` |
+| Filtered | `SKIPPED`, `DISCARDED`, `CANCELLED`, `EXCLUDED` |
+| Information | `HELP`, `ABOUT`, `VERSION`, `EXIT`, `MOVED`, `NOTICE` |
+| Restricted | `RESTRICTED`, `UNAUTHENTICATED`, `UNAUTHORIZED`, `FORBIDDEN` |
+| Invalid | `BAD_REQUEST`, `INVALID_VALUE`, `NOT_FOUND`, `OUT_OF_RANGE`, `PAYLOAD_TOO_LARGE` |
+| Rejected | `CONFLICT`, `RULE_VIOLATION`, `NOT_EXISTS`, `PRECONDITION_FAILED` |
+| Unserved | `UNIMPLEMENTED`, `UNSUPPORTED`, `TIMEOUT`, `RATE_LIMITED`, `UNREACHABLE`, `UNDER_MAINTENANCE`, `UNEXPECTED`, `CONCURRENCY_CONFLICT`, `INTERNAL`, `DATA_LOSS` |
+
 ## 📖 Built-in codes
 
 The `Codes` object provides a standard registry — using it is optional, and you can construct any `Passed`/`Failed` subtype directly for domain-specific outcomes.
@@ -227,16 +252,18 @@ The `Codes` object provides a standard registry — using it is optional, and yo
 |---|---|
 | Succeeded | `SUCCESS`, `CREATED`, `UPDATED`, `PATCHED`, `FETCHED`, `DELETED`, `HANDLED`, `REFERRED` |
 | Pending | `ACCEPTED`, `QUEUED`, `PROCESSING`, `CONFIRM`, `REDIRECTED` |
-| Filtered | `SKIPPED` (not processed), `DISCARDED` (processed, result thrown away), `CANCELLED`, `EXCLUDED` |
-| Information | `HELP`, `ABOUT`, `VERSION`, `EXIT`, `MOVED`, `NOTICE` |
+| Filtered | `SKIPPED` (not processed), `DISCARDED` (processed, result thrown away), `CANCELLED` (cancelled by caller), `EXCLUDED` (generic fallback) |
+| Information | `HELP`, `ABOUT`, `VERSION`, `EXIT`, `MOVED` (resource relocated permanently), `NOTICE` (generic fallback) |
 | Restricted | `RESTRICTED`, `UNAUTHENTICATED`, `UNAUTHORIZED`, `FORBIDDEN` |
-| Invalid | `BAD_REQUEST`, `INVALID_VALUE`, `NOT_FOUND`, `OUT_OF_RANGE`, `PAYLOAD_TOO_LARGE`, `REMOVED` |
-| Rejected | `CONFLICT`, `RULE_VIOLATION`, `NOT_EXISTS`, `PRECONDITION_FAILED` |
+| Invalid | `BAD_REQUEST`, `INVALID_VALUE`, `NOT_FOUND` (route/request not found), `OUT_OF_RANGE`, `PAYLOAD_TOO_LARGE`, `REMOVED` |
+| Rejected | `CONFLICT`, `RULE_VIOLATION`, `NOT_EXISTS` (entity-level not found), `PRECONDITION_FAILED` |
 | Unserved | `UNIMPLEMENTED`, `UNSUPPORTED`, `TIMEOUT`, `RATE_LIMITED`, `UNREACHABLE`, `UNDER_MAINTENANCE`, `UNEXPECTED`, `CONCURRENCY_CONFLICT`, `INTERNAL`, `DATA_LOSS` |
 
 Every built-in code's `origin` is `"kiit"`. Custom codes should supply their own, a module or team name, rather than relying on a default, so uniqueness only has to hold within your own `origin`, not globally:
 
 ```kotlin
+import kiit.codes.Failed
+
 val PAYMENT_DECLINED = Failed.Rejected("PAYMENT_DECLINED", "Payment declined", origin = "payments")
 ```
 
@@ -247,8 +274,12 @@ Uniqueness over `id` (`origin.name`) is enforced at object-init time, a collisio
 `CodesToHttp` maps `Status` to HTTP status codes: a compiler-exhaustive category default (`Succeeded` → 200, `Restricted` → 401, etc.), layered with a small overrides table, keyed by `Status` instance, for the handful of codes that differ (`CREATED` → 201, `NOT_FOUND` → 404). `toStatus` is derived from `toCode`, so the two directions can never drift out of sync — but the mapping is many-to-one (six different `Passed` codes all resolve to `200`), so `toStatus` is inherently lossy. It returns a deterministic canonical status for a given code, not necessarily the specific one you originally converted.
 
 ```kotlin
+import kiit.codes.*
+
 val http = CodesToHttp()
 http.toStatus(404)?.name           // "NOT_FOUND" — deterministic even though NOT_EXISTS also maps to 404
+http.toStatus(413)?.name           // "PAYLOAD_TOO_LARGE"
+http.toStatus(307)?.name           // "REDIRECTED"
 http.toCode(Codes.UPDATED)         // 200
 http.toStatus(200)?.name           // "SUCCESS", not "UPDATED" — lossy, not a round trip
 http.toStatus(999)                 // null — unrecognized code, no guessed fallback
@@ -259,6 +290,8 @@ A few overrides worth calling out specifically: `CANCELLED` → 499 (`Client Clo
 `CompositeLookup` composes a base lookup with your own extensions, also keyed by `Status` instance so custom, unregistered statuses are reverse-lookupable too:
 
 ```kotlin
+import kiit.codes.*
+
 val lookup = CompositeLookup(base = CodesToHttp(), extensions = mapOf(PAYMENT_DECLINED to 402))
 lookup.toCode(PAYMENT_DECLINED) // 402
 ```
@@ -268,6 +301,8 @@ lookup.toCode(PAYMENT_DECLINED) // 402
 `CodesToGrpc` maps `Status` to gRPC status codes (0-16) the same way `CodesToHttp` maps to HTTP: a compiler-exhaustive category default (`Passed` → 0 `OK`, `Restricted` → 7 `PERMISSION_DENIED`, `Invalid` → 3 `INVALID_ARGUMENT`, `Rejected` → 9 `FAILED_PRECONDITION`, `Unserved` → 13 `INTERNAL`), layered with an overrides table for codes that need their own dedicated gRPC code (`UNAUTHENTICATED` → 16, `TIMEOUT` → 4 `DEADLINE_EXCEEDED`, `RATE_LIMITED` → 8 `RESOURCE_EXHAUSTED`, and so on). `toStatus` is derived from `toCode` the same deterministic way as `CodesToHttp.toStatus`.
 
 ```kotlin
+import kiit.codes.*
+
 val grpc = CodesToGrpc()
 grpc.toCode(Codes.RESTRICTED)      // 7
 grpc.toCode(Codes.TIMEOUT)         // 4
@@ -285,6 +320,8 @@ grpc.toStatus(9)?.name             // "PRECONDITION_FAILED" — deterministic ca
 - **`collect`** combines several `Checked` into one, pooling every error from every failing entry, not just the first.
 
 ```kotlin
+import kiit.codes.*
+
 fun validateEmail(email: String): Checked =
     if (email.contains("@")) Checked.success()
     else Checked.failure(Codes.INVALID_VALUE, listOf(Err.on("email", "must contain @")))
@@ -306,6 +343,8 @@ if (!result.isValid) {
 `StatusException` is sealed, one subtype per `Failed` category, each carrying a `Checked` so no structure is lost crossing an exception-only boundary:
 
 ```kotlin
+import kiit.codes.*
+
 throw StatusException.RestrictedException(Codes.UNAUTHORIZED)
 
 try {
@@ -320,10 +359,19 @@ try {
 }
 ```
 
-Or catch narrowly, by class, without ever touching a `when` block:
+Or catch narrowly, by class, without ever touching a `when` block. Kotlin lets you import a nested class directly, which drops the `StatusException.` prefix at every call site without giving up the namespace protection nesting provides:
 
 ```kotlin
-catch (e: StatusException.RestrictedException) { /* handled */ }
+import kiit.codes.Codes
+import kiit.codes.StatusException.RestrictedException
+
+throw RestrictedException(Codes.UNAUTHENTICATED)
+
+try {
+    // ...
+} catch (e: RestrictedException) {
+    // handled without the StatusException. prefix, and without a when block
+}
 ```
 
 **This replaces most of what a custom exception class used to do.** A hand-rolled `RegistrationException` was usually doing three jobs at once, routing by class, carrying custom fields, and grouping a family of related failures. `Status`, `Checked`, and the sealed exception family already do all three, generally better, since dispatch and grouping are compiler-checked instead of left to a class hierarchy you maintain by hand.
@@ -340,12 +388,16 @@ class RegistrationException(
 **After:**
 
 ```kotlin
+import kiit.codes.*
+
 throw StatusException.InvalidException(Codes.INVALID_VALUE, listOf(Err.on("email", "already taken")))
 ```
 
 If a named class is still useful for framework or crash-tooling reasons that dispatch on exception type specifically, each subtype is `open`, so it's a one-line addition, not a whole class with its own fields and catch logic:
 
 ```kotlin
+import kiit.codes.*
+
 class RegistrationException(status: Failed.Restricted, errors: List<Err> = emptyList()) :
     StatusException.RestrictedException(status, errors)
 ```
@@ -353,6 +405,8 @@ class RegistrationException(status: Failed.Restricted, errors: List<Err> = empty
 **Converting a bare `Failed` you already have in hand:**
 
 ```kotlin
+import kiit.codes.*
+
 fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
     when (this) {
         is Failed.Restricted -> StatusException.RestrictedException(this, errors)
