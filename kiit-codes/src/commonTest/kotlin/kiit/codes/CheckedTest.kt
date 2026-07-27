@@ -75,7 +75,7 @@ class CheckedTest {
     fun collectWithOneFailurePoolsItsErrors() {
         val errors = listOf(Err.of("bad field"))
         val result = collect(Checked.success(), Checked.failure(Codes.BAD_REQUEST, errors))
-        assertEquals(Codes.INVALID, result.status)
+        assertEquals(Codes.INVALID_VALUE, result.status)
         assertEquals(errors, result.errors)
     }
 
@@ -89,7 +89,7 @@ class CheckedTest {
                 Checked.success(),
                 Checked.failure(Codes.NOT_FOUND, secondErrors),
             )
-        assertEquals(Codes.INVALID, result.status)
+        assertEquals(Codes.INVALID_VALUE, result.status)
         assertEquals(firstErrors + secondErrors, result.errors)
     }
 

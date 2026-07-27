@@ -203,3 +203,6 @@ sealed class Failed : Status {
             is Unserved -> copy(message = msg, origin = origin)
         }
 }
+
+/** True only for [Passed.Filtered]/[Passed.Information] — every other subtype is a genuine success or failure. */
+val Status.isNeutral: Boolean get() = this is Passed.Filtered || this is Passed.Information
