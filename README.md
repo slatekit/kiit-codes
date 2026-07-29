@@ -243,7 +243,7 @@ Each category's fallback/default code is declared, and listed, first.
 | Information | `NOTICE`, `ADVISORY`, `HELP`, `ABOUT`, `VERSION`, `EXIT`, `MOVED` |
 | Restricted | `DENIED`, `UNAUTHENTICATED`, `UNAUTHORIZED`, `FORBIDDEN`, `LOCKED`, `SUSPENDED` |
 | Invalid | `INVALID_VALUE`, `BAD_REQUEST`, `NOT_FOUND`, `OUT_OF_RANGE`, `PAYLOAD_TOO_LARGE`, `MISSING_FIELD`, `INVALID_ENTITY` |
-| Rejected | `RULE_VIOLATION`, `CONFLICT`, `NOT_EXISTS`, `PRECONDITION_FAILED`, `EXPIRED` |
+| Rejected | `RULE_VIOLATION`, `CONFLICT`, `NOT_EXISTS`, `PRECONDITION_FAILED`, `EXPIRED`, `GONE` |
 | Unserved | `UNEXPECTED`, `UNIMPLEMENTED`, `UNSUPPORTED`, `TIMEOUT`, `RATE_LIMITED`, `RESOURCE_LIMITED`, `UNREACHABLE`, `UNDER_MAINTENANCE`, `INTERNAL`, `DATA_LOSS` |
 
 ## 📖 Built-in codes
@@ -258,7 +258,7 @@ The `Codes` object provides a standard registry — using it is optional, and yo
 | Information | `NOTICE` (generic fallback), `ADVISORY` (may need attention or action), `HELP`, `ABOUT`, `VERSION`, `EXIT`, `MOVED` (resource relocated permanently) |
 | Restricted | `DENIED` (generic fallback), `UNAUTHENTICATED`, `UNAUTHORIZED`, `FORBIDDEN`, `LOCKED` (self-resolving), `SUSPENDED` (administrative) |
 | Invalid | `INVALID_VALUE` (generic fallback), `BAD_REQUEST`, `NOT_FOUND` (route/request not found), `OUT_OF_RANGE`, `PAYLOAD_TOO_LARGE`, `MISSING_FIELD`, `INVALID_ENTITY` (HTTP `422`'s real case) |
-| Rejected | `RULE_VIOLATION` (generic fallback), `CONFLICT`, `NOT_EXISTS` (entity-level not found), `PRECONDITION_FAILED`, `EXPIRED` |
+| Rejected | `RULE_VIOLATION` (generic fallback), `CONFLICT`, `NOT_EXISTS` (entity-level not found), `PRECONDITION_FAILED`, `EXPIRED`, `GONE` (deliberately removed) |
 | Unserved | `UNEXPECTED` (generic fallback), `UNIMPLEMENTED`, `UNSUPPORTED`, `TIMEOUT`, `RATE_LIMITED`, `RESOURCE_LIMITED`, `UNREACHABLE`, `UNDER_MAINTENANCE`, `INTERNAL`, `DATA_LOSS` |
 
 A few pairs worth distinguishing on sight, without cross-referencing the source:
@@ -270,6 +270,7 @@ A few pairs worth distinguishing on sight, without cross-referencing the source:
 - **`NOTICE` vs `ADVISORY`** — purely neutral information, vs something that may need attention or action.
 - **`NOT_FOUND` vs `NOT_EXISTS`** — route/request-level (client-integration error), vs entity-level (well-formed request, the thing just doesn't exist).
 - **`EXPIRED` vs `NOT_EXISTS` vs `CONFLICT`** — was valid but timed out, vs never existed, vs exists but something else changed its state.
+- **`EXPIRED` vs `GONE`** — timed out on its own (a natural, expected lifecycle event), vs deliberately removed by an action (a decision someone made). Both map to HTTP `410 Gone`; `GONE` is the canonical winner on the reverse lookup since its name and message are the literal `410` concept.
 
 Every built-in code's `origin` is `"kiit"`. Custom codes should supply their own, a module or team name, rather than relying on a default, so uniqueness only has to hold within your own `origin`, not globally:
 
@@ -299,7 +300,7 @@ http.toStatus(200)?.name           // "SUCCESS", not "UPDATED" — lossy, not a 
 http.toStatus(999)                 // null — unrecognized code, no guessed fallback
 ```
 
-A few overrides worth calling out specifically: `CANCELLED` → 499 (`Client Closed Request`, nginx-originated, not in the RFC but the de facto standard for this exact concept), `REDIRECTED` → 307 (`Temporary Redirect`, not 302, to preserve the original method and body), `PAYLOAD_TOO_LARGE` → 413 (exact match), `LOCKED` → 423 (WebDAV in origin, widely reused generally, exact match), `SUSPENDED` → 403 (closer to Forbidden than Unauthenticated — the caller is known), `EXPIRED` → 410 (`Gone`), `RESOURCE_LIMITED` → 429 (same axis as `RATE_LIMITED`, HTTP doesn't distinguish the two), `INVALID_ENTITY` → 422 (`Unprocessable Entity`, exact match). `MISSING_FIELD` and `DEDUPLICATED` need no override, they fall through cleanly to their category defaults (400 and 200 respectively).
+A few overrides worth calling out specifically: `CANCELLED` → 499 (`Client Closed Request`, nginx-originated, not in the RFC but the de facto standard for this exact concept), `REDIRECTED` → 307 (`Temporary Redirect`, not 302, to preserve the original method and body), `PAYLOAD_TOO_LARGE` → 413 (exact match), `LOCKED` → 423 (WebDAV in origin, widely reused generally, exact match), `SUSPENDED` → 403 (closer to Forbidden than Unauthenticated — the caller is known), `EXPIRED` and `GONE` → 410 (`Gone`, see the key distinction above for which wins the reverse lookup), `RESOURCE_LIMITED` → 429 (same axis as `RATE_LIMITED`, HTTP doesn't distinguish the two), `INVALID_ENTITY` → 422 (`Unprocessable Entity`, exact match). `MISSING_FIELD` and `DEDUPLICATED` need no override, they fall through cleanly to their category defaults (400 and 200 respectively).
 
 `CompositeLookup` composes a base lookup with your own extensions, also keyed by `Status` instance so custom, unregistered statuses are reverse-lookupable too:
 

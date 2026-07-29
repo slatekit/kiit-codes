@@ -42,6 +42,12 @@ class CodesTest {
     }
 
     @Test
+    fun goneIsRejected() {
+        // Deliberately removed — a known business outcome, not malformed input.
+        assertTrue(Codes.GONE is Failed.Rejected)
+    }
+
+    @Test
     fun skippedAndDiscardedHaveDistinctNamesAndSuccessTrue() {
         assertTrue(Codes.SKIPPED.success)
         assertTrue(Codes.DISCARDED.success)
@@ -149,6 +155,10 @@ class CodesToHttpTest {
 
     @Test fun overrideExpired() {
         assertEquals(410, http.toCode(Codes.EXPIRED))
+    }
+
+    @Test fun overrideGone() {
+        assertEquals(410, http.toCode(Codes.GONE))
     }
 
     @Test fun overrideNotExists() {
@@ -267,6 +277,12 @@ class CodesToHttpTest {
         assertSame(Codes.NOT_FOUND, http.toStatus(404))
     }
 
+    /** EXPIRED and GONE both resolve to 410; GONE wins — its name and message are the literal HTTP 410 concept. */
+    @Test
+    fun toStatus410ResolvesToGoneNotExpired() {
+        assertSame(Codes.GONE, http.toStatus(410))
+    }
+
     /** RULE_VIOLATION, PRECONDITION_FAILED, and UNEXPECTED all resolve to 500; UNEXPECTED wins. */
     @Test
     fun toStatus500ResolvesToUnexpectedNotRuleViolationOrPreconditionFailed() {
@@ -332,6 +348,7 @@ class CodesToGrpcTest {
         assertEquals(9, grpc.toCode(Codes.RULE_VIOLATION))
         assertEquals(9, grpc.toCode(Codes.NOT_EXISTS))
         assertEquals(9, grpc.toCode(Codes.EXPIRED))
+        assertEquals(9, grpc.toCode(Codes.GONE))
     }
 
     @Test fun categoryDefaultUnservedIsInternal() {
@@ -429,7 +446,7 @@ class CodesToGrpcTest {
         assertSame(Codes.RATE_LIMITED, grpc.toStatus(8))
     }
 
-    /** RULE_VIOLATION, NOT_EXISTS, PRECONDITION_FAILED, and EXPIRED all resolve to 9; PRECONDITION_FAILED wins. */
+    /** RULE_VIOLATION, NOT_EXISTS, PRECONDITION_FAILED, EXPIRED, and GONE all resolve to 9; PRECONDITION_FAILED wins. */
     @Test
     fun toStatus9ResolvesToPreconditionFailed() {
         assertSame(Codes.PRECONDITION_FAILED, grpc.toStatus(9))

@@ -118,6 +118,12 @@ object Codes {
         Failed.Rejected("PRECONDITION_FAILED", "A required precondition was not met.", origin = StatusConstants.KIIT)
     val EXPIRED =
         Failed.Rejected("EXPIRED", "The referenced item is no longer valid; it has expired.", origin = StatusConstants.KIIT)
+    val GONE =
+        Failed.Rejected(
+            "GONE",
+            "This resource was deliberately removed and is no longer available.",
+            origin = StatusConstants.KIIT,
+        )
 
     // ---- Unserved — valid & permitted, can't be serviced right now ----
     val UNEXPECTED =
@@ -147,7 +153,7 @@ object Codes {
             NOTICE, ADVISORY, HELP, ABOUT, VERSION, EXIT, MOVED,
             DENIED, UNAUTHENTICATED, UNAUTHORIZED, FORBIDDEN, LOCKED, SUSPENDED,
             INVALID_VALUE, BAD_REQUEST, NOT_FOUND, OUT_OF_RANGE, PAYLOAD_TOO_LARGE, MISSING_FIELD, INVALID_ENTITY,
-            RULE_VIOLATION, CONFLICT, NOT_EXISTS, PRECONDITION_FAILED, EXPIRED,
+            RULE_VIOLATION, CONFLICT, NOT_EXISTS, PRECONDITION_FAILED, EXPIRED, GONE,
             UNEXPECTED, UNIMPLEMENTED, UNSUPPORTED, TIMEOUT, RATE_LIMITED, RESOURCE_LIMITED,
             UNREACHABLE, UNDER_MAINTENANCE, INTERNAL, DATA_LOSS,
         )
@@ -234,6 +240,7 @@ open class CodesToHttp(
                 Codes.SUSPENDED to 403,
                 Codes.LOCKED to 423,
                 Codes.EXPIRED to 410,
+                Codes.GONE to 410,
                 Codes.CONFLICT to 409,
                 Codes.INVALID_ENTITY to 422,
                 Codes.PAYLOAD_TOO_LARGE to 413,
@@ -256,7 +263,7 @@ open class CodesToHttp(
             listOf(
                 Codes.SUCCESS, Codes.CREATED, Codes.HANDLED, Codes.PROCESSING,
                 Codes.UNAUTHENTICATED, Codes.FORBIDDEN,
-                Codes.INVALID_VALUE, Codes.NOT_FOUND,
+                Codes.INVALID_VALUE, Codes.NOT_FOUND, Codes.GONE,
                 Codes.CONFLICT, Codes.TIMEOUT, Codes.RATE_LIMITED,
                 Codes.UNIMPLEMENTED, Codes.UNDER_MAINTENANCE, Codes.UNEXPECTED,
             )
