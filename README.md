@@ -16,7 +16,6 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 ---
 
 ## 📚 Table of Contents
-## 📚 Table of Contents
 
 | Topic | Description |
 |---|---|
@@ -40,6 +39,7 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 | 🗺️ [Roadmap](#️-roadmap) | Publishing pipelines and CI work planned but not yet done |
 | 🤝 [Contributing](#-contributing) | How to build, test, and submit changes |
 | 📄 [License](#-license) | Licensing terms for this project |
+
 ---
 
 ## ℹ️ About
@@ -88,19 +88,13 @@ dependencies {
 }
 ```
 
-**Return a status when the outcome itself is all the detail you need:**
+**Return a status, and branch on it exhaustively:**
 
 ```kotlin
 import kiit.codes.*
 
 fun authorize(userId: String, requesterId: String): Status =
     if (userId != requesterId) Codes.UNAUTHORIZED else Codes.SUCCESS
-```
-
-**Branch on the outcome, exhaustively:**
-
-```kotlin
-import kiit.codes.*
 
 when (val status = authorize(userId, requesterId)) {
     is Passed -> log.info("ok: ${status.name}")
@@ -108,39 +102,20 @@ when (val status = authorize(userId, requesterId)) {
 }
 ```
 
-**Return `Checked` when a failure needs to carry *why*, not just *that*:**
+**Return `Checked` to carry *why*, and `collect` to report every problem at once:**
 
 ```kotlin
 import kiit.codes.*
 
 fun createUser(email: String): Checked =
-    if (users.containsKey(email)) {
-        Checked.failure(Codes.CONFLICT, listOf(Err.on("email", email, "already registered")))
-    } else {
-        // ... create the user ...
-        Checked.success(Codes.CREATED)
-    }
-
-val result = createUser(email)
-if (!result.isValid) {
-    log.warn("failed: ${result.status.name} — ${result.errors}")
-}
-```
-
-**Report more than one problem at once with `collect`:**
-
-```kotlin
-import kiit.codes.*
+    if (users.containsKey(email)) Checked.failure(Codes.CONFLICT, listOf(Err.on("email", email, "already registered")))
+    else Checked.success(Codes.CREATED)
 
 fun checkEmail(email: String): Checked =
     if (email.contains("@")) Checked.success()
     else Checked.failure(Codes.INVALID_VALUE, listOf(Err.on("email", email, "must contain @")))
 
-fun checkPhone(phone: String): Checked =
-    if (phone.length >= 10) Checked.success()
-    else Checked.failure(Codes.INVALID_VALUE, listOf(Err.on("phone", phone, "too short")))
-
-val result = collect(checkEmail(email), checkPhone(phone))
+val result = collect(createUser(email), checkEmail(email))
 if (!result.isValid) {
     // result.errors has every problem found, not just the first
 }
@@ -158,16 +133,6 @@ try {
 } catch (e: StatusException.RestrictedException) {
     // handled without ever touching a when block
 }
-```
-
-**Convert to HTTP when you need a real status code:**
-
-```kotlin
-import kiit.codes.*
-
-val http = CodesToHttp()
-http.toCode(Codes.CREATED)      // 201
-http.toCode(Codes.DENIED)       // 401
 ```
 
 See [`samples/sample1`](./samples/sample1) for a runnable end-to-end example.
@@ -223,44 +188,34 @@ graph TD
 
 | Term | What it is |
 |---|---|
-| **Status** | The outcome of an operation — `id`, `name`, `group`, `origin`, `message`, `success`. Sealed: `Passed` or `Failed`. |
-| **Passed** | `Succeeded` (primary purpose completed), `Pending` (accepted, not yet done), `Excluded` (left out — not processed, processed and discarded, or omitted for any other reason), `Information` (metadata output, e.g. `HELP`). |
-| **Failed** | `Restricted` (security/access-control), `Invalid` (bad input), `Rejected` (known business-rule failure), `Unserved` (valid & permitted, but can't be handled right now). |
-| **id** | `"$origin.$name"`, derived, unique across every `Status` — usable as a map/lookup key without building the pair yourself. |
-| **origin** | Where a code came from — `"kiit"` for built-ins, your own module or team name for custom codes. `id` (`origin.name`) is what's actually enforced unique, not `name` alone, so two teams can both have a code named `CONFLICT` without colliding. |
-| **isNeutral** | Extension property, `true` only for `Excluded`/`Information` — the two categories that represent neither a genuine success nor a genuine failure. |
-| **Codes** | The built-in registry of common `Status` instances — optional, and duplicate-checked at init time. |
-| **CodeLookup** | Bidirectional conversion between a `Status` and a target protocol's code (`toCode`/`toStatus`), direction-explicit so the two code spaces can't be confused. |
-| **Err** | A single piece of instance-level detail behind a failure, a field, a value, a cause — the thing `Status` deliberately doesn't carry on its own. |
-| **Checked** | A `Status` plus zero or more `Err`, for reporting every problem found at once instead of stopping at the first one. `collect` combines several `Checked` into one. |
-| **StatusException** | Sealed, carries a `Checked` across a call boundary that can only communicate via exceptions. One subtype per `Failed` category — `RestrictedException`, `InvalidException`, `RejectedException`, `UnservedException`. |
-
+| **Status** | `id`, `name`, `group`, `origin`, `message`, `success` — `Passed`/`Failed`. |
+| **Passed** | `Succeeded`, `Pending`, `Excluded`, `Information` — non-failure. |
+| **Failed** | `Restricted`, `Invalid`, `Rejected`, `Unserved` — a failure. |
+| **id** | `"$origin.$name"`, derived, unique across every `Status` — a map key. |
+| **origin** | Where a code came from — `"kiit"` for built-ins, custom name otherwise. |
+| **isNeutral** | `true` only for `Excluded`/`Information` — never success or failure. |
+| **Codes** | Built-in `Status` registry, duplicate-checked at init time. |
+| **CodeLookup** | Converts a `Status` to/from a protocol code (`toCode`/`toStatus`). |
+| **Err** | One piece of per-occurrence detail behind a failure — field, value, cause. |
+| **Checked** | A `Status` plus zero or more `Err`. `collect` combines several into one. |
+| **StatusException** | Sealed, carries a `Checked` across an exception boundary. |
 
 ## 📖 Built-in codes
 
 The `Codes` object provides a standard registry — using it is optional, and you can construct any `Passed`/`Failed` subtype directly for domain-specific outcomes.
 
-| Category | Examples |
-|---|---|
-| Succeeded | `SUCCESS` (generic fallback), `CREATED`, `UPDATED`, `PATCHED`, `FETCHED`, `DELETED`, `HANDLED`, `REFERRED` |
-| Pending | `ACCEPTED` (generic fallback), `QUEUED`, `PROCESSING`, `CONFIRM`, `REDIRECTED` |
-| Excluded | `OMITTED` (generic fallback), `SKIPPED` (not processed), `DISCARDED` (processed, result thrown away), `CANCELLED` (cancelled by caller), `DEDUPLICATED` |
-| Information | `NOTICE` (generic fallback), `ADVISORY` (may need attention or action), `HELP`, `ABOUT`, `VERSION`, `EXIT`, `MOVED` (resource relocated permanently) |
-| Restricted | `DENIED` (generic fallback), `UNAUTHENTICATED`, `UNAUTHORIZED`, `FORBIDDEN`, `LOCKED` (self-resolving), `SUSPENDED` (administrative) |
-| Invalid | `INVALID_VALUE` (generic fallback), `BAD_REQUEST`, `NOT_FOUND` (route/request not found), `OUT_OF_RANGE`, `PAYLOAD_TOO_LARGE`, `MISSING_FIELD`, `INVALID_ENTITY` (HTTP `422`'s real case) |
-| Rejected | `RULE_VIOLATION` (generic fallback), `CONFLICT`, `NOT_EXISTS` (entity-level not found), `PRECONDITION_FAILED`, `EXPIRED`, `GONE` (deliberately removed) |
-| Unserved | `UNEXPECTED` (generic fallback), `UNIMPLEMENTED`, `UNSUPPORTED`, `TIMEOUT`, `RATE_LIMITED`, `RESOURCE_LIMITED`, `UNREACHABLE`, `UNDER_MAINTENANCE`, `INTERNAL`, `DATA_LOSS` |
+Some common examples: `SUCCESS`, `CREATED`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMITED`, `UNEXPECTED` — see [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) for the full registry (53 codes across 8 categories).
 
-A few pairs worth distinguishing on sight, without cross-referencing the source:
+A few pairs worth distinguishing on sight:
 
-- **`RATE_LIMITED` vs `RESOURCE_LIMITED`** — too many requests per unit of time, vs a fixed amount consumed (storage, seats, quota) regardless of how quickly it was used.
-- **`LOCKED` vs `SUSPENDED`** — self-resolving through caller action (e.g. verify identity), vs an administrative decision that doesn't resolve on its own.
+- **`RATE_LIMITED` vs `RESOURCE_LIMITED`** — too many requests, vs a fixed amount used.
+- **`LOCKED` vs `SUSPENDED`** — self-resolving, vs an administrative decision.
 - **`INVALID_VALUE` vs `MISSING_FIELD`** — present but wrong, vs never provided at all.
-- **`INVALID_VALUE` vs `INVALID_ENTITY`** — a single value is wrong, vs several individually valid fields don't make sense together as a whole payload.
-- **`NOTICE` vs `ADVISORY`** — purely neutral information, vs something that may need attention or action.
-- **`NOT_FOUND` vs `NOT_EXISTS`** — route/request-level (client-integration error), vs entity-level (well-formed request, the thing just doesn't exist).
-- **`EXPIRED` vs `NOT_EXISTS` vs `CONFLICT`** — was valid but timed out, vs never existed, vs exists but something else changed its state.
-- **`EXPIRED` vs `GONE`** — timed out on its own (a natural, expected lifecycle event), vs deliberately removed by an action (a decision someone made). Both map to HTTP `410 Gone`; `GONE` is the canonical winner on the reverse lookup since its name and message are the literal `410` concept.
+- **`INVALID_VALUE` vs `INVALID_ENTITY`** — one bad value, vs fields that don't fit.
+- **`NOTICE` vs `ADVISORY`** — neutral info, vs something needing action.
+- **`NOT_FOUND` vs `NOT_EXISTS`** — route-level, vs entity-level (doesn't exist).
+- **`EXPIRED` vs `NOT_EXISTS` vs `CONFLICT`** — timed out, never existed, state changed.
+- **`EXPIRED` vs `GONE`** — timed out naturally, vs removed on purpose; both map to `410`.
 
 Every built-in code's `origin` is `"kiit"`. Custom codes should supply their own, a module or team name, rather than relying on a default, so uniqueness only has to hold within your own `origin`, not globally:
 
@@ -276,21 +231,16 @@ Uniqueness over `id` (`origin.name`) is enforced at object-init time, a collisio
 
 ## 🌐 HTTP conversion
 
-`CodesToHttp` maps `Status` to HTTP status codes: a compiler-exhaustive category default (`Succeeded` → 200, `Restricted` → 401, etc.), layered with a small overrides table, keyed by `Status` instance, for the handful of codes that differ (`CREATED` → 201, `NOT_FOUND` → 404). `toStatus` is derived from `toCode`, so the two directions can never drift out of sync — but the mapping is many-to-one (many different `Passed` codes all resolve to `200`), so `toStatus` is inherently lossy. It returns a deterministic canonical status for a given code, not necessarily the specific one you originally converted.
+`CodesToHttp` maps `Status` to HTTP status codes: a category default (`Restricted` → 401, `Invalid` → 400, etc.) plus a small overrides table for codes that differ (`CREATED` → 201, `NOT_FOUND` → 404). `toStatus` is derived from `toCode`, so it's always in sync but lossy — it returns a deterministic canonical status, not necessarily the one you originally converted. See [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) for the full overrides table.
 
 ```kotlin
 import kiit.codes.*
 
 val http = CodesToHttp()
-http.toStatus(404)?.name           // "NOT_FOUND" — deterministic even though NOT_EXISTS also maps to 404
-http.toStatus(413)?.name           // "PAYLOAD_TOO_LARGE"
-http.toStatus(307)?.name           // "REDIRECTED"
 http.toCode(Codes.UPDATED)         // 200
-http.toStatus(200)?.name           // "SUCCESS", not "UPDATED" — lossy, not a round trip
+http.toStatus(404)?.name           // "NOT_FOUND" — deterministic even though NOT_EXISTS also maps to 404
 http.toStatus(999)                 // null — unrecognized code, no guessed fallback
 ```
-
-A few overrides worth calling out specifically: `CANCELLED` → 499 (`Client Closed Request`, nginx-originated, not in the RFC but the de facto standard for this exact concept), `REDIRECTED` → 307 (`Temporary Redirect`, not 302, to preserve the original method and body), `PAYLOAD_TOO_LARGE` → 413 (exact match), `LOCKED` → 423 (WebDAV in origin, widely reused generally, exact match), `SUSPENDED` → 403 (closer to Forbidden than Unauthenticated — the caller is known), `EXPIRED` and `GONE` → 410 (`Gone`, see the key distinction above for which wins the reverse lookup), `RESOURCE_LIMITED` → 429 (same axis as `RATE_LIMITED`, HTTP doesn't distinguish the two), `INVALID_ENTITY` → 422 (`Unprocessable Entity`, exact match). `MISSING_FIELD` and `DEDUPLICATED` need no override, they fall through cleanly to their category defaults (400 and 200 respectively).
 
 `CompositeLookup` composes a base lookup with your own extensions, also keyed by `Status` instance so custom, unregistered statuses are reverse-lookupable too:
 
@@ -303,20 +253,17 @@ lookup.toCode(PAYMENT_DECLINED) // 402
 
 ## 🔌 gRPC conversion
 
-`CodesToGrpc` maps `Status` to gRPC status codes (0-16) the same way `CodesToHttp` maps to HTTP: a compiler-exhaustive category default (`Passed` → 0 `OK`, `Restricted` → 7 `PERMISSION_DENIED`, `Invalid` → 3 `INVALID_ARGUMENT`, `Rejected` → 9 `FAILED_PRECONDITION`, `Unserved` → 13 `INTERNAL`), layered with an overrides table for codes that need their own dedicated gRPC code (`UNAUTHENTICATED` → 16, `TIMEOUT` → 4 `DEADLINE_EXCEEDED`, `RATE_LIMITED` → 8 `RESOURCE_EXHAUSTED`, and so on). `toStatus` is derived from `toCode` the same deterministic way as `CodesToHttp.toStatus`.
+`CodesToGrpc` maps `Status` to gRPC codes (0-16) the same way `CodesToHttp` maps to HTTP — category defaults plus an overrides table. See [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) for the full mapping.
 
 ```kotlin
 import kiit.codes.*
 
 val grpc = CodesToGrpc()
 grpc.toCode(Codes.DENIED)          // 7
-grpc.toCode(Codes.TIMEOUT)         // 4
 grpc.toStatus(9)?.name             // "PRECONDITION_FAILED" — deterministic canonical winner for that code
 ```
 
-`CONFLICT` maps to 6 (`ALREADY_EXISTS`) — otherwise it would silently fall through to `Rejected`'s category default (9), which is the wrong signal for "this already exists." `RESOURCE_LIMITED` and `PAYLOAD_TOO_LARGE` both also map to 8 (`RESOURCE_EXHAUSTED`) alongside `RATE_LIMITED` — `RATE_LIMITED` is the official meaning, the other two are real-world conventions layered on top, not part of the spec.
-
-**gRPC's `ABORTED` (10) has no dedicated code.** It's a real, narrow concept — "aborted, typically due to a concurrency issue such as a sequencer check failure or transaction abort" — but without independent validation elsewhere in the registry, it falls through to `Unserved`'s category default rather than getting its own code. This creates one accepted asymmetry: outgoing (`Status` → gRPC) is unaffected, anything on the category default still correctly returns `13` (`INTERNAL`); incoming, `CodesToGrpc().toStatus(10)` returns `null`, since nothing in the registry maps to `10`. A raw `ABORTED` received from an external gRPC service won't resolve to a `Status` automatically — callers need to handle that `null` explicitly. Every other gRPC code (0-16 except 10) resolves to a `Status`, either a dedicated code or the correct category default.
+One gap worth knowing: gRPC's `ABORTED` (10) has no dedicated `Status`, so `toStatus(10)` returns `null` — callers need to handle that explicitly.
 
 ## 🧾 Err & Checked
 
@@ -425,13 +372,13 @@ fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
 
 ## 🛠️ Use cases
 
-1. **Service layers** — return a `Status` instead of throwing for expected failures; reserve exceptions for boundary crossings.
-2. **Validation** — `Checked` and `collect` report every problem found at once, not just the first.
-3. **API responses** — a consistent, structured error body across every endpoint, convertible to a real HTTP code via `CodesToHttp`.
-4. **Existing, exception-based codebases** — `StatusException` supplements exceptions rather than replacing them, adopt it in one service or one endpoint without a rewrite.
-5. **Background jobs / CLIs** — `Pending`/`Information` categories that don't map cleanly to HTTP but still need a consistent shape.
-6. **Logging & metrics** — `name`, `group`, and `origin` are stable, aggregable, and searchable keys, for humans and for AI tooling reading the codebase.
-7. **Cross-platform consumers** — the same taxonomy on JVM, Android, JS/TypeScript, and iOS.
+1. **Service layers** — return a `Status` instead of throwing for expected failures.
+2. **Validation** — `Checked`/`collect` report every problem, not just the first.
+3. **API responses** — a consistent error body, convertible to HTTP via `CodesToHttp`.
+4. **Existing codebases** — `StatusException` supplements exceptions, no rewrite.
+5. **Background jobs / CLIs** — `Pending`/`Information` fit non-HTTP outcomes.
+6. **Logging & metrics** — `name`, `group`, `origin` are stable, searchable keys.
+7. **Cross-platform** — same taxonomy on JVM, Android, JS/TypeScript, and iOS.
 
 ## ✅ When to use this and when not to
 
