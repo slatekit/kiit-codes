@@ -235,20 +235,6 @@ graph TD
 | **Checked** | A `Status` plus zero or more `Err`, for reporting every problem found at once instead of stopping at the first one. `collect` combines several `Checked` into one. |
 | **StatusException** | Sealed, carries a `Checked` across a call boundary that can only communicate via exceptions. One subtype per `Failed` category — `RestrictedException`, `InvalidException`, `RejectedException`, `UnservedException`. |
 
-Every current member, by category:
-
-Each category's fallback/default code is declared, and listed, first.
-
-| Category | Members |
-|---|---|
-| Succeeded | `SUCCESS`, `CREATED`, `UPDATED`, `PATCHED`, `FETCHED`, `DELETED`, `HANDLED`, `REFERRED` |
-| Pending | `ACCEPTED`, `QUEUED`, `PROCESSING`, `CONFIRM`, `REDIRECTED` |
-| Excluded | `OMITTED`, `SKIPPED`, `DISCARDED`, `CANCELLED`, `DEDUPLICATED` |
-| Information | `NOTICE`, `ADVISORY`, `HELP`, `ABOUT`, `VERSION`, `EXIT`, `MOVED` |
-| Restricted | `DENIED`, `UNAUTHENTICATED`, `UNAUTHORIZED`, `FORBIDDEN`, `LOCKED`, `SUSPENDED` |
-| Invalid | `INVALID_VALUE`, `BAD_REQUEST`, `NOT_FOUND`, `OUT_OF_RANGE`, `PAYLOAD_TOO_LARGE`, `MISSING_FIELD`, `INVALID_ENTITY` |
-| Rejected | `RULE_VIOLATION`, `CONFLICT`, `NOT_EXISTS`, `PRECONDITION_FAILED`, `EXPIRED`, `GONE` |
-| Unserved | `UNEXPECTED`, `UNIMPLEMENTED`, `UNSUPPORTED`, `TIMEOUT`, `RATE_LIMITED`, `RESOURCE_LIMITED`, `UNREACHABLE`, `UNDER_MAINTENANCE`, `INTERNAL`, `DATA_LOSS` |
 
 ## 📖 Built-in codes
 
