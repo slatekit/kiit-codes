@@ -51,74 +51,95 @@ object Codes {
             origin = StatusConstants.KIIT,
         )
 
-    // ---- Filtered ----
-    val SKIPPED = Passed.Filtered("SKIPPED", "The item was not processed.", origin = StatusConstants.KIIT)
+    // ---- Excluded ----
+    val OMITTED = Passed.Excluded("OMITTED", "The item was excluded from the result.", origin = StatusConstants.KIIT)
+    val SKIPPED = Passed.Excluded("SKIPPED", "The item was not processed.", origin = StatusConstants.KIIT)
     val DISCARDED =
-        Passed.Filtered("DISCARDED", "The item was processed, but its result was intentionally discarded.", origin = StatusConstants.KIIT)
+        Passed.Excluded("DISCARDED", "The item was processed, but its result was intentionally discarded.", origin = StatusConstants.KIIT)
     val CANCELLED =
-        Passed.Filtered("CANCELLED", "The operation was cancelled by the caller before completion.", origin = StatusConstants.KIIT)
-    val EXCLUDED = Passed.Filtered("EXCLUDED", "The item was excluded from the result.", origin = StatusConstants.KIIT)
+        Passed.Excluded("CANCELLED", "The operation was cancelled by the caller before completion.", origin = StatusConstants.KIIT)
+    val DEDUPLICATED =
+        Passed.Excluded(
+            "DEDUPLICATED",
+            "The item was identified as a duplicate and was not processed again.",
+            origin = StatusConstants.KIIT,
+        )
 
     // ---- Information ----
+    val NOTICE = Passed.Information("NOTICE", "An informational notice.", origin = StatusConstants.KIIT)
+    val ADVISORY =
+        Passed.Information("ADVISORY", "An advisory that may require attention or action.", origin = StatusConstants.KIIT)
     val HELP = Passed.Information("HELP", "Help information was returned.", origin = StatusConstants.KIIT)
     val ABOUT = Passed.Information("ABOUT", "Information about this application was returned.", origin = StatusConstants.KIIT)
     val VERSION = Passed.Information("VERSION", "The current version was returned.", origin = StatusConstants.KIIT)
     val EXIT = Passed.Information("EXIT", "The application is exiting.", origin = StatusConstants.KIIT)
     val MOVED =
         Passed.Information("MOVED", "The resource has permanently moved to a new location.", origin = StatusConstants.KIIT)
-    val NOTICE = Passed.Information("NOTICE", "An informational notice.", origin = StatusConstants.KIIT)
 
     // ---- Restricted — security / access-control ----
-    val RESTRICTED = Failed.Restricted("RESTRICTED", "The request was denied.", origin = StatusConstants.KIIT)
+    val DENIED = Failed.Restricted("DENIED", "The request was denied.", origin = StatusConstants.KIIT)
     val UNAUTHENTICATED =
         Failed.Restricted("UNAUTHENTICATED", "Valid authentication credentials are required.", origin = StatusConstants.KIIT)
     val UNAUTHORIZED =
         Failed.Restricted("UNAUTHORIZED", "The caller does not have permission to perform this action.", origin = StatusConstants.KIIT)
     val FORBIDDEN = Failed.Restricted("FORBIDDEN", "Access to this resource is forbidden.", origin = StatusConstants.KIIT)
+    val LOCKED =
+        Failed.Restricted("LOCKED", "Access is locked; resolve the condition to restore access.", origin = StatusConstants.KIIT)
+    val SUSPENDED =
+        Failed.Restricted("SUSPENDED", "Access has been administratively suspended.", origin = StatusConstants.KIIT)
 
     // ---- Invalid — bad input ----
-    val BAD_REQUEST =
-        Failed.Invalid("BAD_REQUEST", "The request was malformed and could not be understood.", origin = StatusConstants.KIIT)
     val INVALID_VALUE =
         Failed.Invalid("INVALID_VALUE", "The request was well-formed, but contained invalid values.", origin = StatusConstants.KIIT)
+    val BAD_REQUEST =
+        Failed.Invalid("BAD_REQUEST", "The request was malformed and could not be understood.", origin = StatusConstants.KIIT)
     val NOT_FOUND =
         Failed.Invalid("NOT_FOUND", "The requested route or endpoint does not exist.", origin = StatusConstants.KIIT)
     val OUT_OF_RANGE = Failed.Invalid("OUT_OF_RANGE", "A value was outside the acceptable range.", origin = StatusConstants.KIIT)
     val PAYLOAD_TOO_LARGE =
         Failed.Invalid("PAYLOAD_TOO_LARGE", "The request payload exceeds the allowed size.", origin = StatusConstants.KIIT)
-
-    // permanently removed, was here before — not part of the current audit pass, unchanged
-    val REMOVED = Failed.Invalid("REMOVED", "Removed", origin = StatusConstants.KIIT)
+    val MISSING_FIELD =
+        Failed.Invalid("MISSING_FIELD", "A required field was not provided.", origin = StatusConstants.KIIT)
+    val INVALID_ENTITY =
+        Failed.Invalid(
+            "INVALID_ENTITY",
+            "The request was well-formed and individually valid, but does not make sense as a whole.",
+            origin = StatusConstants.KIIT,
+        )
 
     // ---- Rejected — known, expected business-rule failure ----
-    val CONFLICT =
-        Failed.Rejected("CONFLICT", "The request conflicts with the current state of the resource.", origin = StatusConstants.KIIT)
     val RULE_VIOLATION =
         Failed.Rejected("RULE_VIOLATION", "The request was understood but rejected by a business rule.", origin = StatusConstants.KIIT)
+    val CONFLICT =
+        Failed.Rejected("CONFLICT", "The request conflicts with the current state of the resource.", origin = StatusConstants.KIIT)
     val NOT_EXISTS =
         Failed.Rejected("NOT_EXISTS", "The request was valid, but the referenced item does not exist.", origin = StatusConstants.KIIT)
     val PRECONDITION_FAILED =
         Failed.Rejected("PRECONDITION_FAILED", "A required precondition was not met.", origin = StatusConstants.KIIT)
+    val EXPIRED =
+        Failed.Rejected("EXPIRED", "The referenced item is no longer valid; it has expired.", origin = StatusConstants.KIIT)
+    val GONE =
+        Failed.Rejected(
+            "GONE",
+            "This resource was deliberately removed and is no longer available.",
+            origin = StatusConstants.KIIT,
+        )
 
     // ---- Unserved — valid & permitted, can't be serviced right now ----
+    val UNEXPECTED =
+        Failed.Unserved("UNEXPECTED", "An unexpected, unclassified error occurred.", origin = StatusConstants.KIIT)
     val UNIMPLEMENTED =
         Failed.Unserved("UNIMPLEMENTED", "This capability has not been implemented yet.", origin = StatusConstants.KIIT)
     val UNSUPPORTED =
         Failed.Unserved("UNSUPPORTED", "This capability is not supported and will not be implemented.", origin = StatusConstants.KIIT)
     val TIMEOUT = Failed.Unserved("TIMEOUT", "The operation did not complete within the allotted time.", origin = StatusConstants.KIIT)
     val RATE_LIMITED = Failed.Unserved("RATE_LIMITED", "Too many requests; try again later.", origin = StatusConstants.KIIT)
+    val RESOURCE_LIMITED =
+        Failed.Unserved("RESOURCE_LIMITED", "A resource limit has been reached.", origin = StatusConstants.KIIT)
     val UNREACHABLE =
         Failed.Unserved("UNREACHABLE", "A required dependency could not be reached.", origin = StatusConstants.KIIT)
     val UNDER_MAINTENANCE =
         Failed.Unserved("UNDER_MAINTENANCE", "The service is temporarily under maintenance.", origin = StatusConstants.KIIT)
-    val UNEXPECTED =
-        Failed.Unserved("UNEXPECTED", "An unexpected, unclassified error occurred.", origin = StatusConstants.KIIT)
-    val CONCURRENCY_CONFLICT =
-        Failed.Unserved(
-            "CONCURRENCY_CONFLICT",
-            "A concurrent operation conflicted with this one; retrying may succeed.",
-            origin = StatusConstants.KIIT,
-        )
     val INTERNAL = Failed.Unserved("INTERNAL", "An internal system invariant was violated.", origin = StatusConstants.KIIT)
     val DATA_LOSS =
         Failed.Unserved("DATA_LOSS", "Unrecoverable data loss or corruption occurred.", origin = StatusConstants.KIIT)
@@ -128,13 +149,13 @@ object Codes {
         listOf(
             SUCCESS, CREATED, UPDATED, PATCHED, FETCHED, DELETED, HANDLED, REFERRED,
             ACCEPTED, QUEUED, PROCESSING, CONFIRM, REDIRECTED,
-            SKIPPED, DISCARDED, CANCELLED, EXCLUDED,
-            HELP, ABOUT, VERSION, EXIT, MOVED, NOTICE,
-            RESTRICTED, UNAUTHENTICATED, UNAUTHORIZED, FORBIDDEN,
-            BAD_REQUEST, INVALID_VALUE, NOT_FOUND, OUT_OF_RANGE, PAYLOAD_TOO_LARGE, REMOVED,
-            CONFLICT, RULE_VIOLATION, NOT_EXISTS, PRECONDITION_FAILED,
-            UNIMPLEMENTED, UNSUPPORTED, TIMEOUT, RATE_LIMITED, UNREACHABLE, UNDER_MAINTENANCE, UNEXPECTED,
-            CONCURRENCY_CONFLICT, INTERNAL, DATA_LOSS,
+            OMITTED, SKIPPED, DISCARDED, CANCELLED, DEDUPLICATED,
+            NOTICE, ADVISORY, HELP, ABOUT, VERSION, EXIT, MOVED,
+            DENIED, UNAUTHENTICATED, UNAUTHORIZED, FORBIDDEN, LOCKED, SUSPENDED,
+            INVALID_VALUE, BAD_REQUEST, NOT_FOUND, OUT_OF_RANGE, PAYLOAD_TOO_LARGE, MISSING_FIELD, INVALID_ENTITY,
+            RULE_VIOLATION, CONFLICT, NOT_EXISTS, PRECONDITION_FAILED, EXPIRED, GONE,
+            UNEXPECTED, UNIMPLEMENTED, UNSUPPORTED, TIMEOUT, RATE_LIMITED, RESOURCE_LIMITED,
+            UNREACHABLE, UNDER_MAINTENANCE, INTERNAL, DATA_LOSS,
         )
 
     init {
@@ -168,7 +189,7 @@ interface CodeLookup {
  * Default [CodeLookup] implementation mapping [Status] to HTTP status codes.
  *
  * Category -> HTTP default:
- *   Succeeded / Filtered / Information -> 200      Pending -> 202
+ *   Succeeded / Excluded / Information -> 200      Pending -> 202
  *   Restricted -> 401  Invalid -> 400   Rejected -> 500        Unserved -> 503
  *
  * Individual codes can differ from their category's default via [overrides] (e.g. CREATED -> 201,
@@ -185,7 +206,7 @@ open class CodesToHttp(
         return when (status) {
             is Passed.Succeeded -> 200
             is Passed.Pending -> 202
-            is Passed.Filtered -> 200
+            is Passed.Excluded -> 200
             is Passed.Information -> 200
             is Failed.Restricted -> 401
             is Failed.Invalid -> 400
@@ -213,10 +234,15 @@ open class CodesToHttp(
                 Codes.CANCELLED to 499,
                 Codes.REDIRECTED to 307,
                 Codes.NOT_FOUND to 404,
-                Codes.REMOVED to 410,
                 Codes.NOT_EXISTS to 404,
                 Codes.FORBIDDEN to 403,
+                // closer to Forbidden than Unauthenticated — the caller is known
+                Codes.SUSPENDED to 403,
+                Codes.LOCKED to 423,
+                Codes.EXPIRED to 410,
+                Codes.GONE to 410,
                 Codes.CONFLICT to 409,
+                Codes.INVALID_ENTITY to 422,
                 Codes.PAYLOAD_TOO_LARGE to 413,
                 // share 501 deliberately — HTTP has no separate "unsupported" code
                 Codes.UNIMPLEMENTED to 501,
@@ -224,6 +250,8 @@ open class CodesToHttp(
                 // deadline exceeded waiting on something else, not a slow client (408)
                 Codes.TIMEOUT to 504,
                 Codes.RATE_LIMITED to 429,
+                // same axis as RATE_LIMITED — HTTP doesn't distinguish the two
+                Codes.RESOURCE_LIMITED to 429,
                 Codes.UNEXPECTED to 500,
             )
 
@@ -235,7 +263,7 @@ open class CodesToHttp(
             listOf(
                 Codes.SUCCESS, Codes.CREATED, Codes.HANDLED, Codes.PROCESSING,
                 Codes.UNAUTHENTICATED, Codes.FORBIDDEN,
-                Codes.INVALID_VALUE, Codes.NOT_FOUND, Codes.REMOVED,
+                Codes.INVALID_VALUE, Codes.NOT_FOUND, Codes.GONE,
                 Codes.CONFLICT, Codes.TIMEOUT, Codes.RATE_LIMITED,
                 Codes.UNIMPLEMENTED, Codes.UNDER_MAINTENANCE, Codes.UNEXPECTED,
             )
@@ -247,6 +275,8 @@ open class CodesToHttp(
  *
  * Category -> gRPC default: Passed (all) -> 0 (OK)   Restricted -> 7 (PERMISSION_DENIED)
  *   Invalid -> 3 (INVALID_ARGUMENT)   Rejected -> 9 (FAILED_PRECONDITION)   Unserved -> 13 (INTERNAL)
+ *
+ * gRPC's `ABORTED` (10) has no dedicated [Status]; [toStatus] returns null for it.
  */
 open class CodesToGrpc(
     private val overrides: Map<Status, Int> = DEFAULT_OVERRIDES,
@@ -256,7 +286,7 @@ open class CodesToGrpc(
         return when (status) {
             is Passed.Succeeded -> 0
             is Passed.Pending -> 0
-            is Passed.Filtered -> 0
+            is Passed.Excluded -> 0
             is Passed.Information -> 0
             is Failed.Restricted -> 7
             is Failed.Invalid -> 3
@@ -282,13 +312,16 @@ open class CodesToGrpc(
                 Codes.INVALID_VALUE to 3,
                 Codes.NOT_FOUND to 5,
                 Codes.OUT_OF_RANGE to 11,
-                Codes.RESTRICTED to 7,
-                Codes.CONCURRENCY_CONFLICT to 10,
+                Codes.DENIED to 7,
+                // ALREADY_EXISTS — was previously falling through to Rejected's category default
+                Codes.CONFLICT to 6,
                 Codes.PRECONDITION_FAILED to 9,
                 Codes.UNIMPLEMENTED to 12,
                 Codes.UNREACHABLE to 14,
                 Codes.TIMEOUT to 4,
                 Codes.RATE_LIMITED to 8,
+                // RESOURCE_EXHAUSTED, same axis as RATE_LIMITED
+                Codes.RESOURCE_LIMITED to 8,
                 Codes.UNEXPECTED to 2,
                 Codes.INTERNAL to 13,
                 Codes.DATA_LOSS to 15,
@@ -301,7 +334,7 @@ open class CodesToGrpc(
             listOf(
                 Codes.SUCCESS,
                 Codes.INVALID_VALUE,
-                Codes.RESTRICTED,
+                Codes.DENIED,
                 Codes.RATE_LIMITED,
                 Codes.PRECONDITION_FAILED,
                 Codes.INTERNAL,
