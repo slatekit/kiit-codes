@@ -384,7 +384,7 @@ fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
 
 **Good fit if:**
 1. You want one consistent shape for "what happened" across services, jobs, APIs, and CLIs.
-2. You're tired of writing a new custom exception class for every domain, just to get dispatch and a couple of fields.
+2. You're tired of writing a new custom exception for every domain, just to get dispatch and a couple of fields.
 3. You need to convert internal outcomes to HTTP (or another protocol) without hardcoding numeric ranges.
 4. You're building or consuming a Kotlin Multiplatform target (JS/iOS) and want idiomatic error types on each side.
 
