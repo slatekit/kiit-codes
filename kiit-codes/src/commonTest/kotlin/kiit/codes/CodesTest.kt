@@ -23,10 +23,10 @@ class CodesTest {
     }
 
     @Test
-    fun restrictedHasCorrectValues() {
-        assertEquals("RESTRICTED", Codes.RESTRICTED.name)
-        assertEquals(StatusConstants.KIIT, Codes.RESTRICTED.origin)
-        assertFalse(Codes.RESTRICTED.success)
+    fun deniedHasCorrectValues() {
+        assertEquals("DENIED", Codes.DENIED.name)
+        assertEquals(StatusConstants.KIIT, Codes.DENIED.origin)
+        assertFalse(Codes.DENIED.success)
     }
 
     @Test
@@ -36,9 +36,9 @@ class CodesTest {
     }
 
     @Test
-    fun removedIsInvalid() {
-        // A more specific, permanent variant of NOT_FOUND — same category.
-        assertTrue(Codes.REMOVED is Failed.Invalid)
+    fun expiredIsRejected() {
+        // Was valid and timed out — a known business outcome, not malformed input.
+        assertTrue(Codes.EXPIRED is Failed.Rejected)
     }
 
     @Test
@@ -96,7 +96,8 @@ class CodesToHttpTest {
         assertEquals(202, http.toCode(Codes.ACCEPTED))
     }
 
-    @Test fun categoryDefaultFiltered() {
+    @Test fun categoryDefaultExcluded() {
+        assertEquals(200, http.toCode(Codes.OMITTED))
         assertEquals(200, http.toCode(Codes.SKIPPED))
         assertEquals(200, http.toCode(Codes.DISCARDED))
     }
@@ -106,7 +107,7 @@ class CodesToHttpTest {
     }
 
     @Test fun categoryDefaultRestricted() {
-        assertEquals(401, http.toCode(Codes.RESTRICTED))
+        assertEquals(401, http.toCode(Codes.DENIED))
         assertEquals(401, http.toCode(Codes.UNAUTHENTICATED))
     }
 
@@ -146,8 +147,8 @@ class CodesToHttpTest {
         assertEquals(403, http.toCode(Codes.FORBIDDEN))
     }
 
-    @Test fun overrideRemoved() {
-        assertEquals(410, http.toCode(Codes.REMOVED))
+    @Test fun overrideExpired() {
+        assertEquals(410, http.toCode(Codes.EXPIRED))
     }
 
     @Test fun overrideNotExists() {
@@ -168,6 +169,22 @@ class CodesToHttpTest {
 
     @Test fun overrideConflict() {
         assertEquals(409, http.toCode(Codes.CONFLICT))
+    }
+
+    @Test fun overrideLocked() {
+        assertEquals(423, http.toCode(Codes.LOCKED))
+    }
+
+    @Test fun overrideSuspended() {
+        assertEquals(403, http.toCode(Codes.SUSPENDED))
+    }
+
+    @Test fun overrideInvalidEntity() {
+        assertEquals(422, http.toCode(Codes.INVALID_ENTITY))
+    }
+
+    @Test fun overrideResourceLimited() {
+        assertEquals(429, http.toCode(Codes.RESOURCE_LIMITED))
     }
 
     @Test fun overrideTimeout() {
@@ -236,7 +253,7 @@ class CodesToHttpTest {
     }
 
     /**
-     * Six built-in statuses resolve to 200. Pins the canonical winner so this can't silently
+     * Many built-in statuses resolve to 200. Pins the canonical winner so this can't silently
      * change if [Codes.all]'s declaration order ever shifts.
      */
     @Test
@@ -262,10 +279,16 @@ class CodesToHttpTest {
         assertSame(Codes.UNIMPLEMENTED, http.toStatus(501))
     }
 
-    /** RESTRICTED, UNAUTHENTICATED, and UNAUTHORIZED all resolve to 401; UNAUTHENTICATED wins. */
+    /** DENIED, UNAUTHENTICATED, and UNAUTHORIZED all resolve to 401; UNAUTHENTICATED wins. */
     @Test
-    fun toStatus401ResolvesToUnauthenticatedNotRestrictedOrUnauthorized() {
+    fun toStatus401ResolvesToUnauthenticatedNotDeniedOrUnauthorized() {
         assertSame(Codes.UNAUTHENTICATED, http.toStatus(401))
+    }
+
+    /** FORBIDDEN and SUSPENDED both resolve to 403; FORBIDDEN wins. */
+    @Test
+    fun toStatus403ResolvesToForbiddenNotSuspended() {
+        assertSame(Codes.FORBIDDEN, http.toStatus(403))
     }
 
     /**
@@ -295,20 +318,20 @@ class CodesToGrpcTest {
     }
 
     @Test fun categoryDefaultRestrictedIsPermissionDenied() {
-        assertEquals(7, grpc.toCode(Codes.RESTRICTED))
+        assertEquals(7, grpc.toCode(Codes.DENIED))
         assertEquals(7, grpc.toCode(Codes.UNAUTHORIZED))
         assertEquals(7, grpc.toCode(Codes.FORBIDDEN))
     }
 
     @Test fun categoryDefaultInvalidIsInvalidArgument() {
         assertEquals(3, grpc.toCode(Codes.BAD_REQUEST))
-        assertEquals(3, grpc.toCode(Codes.REMOVED))
+        assertEquals(3, grpc.toCode(Codes.MISSING_FIELD))
     }
 
     @Test fun categoryDefaultRejectedIsFailedPrecondition() {
-        assertEquals(9, grpc.toCode(Codes.CONFLICT))
         assertEquals(9, grpc.toCode(Codes.RULE_VIOLATION))
         assertEquals(9, grpc.toCode(Codes.NOT_EXISTS))
+        assertEquals(9, grpc.toCode(Codes.EXPIRED))
     }
 
     @Test fun categoryDefaultUnservedIsInternal() {
@@ -332,8 +355,8 @@ class CodesToGrpcTest {
         assertEquals(11, grpc.toCode(Codes.OUT_OF_RANGE))
     }
 
-    @Test fun overrideConcurrencyConflict() {
-        assertEquals(10, grpc.toCode(Codes.CONCURRENCY_CONFLICT))
+    @Test fun overrideConflict() {
+        assertEquals(6, grpc.toCode(Codes.CONFLICT))
     }
 
     @Test fun overrideUnimplemented() {
@@ -366,6 +389,12 @@ class CodesToGrpcTest {
         assertEquals(8, grpc.toCode(Codes.PAYLOAD_TOO_LARGE))
     }
 
+    /** Genuine sibling of RATE_LIMITED, same axis, shares RESOURCE_EXHAUSTED (8) too. */
+    @Test
+    fun overrideResourceLimited() {
+        assertEquals(8, grpc.toCode(Codes.RESOURCE_LIMITED))
+    }
+
     // -------------------------------------------------------------------------
     // toStatus — deterministic canonical choice for gRPC codes shared by multiple statuses
     // -------------------------------------------------------------------------
@@ -376,25 +405,31 @@ class CodesToGrpcTest {
         assertSame(Codes.SUCCESS, grpc.toStatus(0))
     }
 
-    /** BAD_REQUEST, INVALID_VALUE, and REMOVED all resolve to 3; INVALID_VALUE wins. */
+    /** BAD_REQUEST, INVALID_VALUE, MISSING_FIELD, and INVALID_ENTITY all resolve to 3; INVALID_VALUE wins. */
     @Test
     fun toStatus3ResolvesToInvalidValue() {
         assertSame(Codes.INVALID_VALUE, grpc.toStatus(3))
     }
 
-    /** RESTRICTED, UNAUTHORIZED, and FORBIDDEN all resolve to 7; RESTRICTED wins. */
+    /** ALREADY_EXISTS — only CONFLICT resolves to 6, no tie to break. */
     @Test
-    fun toStatus7ResolvesToRestricted() {
-        assertSame(Codes.RESTRICTED, grpc.toStatus(7))
+    fun toStatus6ResolvesToConflict() {
+        assertSame(Codes.CONFLICT, grpc.toStatus(6))
     }
 
-    /** RATE_LIMITED and PAYLOAD_TOO_LARGE both resolve to 8; RATE_LIMITED wins. */
+    /** DENIED, UNAUTHORIZED, and FORBIDDEN all resolve to 7; DENIED wins. */
     @Test
-    fun toStatus8ResolvesToRateLimitedNotPayloadTooLarge() {
+    fun toStatus7ResolvesToDenied() {
+        assertSame(Codes.DENIED, grpc.toStatus(7))
+    }
+
+    /** RATE_LIMITED, PAYLOAD_TOO_LARGE, and RESOURCE_LIMITED all resolve to 8; RATE_LIMITED wins. */
+    @Test
+    fun toStatus8ResolvesToRateLimitedNotPayloadTooLargeOrResourceLimited() {
         assertSame(Codes.RATE_LIMITED, grpc.toStatus(8))
     }
 
-    /** CONFLICT, RULE_VIOLATION, NOT_EXISTS, and PRECONDITION_FAILED all resolve to 9; PRECONDITION_FAILED wins. */
+    /** RULE_VIOLATION, NOT_EXISTS, PRECONDITION_FAILED, and EXPIRED all resolve to 9; PRECONDITION_FAILED wins. */
     @Test
     fun toStatus9ResolvesToPreconditionFailed() {
         assertSame(Codes.PRECONDITION_FAILED, grpc.toStatus(9))
@@ -404,6 +439,12 @@ class CodesToGrpcTest {
     @Test
     fun toStatus13ResolvesToInternal() {
         assertSame(Codes.INTERNAL, grpc.toStatus(13))
+    }
+
+    /** ABORTED (10) has no dedicated Status and nothing falls through to it by default; null. */
+    @Test
+    fun toStatus10ReturnsNullSinceAbortedHasNoDedicatedCode() {
+        assertNull(grpc.toStatus(10))
     }
 
     @Test
@@ -437,7 +478,7 @@ class CompositeLookupTest {
 
     @Test
     fun fallsBackToBaseForRegisteredCodes() {
-        assertEquals(401, lookup.toCode(Codes.RESTRICTED))
+        assertEquals(401, lookup.toCode(Codes.DENIED))
         assertSame(Codes.CREATED, lookup.toStatus(201))
     }
 

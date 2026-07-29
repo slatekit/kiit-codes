@@ -24,8 +24,8 @@ class StatusTest {
         assertTrue(Passed.Pending("P", "P").success)
     }
 
-    @Test fun filteredHasSuccessTrue() {
-        assertTrue(Passed.Filtered("F", "F").success)
+    @Test fun excludedHasSuccessTrue() {
+        assertTrue(Passed.Excluded("F", "F").success)
     }
 
     @Test fun informationHasSuccessTrue() {
@@ -73,7 +73,7 @@ class StatusTest {
     fun groupReturnsCorrectStringForAllSubtypes() {
         assertEquals("Succeeded", Passed.Succeeded("S", "S").group)
         assertEquals("Pending", Passed.Pending("P", "P").group)
-        assertEquals("Filtered", Passed.Filtered("F", "F").group)
+        assertEquals("Excluded", Passed.Excluded("F", "F").group)
         assertEquals("Information", Passed.Information("N", "N").group)
         assertEquals("Restricted", Failed.Restricted("R", "R").group)
         assertEquals("Invalid", Failed.Invalid("I", "I").group)
@@ -99,12 +99,12 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // isNeutral — true only for Filtered/Information, false for every other subtype
+    // isNeutral — true only for Excluded/Information, false for every other subtype
     // -------------------------------------------------------------------------
 
     @Test
-    fun isNeutralIsTrueForFilteredAndInformation() {
-        assertTrue(Passed.Filtered("F", "F").isNeutral)
+    fun isNeutralIsTrueForExcludedAndInformation() {
+        assertTrue(Passed.Excluded("F", "F").isNeutral)
         assertTrue(Passed.Information("I", "I").isNeutral)
     }
 

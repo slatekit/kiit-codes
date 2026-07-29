@@ -33,7 +33,7 @@ object StatusConstants {
  * by constructing a [Passed] or [Failed] subtype directly (see [Codes] for the built-in set):
  *
  *   Status  = Passed     | Failed
- *   Passed  = Succeeded  | Pending | Filtered | Information
+ *   Passed  = Succeeded  | Pending | Excluded | Information
  *   Failed  = Restricted | Invalid | Rejected | Unserved
  */
 sealed interface Status {
@@ -89,7 +89,7 @@ sealed interface Status {
 
 /**
  * Parent sealed type for all non-failure statuses (success = true for every subtype).
- * Subtypes: [Succeeded], [Pending], [Filtered], [Information].
+ * Subtypes: [Succeeded], [Pending], [Excluded], [Information].
  */
 sealed class Passed : Status {
     final override val success: Boolean get() = true
@@ -98,7 +98,7 @@ sealed class Passed : Status {
         get() = when (this) {
             is Succeeded -> "Succeeded"
             is Pending -> "Pending"
-            is Filtered -> "Filtered"
+            is Excluded -> "Excluded"
             is Information -> "Information"
         }
 
@@ -117,13 +117,12 @@ sealed class Passed : Status {
     ) : Passed()
 
     /**
-     * Item was excluded from the operation's normal output. Covers both:
-     *   - not processed at all (e.g. SKIPPED — screened out before any work happened), and
-     *   - processed, then its result was deliberately discarded (e.g. DISCARDED).
+     * Item was excluded from the operation's normal output — not processed at all (e.g.
+     * SKIPPED), processed then discarded (e.g. DISCARDED), or omitted for any other reason.
      * The distinction is carried by [name], not by separate types — see [Codes.SKIPPED]
      * and [Codes.DISCARDED].
      */
-    data class Filtered(
+    data class Excluded(
         override val name: String,
         override val message: String,
         override val origin: String = StatusConstants.CUSTOM,
@@ -143,7 +142,7 @@ sealed class Passed : Status {
         when (this) {
             is Succeeded -> copy(message = msg, origin = origin)
             is Pending -> copy(message = msg, origin = origin)
-            is Filtered -> copy(message = msg, origin = origin)
+            is Excluded -> copy(message = msg, origin = origin)
             is Information -> copy(message = msg, origin = origin)
         }
 }
@@ -204,5 +203,5 @@ sealed class Failed : Status {
         }
 }
 
-/** True only for [Passed.Filtered]/[Passed.Information] — every other subtype is a genuine success or failure. */
-val Status.isNeutral: Boolean get() = this is Passed.Filtered || this is Passed.Information
+/** True only for [Passed.Excluded]/[Passed.Information] — every other subtype is a genuine success or failure. */
+val Status.isNeutral: Boolean get() = this is Passed.Excluded || this is Passed.Information
