@@ -64,6 +64,9 @@ It's a small, dependency-free library — you can adopt it on its own, independe
 }
 ```
 
+![Codes tiers](assets/codes-tiers.png)
+
+
 ## 🧩 The problem
 
 Most codebases end up with three incompatible ways of describing "what happened": exceptions (expensive, unstructured, and easy to over- or under-catch), raw booleans (`success: Boolean` — no room to say *why*), and ad-hoc HTTP status codes borrowed as a stand-in for domain meaning even outside an HTTP context.
@@ -206,7 +209,6 @@ The `Codes` object provides a standard registry — using it is optional, and yo
 
 Some examples: `SUCCESS`, `CREATED`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMITED`, `UNEXPECTED` — see [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) for the full registry (53 codes across 8 categories).
 
-![Codes tiers](assets/codes-tiers.png)
 
 A few pairs worth distinguishing on sight:
 
