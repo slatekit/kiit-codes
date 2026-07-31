@@ -64,7 +64,7 @@ It's a small, dependency-free library — you can adopt it on its own, independe
 }
 ```
 
-![Codes tiers](assets/codes-tiers-v2.png)
+![Codes tiers](assets/codes-tiers-v2-1.png)
 
 
 ## 🧩 The problem
