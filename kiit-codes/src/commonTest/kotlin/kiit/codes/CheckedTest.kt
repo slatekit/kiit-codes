@@ -11,6 +11,34 @@ import kotlin.test.assertTrue
 // =================================================================================================
 
 class CheckedTest {
+    fun validatePhone(phone: String): Checked {
+        return if (phone.length >= 10) Checked.success()
+        else Checked.failure(
+            Invalid.INVALID_VALUE,
+            listOf(Err.on("phone", "too short"))
+        )
+    }
+
+    // -------------------------------------------------------------------------
+    // validatePhone — a realistic Checked-returning validator, also exercised via collect below
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun validatePhoneSucceedsForLongEnoughNumber() {
+        val checked = validatePhone("5551234567")
+        assertTrue(checked.isValid)
+        assertSame(Succeeded.SUCCESS, checked.status)
+    }
+
+    @Test
+    fun validatePhoneFailsForTooShortNumber() {
+        val checked = validatePhone("12345")
+        assertTrue(!checked.isValid)
+        assertEquals(Invalid.INVALID_VALUE, checked.status)
+        assertEquals(1, checked.errors.size)
+        assertEquals("too short", checked.errors.single().msg)
+    }
+
     @Test
     fun successDefaultsToCodesSuccess() {
         val checked = Checked.success()
@@ -91,6 +119,21 @@ class CheckedTest {
             )
         assertEquals(Invalid.INVALID_VALUE, result.status)
         assertEquals(firstErrors + secondErrors, result.errors)
+    }
+
+    @Test
+    fun collectSucceedsWhenValidatePhonePassesAlongsideOtherChecks() {
+        val result = collect(Checked.success(), validatePhone("5551234567"))
+        assertSame(Succeeded.SUCCESS, result.status)
+        assertTrue(result.errors.isEmpty())
+    }
+
+    @Test
+    fun collectPoolsValidatePhoneErrorsWithOtherFailures() {
+        val emailErrors = listOf(Err.on("email", "must contain @"))
+        val result = collect(Checked.failure(Invalid.INVALID_VALUE, emailErrors), validatePhone("123"))
+        assertEquals(Invalid.INVALID_VALUE, result.status)
+        assertEquals(emailErrors + validatePhone("123").errors, result.errors)
     }
 
     @Test
