@@ -111,7 +111,7 @@ sealed class Err {
 
         fun build(error: Any?): Err {
             return when (error) {
-                null -> of(Codes.UNEXPECTED.message)
+                null -> of(Unserved.UNEXPECTED.message)
                 is Err -> error
                 is String -> of(error)
                 is Exception -> ex(error)

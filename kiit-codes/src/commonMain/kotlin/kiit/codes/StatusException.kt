@@ -11,7 +11,7 @@ package kiit.codes
  * subclasses, or catch one subclass directly to only handle that category:
  *
  * ```kotlin
- * throw StatusException.RestrictedException(Codes.UNAUTHORIZED)
+ * throw StatusException.RestrictedException(Restricted.UNAUTHORIZED)
  *
  * try {
  *     // ...
@@ -20,7 +20,7 @@ package kiit.codes
  *         is StatusException.RestrictedException -> // handle auth failure
  *         is StatusException.InvalidException    -> // handle bad input
  *         is StatusException.RejectedException   -> // handle known business-rule failure
- *         is StatusException.UnservedException   -> // handle capacity / timeout / unimplemented / unexpected
+ *         is StatusException.UnservedException   -> // handle capacity / timeout / unsupported / unexpected
  *     }
  * }
  *

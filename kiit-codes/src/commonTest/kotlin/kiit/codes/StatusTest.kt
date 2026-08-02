@@ -159,30 +159,54 @@ class StatusTest {
 
     @Test
     fun ofStatusReturnStatusWhenBothNull() {
-        val status = Codes.SUCCESS
+        val status = Succeeded.SUCCESS
         assertSame(status, Status.ofStatus(null, null, status))
     }
 
     @Test
     fun ofStatusReturnsRawStatusWhenMsgIsNull() {
-        val raw = Codes.CREATED
-        val result = Status.ofStatus(null, raw, Codes.SUCCESS)
+        val raw = Succeeded.CREATED
+        val result = Status.ofStatus(null, raw, Succeeded.SUCCESS)
         assertSame(raw, result)
     }
 
     @Test
     fun ofStatusReturnsStatusWithUpdatedMsgWhenRawIsNull() {
-        val result = Status.ofStatus("Custom", null, Codes.SUCCESS)
+        val result = Status.ofStatus("Custom", null, Succeeded.SUCCESS)
         assertEquals("Custom", result.message)
-        assertEquals(Codes.SUCCESS.origin, result.origin)
+        assertEquals(Succeeded.SUCCESS.origin, result.origin)
     }
 
     @Test
     fun ofStatusReturnsRawWithUpdatedMsgWhenBothProvided() {
-        val raw = Codes.CREATED
-        val result = Status.ofStatus("Custom", raw, Codes.SUCCESS)
+        val raw = Succeeded.CREATED
+        val result = Status.ofStatus("Custom", raw, Succeeded.SUCCESS)
         assertEquals("Custom", result.message)
         assertEquals(raw.origin, result.origin)
         assertNotSame(raw, result)
+    }
+
+    // -------------------------------------------------------------------------
+    // Typealiases (Restricted, Invalid, ...) are fully transparent — the same type as their
+    // Failed.X/Passed.X target, not a copy. A `when` mixing aliased and fully-qualified branches
+    // must still be treated as exhaustive by the compiler; this is a compile-time check as much
+    // as a runtime one — it wouldn't build if the aliases introduced a distinct type.
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun aliasedAndFullyQualifiedBranchesAreExhaustiveInTheSameWhen() {
+        val status: Status = Restricted.DENIED
+        val label =
+            when (status) {
+                is Restricted -> "restricted"
+                is Failed -> "failed"
+                is Passed -> "passed"
+            }
+        assertEquals("restricted", label)
+    }
+
+    @Test
+    fun aliasedConstantIsSameInstanceAsFullyQualifiedConstant() {
+        assertSame(Failed.Restricted.DENIED, Restricted.DENIED)
     }
 }
