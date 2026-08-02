@@ -29,9 +29,9 @@ class ErrTest {
 
     @Test
     fun ofStatusUsesStatusMessage() {
-        val err = Err.of(Codes.UNAUTHORIZED)
+        val err = Err.of(Restricted.UNAUTHORIZED)
         assertIs<Err.ErrorInfo>(err)
-        assertEquals(Codes.UNAUTHORIZED.message, err.msg)
+        assertEquals(Restricted.UNAUTHORIZED.message, err.msg)
     }
 
     @Test
@@ -112,6 +112,6 @@ class ErrTest {
     @Test
     fun buildFallsBackToUnexpectedMessageForNull() {
         val err = Err.build(null)
-        assertEquals(Codes.UNEXPECTED.message, err.msg)
+        assertEquals(Unserved.UNEXPECTED.message, err.msg)
     }
 }

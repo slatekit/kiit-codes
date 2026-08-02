@@ -13,52 +13,52 @@ import kotlin.test.fail
 class StatusExceptionTest {
     @Test
     fun restrictedExceptionExposesItsStatus() {
-        val ex = StatusException.RestrictedException(Codes.UNAUTHORIZED)
-        assertSame(Codes.UNAUTHORIZED, ex.status)
+        val ex = StatusException.RestrictedException(Restricted.UNAUTHORIZED)
+        assertSame(Restricted.UNAUTHORIZED, ex.status)
     }
 
     @Test
     fun invalidExceptionExposesItsStatus() {
-        val ex = StatusException.InvalidException(Codes.BAD_REQUEST)
-        assertSame(Codes.BAD_REQUEST, ex.status)
+        val ex = StatusException.InvalidException(Invalid.BAD_REQUEST)
+        assertSame(Invalid.BAD_REQUEST, ex.status)
     }
 
     @Test
     fun rejectedExceptionExposesItsStatus() {
-        val ex = StatusException.RejectedException(Codes.CONFLICT)
-        assertSame(Codes.CONFLICT, ex.status)
+        val ex = StatusException.RejectedException(Rejected.CONFLICT)
+        assertSame(Rejected.CONFLICT, ex.status)
     }
 
     @Test
     fun unservedExceptionExposesItsStatus() {
-        val ex = StatusException.UnservedException(Codes.TIMEOUT)
-        assertSame(Codes.TIMEOUT, ex.status)
+        val ex = StatusException.UnservedException(Unserved.TIMEOUT)
+        assertSame(Unserved.TIMEOUT, ex.status)
     }
 
     @Test
     fun defaultErrorsWrapTheStatusSingly() {
-        val ex = StatusException.RestrictedException(Codes.UNAUTHORIZED)
+        val ex = StatusException.RestrictedException(Restricted.UNAUTHORIZED)
         assertEquals(1, ex.errors.size)
-        assertEquals(Codes.UNAUTHORIZED.message, ex.errors.single().msg)
+        assertEquals(Restricted.UNAUTHORIZED.message, ex.errors.single().msg)
     }
 
     @Test
     fun explicitErrorsAreStoredInsteadOfTheDefault() {
         val errors = listOf(Err.of("bad field"))
-        val ex = StatusException.InvalidException(Codes.BAD_REQUEST, errors)
+        val ex = StatusException.InvalidException(Invalid.BAD_REQUEST, errors)
         assertEquals(errors, ex.errors)
     }
 
     @Test
     fun causePropagatesToThrowableCause() {
         val root = IllegalStateException("root")
-        val ex = StatusException.RejectedException(Codes.CONFLICT, cause = root)
+        val ex = StatusException.RejectedException(Rejected.CONFLICT, cause = root)
         assertSame(root, ex.cause)
     }
 
     @Test
     fun messageComesFromCheckedStatus() {
-        val ex = StatusException.UnservedException(Codes.UNREACHABLE)
+        val ex = StatusException.UnservedException(Unserved.UNREACHABLE)
         assertEquals(ex.checked.status.message, ex.message)
     }
 
@@ -66,7 +66,7 @@ class StatusExceptionTest {
     fun catchingAsSealedBaseNarrowsExhaustively() {
         val caught: StatusException =
             try {
-                throw StatusException.InvalidException(Codes.BAD_REQUEST)
+                throw StatusException.InvalidException(Invalid.BAD_REQUEST)
             } catch (e: StatusException) {
                 e
             }
@@ -85,7 +85,7 @@ class StatusExceptionTest {
     fun narrowCatchDoesNotCatchMismatchedSubtype() {
         assertFailsWith<StatusException.InvalidException> {
             try {
-                throw StatusException.InvalidException(Codes.BAD_REQUEST)
+                throw StatusException.InvalidException(Invalid.BAD_REQUEST)
             } catch (e: StatusException.RestrictedException) {
                 fail("RestrictedException catch block should not run for an InvalidException")
             }
@@ -98,32 +98,32 @@ class StatusExceptionTest {
 
     @Test
     fun toExceptionOnRestrictedProducesRestrictedException() {
-        val ex = Codes.UNAUTHORIZED.toException()
+        val ex = Restricted.UNAUTHORIZED.toException()
         assertEquals(StatusException.RestrictedException::class, ex::class)
     }
 
     @Test
     fun toExceptionOnInvalidProducesInvalidException() {
-        val ex = Codes.BAD_REQUEST.toException()
+        val ex = Invalid.BAD_REQUEST.toException()
         assertEquals(StatusException.InvalidException::class, ex::class)
     }
 
     @Test
     fun toExceptionOnRejectedProducesRejectedException() {
-        val ex = Codes.CONFLICT.toException()
+        val ex = Rejected.CONFLICT.toException()
         assertEquals(StatusException.RejectedException::class, ex::class)
     }
 
     @Test
     fun toExceptionOnUnservedProducesUnservedException() {
-        val ex = Codes.TIMEOUT.toException()
+        val ex = Unserved.TIMEOUT.toException()
         assertEquals(StatusException.UnservedException::class, ex::class)
     }
 
     @Test
     fun toExceptionPropagatesExplicitErrors() {
         val errors = listOf(Err.of("bad field"))
-        val ex = Codes.BAD_REQUEST.toException(errors)
+        val ex = Invalid.BAD_REQUEST.toException(errors)
         assertEquals(errors, ex.errors)
     }
 }

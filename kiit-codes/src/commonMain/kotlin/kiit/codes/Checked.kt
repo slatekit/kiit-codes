@@ -30,7 +30,7 @@ class Checked private constructor(val status: Status, override val errors: List<
 
     companion object {
         /** A passing check with no errors. */
-        fun success(status: Passed = Codes.SUCCESS): Checked = Checked(status, emptyList())
+        fun success(status: Passed = Succeeded.SUCCESS): Checked = Checked(status, emptyList())
 
         /** A failing check with one or more [errors]. */
         fun failure(status: Failed, errors: List<Err>): Checked {
@@ -42,11 +42,11 @@ class Checked private constructor(val status: Status, override val errors: List<
 
 /**
  * Collects multiple [checks] into one: passes only if every one of them passed, otherwise fails
- * with [Codes.INVALID_VALUE] and every error from every failing entry pooled together, in order.
+ * with [Invalid.INVALID_VALUE] and every error from every failing entry pooled together, in order.
  */
 fun collect(vararg checks: Checked): Checked {
     val errors = checks.flatMap { it.errors }
-    return if (errors.isEmpty()) Checked.success() else Checked.failure(Codes.INVALID_VALUE, errors)
+    return if (errors.isEmpty()) Checked.success() else Checked.failure(Invalid.INVALID_VALUE, errors)
 }
 
 /** [collect] over a [List] instead of varargs. */

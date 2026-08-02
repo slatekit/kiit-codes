@@ -97,7 +97,7 @@ dependencies {
 import kiit.codes.*
 
 fun authorize(userId: String, requesterId: String): Status =
-    if (userId != requesterId) Codes.UNAUTHORIZED else Codes.SUCCESS
+    if (userId != requesterId) Restricted.UNAUTHORIZED else Succeeded.SUCCESS
 
 when (val status = authorize(userId, requesterId)) {
     is Passed -> log.info("ok: ${status.name}")
@@ -111,12 +111,12 @@ when (val status = authorize(userId, requesterId)) {
 import kiit.codes.*
 
 fun createUser(email: String): Checked =
-    if (users.containsKey(email)) Checked.failure(Codes.CONFLICT, listOf(Err.on("email", email, "already registered")))
-    else Checked.success(Codes.CREATED)
+    if (users.containsKey(email)) Checked.failure(Rejected.CONFLICT, listOf(Err.on("email", email, "already registered")))
+    else Checked.success(Succeeded.CREATED)
 
 fun checkEmail(email: String): Checked =
     if (email.contains("@")) Checked.success()
-    else Checked.failure(Codes.INVALID_VALUE, listOf(Err.on("email", email, "must contain @")))
+    else Checked.failure(Invalid.INVALID_VALUE, listOf(Err.on("email", email, "must contain @")))
 
 val result = collect(createUser(email), checkEmail(email))
 if (!result.isValid) {
@@ -129,7 +129,7 @@ if (!result.isValid) {
 ```kotlin
 import kiit.codes.*
 
-throw StatusException.RestrictedException(Codes.UNAUTHORIZED)
+throw StatusException.RestrictedException(Restricted.UNAUTHORIZED)
 
 try {
     // ...
@@ -197,7 +197,8 @@ graph TD
 | **id** | `"$origin.$name"`, derived, unique across every `Status` — a map key. |
 | **origin** | Where a code came from — `"kiit"` for built-ins, custom name otherwise. |
 | **isNeutral** | `true` only for `Excluded`/`Information` — never success or failure. |
-| **Codes** | Built-in `Status` registry, duplicate-checked at init time. |
+| **Codes** | Aggregate list + lookup over the built-in codes; duplicate-checked at init time. |
+| **Restricted, Invalid, ...** | Package-level shorthand for `Failed.Restricted`, etc. — same type, not a copy. |
 | **CodeLookup** | Converts a `Status` to/from a protocol code (`toCode`/`toStatus`). |
 | **Err** | One piece of per-occurrence detail behind a failure — field, value, cause. |
 | **Checked** | A `Status` plus zero or more `Err`. `collect` combines several into one. |
@@ -205,20 +206,20 @@ graph TD
 
 ## 📖 Built-in codes
 
-The `Codes` object provides a standard registry — using it is optional, and you can construct any `Passed`/`Failed` subtype directly for domain-specific outcomes.
+Each built-in code lives on its own type's companion object (e.g. `Succeeded.CREATED`, `Restricted.DENIED`), not on `Codes` — this keeps autocomplete scoped, typing `Restricted.` shows only `Restricted`'s own members. `Codes` is just the aggregate list + lookup layer over those instances; using it, or the codes at all, is optional — you can construct any `Passed`/`Failed` subtype directly for domain-specific outcomes.
 
-Some examples: `SUCCESS`, `CREATED`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMITED`, `UNEXPECTED` — see [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) for the full registry (53 codes across 8 categories).
-
+Some examples: `SUCCESS`, `CREATED`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMITED`, `UNEXPECTED` — see [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) and [`Status.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Status.kt) for the full registry (54 codes across 8 categories).
 
 A few pairs worth distinguishing on sight:
 
 - **`RATE_LIMITED` vs `RESOURCE_LIMITED`** — too many requests, vs a fixed amount used.
 - **`LOCKED` vs `SUSPENDED`** — self-resolving, vs an administrative decision.
 - **`INVALID_VALUE` vs `MISSING_FIELD`** — present but wrong, vs never provided at all.
-- **`INVALID_VALUE` vs `INVALID_ENTITY`** — one bad value, vs fields that don't fit.
 - **`NOTICE` vs `ADVISORY`** — neutral info, vs something needing action.
 - **`NOT_FOUND` vs `NOT_EXISTS`** — route-level, vs entity-level (doesn't exist).
-- **`EXPIRED` vs `NOT_EXISTS` vs `CONFLICT`** — timed out, never existed, state changed.
+- **`NOT_EXISTS` vs `GONE`** — never existed or cause unknown, vs existed, removed on purpose.
+- **`SKIPPED` vs `DISQUALIFIED` vs `DISCARDED`** — never evaluated, vs didn't qualify, vs excluded anyway.
+- **`QUEUED` vs `SCHEDULED`** — waiting in line now, vs deferred to a specific future time.
 - **`EXPIRED` vs `GONE`** — timed out naturally, vs removed on purpose; both map to `410`.
 
 Every built-in code's `origin` is `"kiit"`. Custom codes should supply their own, a module or team name, rather than relying on a default, so uniqueness only has to hold within your own `origin`, not globally:
@@ -241,7 +242,7 @@ Uniqueness over `id` (`origin.name`) is enforced at object-init time, a collisio
 import kiit.codes.*
 
 val http = CodesToHttp()
-http.toCode(Codes.UPDATED)         // 200
+http.toCode(Succeeded.UPDATED)         // 200
 http.toStatus(404)?.name           // "NOT_FOUND" — deterministic even though NOT_EXISTS also maps to 404
 http.toStatus(999)                 // null — unrecognized code, no guessed fallback
 ```
@@ -255,6 +256,8 @@ val lookup = CompositeLookup(base = CodesToHttp(), extensions = mapOf(PAYMENT_DE
 lookup.toCode(PAYMENT_DECLINED) // 402
 ```
 
+One gap worth knowing: `422 Unprocessable Entity` has no dedicated `Status` mapping, so `toStatus(422)` returns `null` — the registry has no code narrower than `INVALID_VALUE` for that case right now.
+
 ## 🔌 gRPC conversion
 
 `CodesToGrpc` maps `Status` to gRPC codes (0-16) the same way `CodesToHttp` maps to HTTP — category defaults plus an overrides table. See [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) for the full mapping.
@@ -263,7 +266,7 @@ lookup.toCode(PAYMENT_DECLINED) // 402
 import kiit.codes.*
 
 val grpc = CodesToGrpc()
-grpc.toCode(Codes.DENIED)          // 7
+grpc.toCode(Restricted.DENIED)          // 7
 grpc.toStatus(9)?.name             // "PRECONDITION_FAILED" — deterministic canonical winner for that code
 ```
 
@@ -282,11 +285,11 @@ import kiit.codes.*
 
 fun validateEmail(email: String): Checked =
     if (email.contains("@")) Checked.success()
-    else Checked.failure(Codes.INVALID_VALUE, listOf(Err.on("email", "must contain @")))
+    else Checked.failure(Invalid.INVALID_VALUE, listOf(Err.on("email", "must contain @")))
 
 fun validatePhone(phone: String): Checked =
     if (phone.length >= 10) Checked.success()
-    else Checked.failure(Codes.INVALID_VALUE, listOf(Err.on("phone", "too short")))
+    else Checked.failure(Invalid.INVALID_VALUE, listOf(Err.on("phone", "too short")))
 
 val result = collect(validateEmail(email), validatePhone(phone))
 if (!result.isValid) {
@@ -303,7 +306,7 @@ if (!result.isValid) {
 ```kotlin
 import kiit.codes.*
 
-throw StatusException.RestrictedException(Codes.UNAUTHORIZED)
+throw StatusException.RestrictedException(Restricted.UNAUTHORIZED)
 
 try {
     // ...
@@ -312,7 +315,7 @@ try {
         is StatusException.RestrictedException    -> // handle auth failure
         is StatusException.InvalidException   -> // handle bad input
         is StatusException.RejectedException   -> // handle known business-rule failure
-        is StatusException.UnservedException  -> // handle capacity / timeout / unimplemented / unexpected
+        is StatusException.UnservedException  -> // handle capacity / timeout / unsupported / unexpected
     }
 }
 ```
@@ -320,10 +323,10 @@ try {
 Or catch narrowly, by class, without ever touching a `when` block. Kotlin lets you import a nested class directly, which drops the `StatusException.` prefix at every call site without giving up the namespace protection nesting provides:
 
 ```kotlin
-import kiit.codes.Codes
+import kiit.codes.Restricted
 import kiit.codes.StatusException.RestrictedException
 
-throw RestrictedException(Codes.UNAUTHENTICATED)
+throw RestrictedException(Restricted.UNAUTHENTICATED)
 
 try {
     // ...
@@ -348,7 +351,7 @@ class RegistrationException(
 ```kotlin
 import kiit.codes.*
 
-throw StatusException.InvalidException(Codes.INVALID_VALUE, listOf(Err.on("email", "already taken")))
+throw StatusException.InvalidException(Invalid.INVALID_VALUE, listOf(Err.on("email", "already taken")))
 ```
 
 If a named class is still useful for framework or crash-tooling reasons that dispatch on exception type specifically, each subtype is `open`, so it's a one-line addition, not a whole class with its own fields and catch logic:

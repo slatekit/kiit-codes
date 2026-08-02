@@ -9,9 +9,9 @@ package kiit.codes
  *
  * TypeScript usage:
  * ```ts
- * import { RestrictedError, Codes } from '@kiit/codes'
+ * import { RestrictedError, Restricted } from '@kiit/codes'
  *
- * throw new RestrictedError(Codes.UNAUTHORIZED)
+ * throw new RestrictedError(Restricted.UNAUTHORIZED)
  *
  * try { ... } catch (e) {
  *     if (e instanceof RestrictedError) { console.log(e.status.name) }

@@ -16,50 +16,69 @@ import kotlin.test.assertTrue
 class CodesTest {
     @Test
     fun successHasCorrectValues() {
-        assertEquals("SUCCESS", Codes.SUCCESS.name)
-        assertEquals(StatusConstants.KIIT, Codes.SUCCESS.origin)
-        assertEquals("The operation completed successfully.", Codes.SUCCESS.message)
-        assertTrue(Codes.SUCCESS.success)
+        assertEquals("SUCCESS", Succeeded.SUCCESS.name)
+        assertEquals(StatusConstants.KIIT, Succeeded.SUCCESS.origin)
+        assertEquals("The operation completed successfully.", Succeeded.SUCCESS.message)
+        assertTrue(Succeeded.SUCCESS.success)
     }
 
     @Test
     fun deniedHasCorrectValues() {
-        assertEquals("DENIED", Codes.DENIED.name)
-        assertEquals(StatusConstants.KIIT, Codes.DENIED.origin)
-        assertFalse(Codes.DENIED.success)
+        assertEquals("DENIED", Restricted.DENIED.name)
+        assertEquals(StatusConstants.KIIT, Restricted.DENIED.origin)
+        assertFalse(Restricted.DENIED.success)
     }
 
     @Test
     fun forbiddenIsRestricted() {
         // Access-control outcome, not a business-rule failure — see Codes.kt for the reasoning.
-        assertTrue(Codes.FORBIDDEN is Failed.Restricted)
+        assertTrue(Restricted.FORBIDDEN is Failed.Restricted)
     }
 
     @Test
     fun expiredIsRejected() {
         // Was valid and timed out — a known business outcome, not malformed input.
-        assertTrue(Codes.EXPIRED is Failed.Rejected)
+        assertTrue(Rejected.EXPIRED is Failed.Rejected)
     }
 
     @Test
     fun goneIsRejected() {
         // Deliberately removed — a known business outcome, not malformed input.
-        assertTrue(Codes.GONE is Failed.Rejected)
+        assertTrue(Rejected.GONE is Failed.Rejected)
     }
 
     @Test
     fun skippedAndDiscardedHaveDistinctNamesAndSuccessTrue() {
-        assertTrue(Codes.SKIPPED.success)
-        assertTrue(Codes.DISCARDED.success)
-        assertTrue(Codes.SKIPPED.name != Codes.DISCARDED.name)
+        assertTrue(Excluded.SKIPPED.success)
+        assertTrue(Excluded.DISCARDED.success)
+        assertTrue(Excluded.SKIPPED.name != Excluded.DISCARDED.name)
     }
 
     @Test
     fun informationCodesHaveSuccessTrue() {
-        assertTrue(Codes.HELP.success)
-        assertTrue(Codes.ABOUT.success)
-        assertTrue(Codes.VERSION.success)
-        assertTrue(Codes.EXIT.success)
+        assertTrue(Information.HELP.success)
+        assertTrue(Information.ABOUT.success)
+        assertTrue(Information.VERSION.success)
+    }
+
+    @Test
+    fun exitedIsSucceededNotInformation() {
+        // Exiting is a real completed operation, not metadata — moved from Information.EXIT.
+        assertTrue(Succeeded.EXITED.success)
+        assertTrue(Succeeded.EXITED is Passed.Succeeded)
+    }
+
+    @Test
+    fun scheduledIsPending() {
+        assertTrue(Pending.SCHEDULED.success)
+        assertTrue(Pending.SCHEDULED is Passed.Pending)
+    }
+
+    @Test
+    fun disqualifiedIsExcluded() {
+        // Evaluated, and the item's own state/attributes didn't meet criteria.
+        assertTrue(Excluded.DISQUALIFIED.success)
+        assertTrue(Excluded.DISQUALIFIED is Passed.Excluded)
     }
 
     @Test
@@ -92,45 +111,45 @@ class CodesToHttpTest {
     // -------------------------------------------------------------------------
 
     @Test fun categoryDefaultSucceeded() {
-        assertEquals(200, http.toCode(Codes.SUCCESS))
-        assertEquals(200, http.toCode(Codes.UPDATED))
+        assertEquals(200, http.toCode(Succeeded.SUCCESS))
+        assertEquals(200, http.toCode(Succeeded.UPDATED))
     }
 
     @Test fun categoryDefaultPending() {
-        assertEquals(202, http.toCode(Codes.PROCESSING))
-        assertEquals(202, http.toCode(Codes.QUEUED))
-        assertEquals(202, http.toCode(Codes.ACCEPTED))
+        assertEquals(202, http.toCode(Pending.PROCESSING))
+        assertEquals(202, http.toCode(Pending.QUEUED))
+        assertEquals(202, http.toCode(Pending.ACCEPTED))
     }
 
     @Test fun categoryDefaultExcluded() {
-        assertEquals(200, http.toCode(Codes.OMITTED))
-        assertEquals(200, http.toCode(Codes.SKIPPED))
-        assertEquals(200, http.toCode(Codes.DISCARDED))
+        assertEquals(200, http.toCode(Excluded.OMITTED))
+        assertEquals(200, http.toCode(Excluded.SKIPPED))
+        assertEquals(200, http.toCode(Excluded.DISCARDED))
     }
 
     @Test fun categoryDefaultInformation() {
-        assertEquals(200, http.toCode(Codes.ABOUT))
+        assertEquals(200, http.toCode(Information.ABOUT))
     }
 
     @Test fun categoryDefaultRestricted() {
-        assertEquals(401, http.toCode(Codes.DENIED))
-        assertEquals(401, http.toCode(Codes.UNAUTHENTICATED))
+        assertEquals(401, http.toCode(Restricted.DENIED))
+        assertEquals(401, http.toCode(Restricted.UNAUTHENTICATED))
     }
 
     @Test fun categoryDefaultInvalid() {
-        assertEquals(400, http.toCode(Codes.BAD_REQUEST))
-        assertEquals(400, http.toCode(Codes.INVALID_VALUE))
-        assertEquals(400, http.toCode(Codes.OUT_OF_RANGE))
+        assertEquals(400, http.toCode(Invalid.BAD_REQUEST))
+        assertEquals(400, http.toCode(Invalid.INVALID_VALUE))
+        assertEquals(400, http.toCode(Invalid.OUT_OF_RANGE))
     }
 
     @Test fun categoryDefaultRejected() {
-        assertEquals(500, http.toCode(Codes.RULE_VIOLATION))
-        assertEquals(500, http.toCode(Codes.PRECONDITION_FAILED))
+        assertEquals(500, http.toCode(Rejected.RULE_VIOLATION))
+        assertEquals(500, http.toCode(Rejected.PRECONDITION_FAILED))
     }
 
     @Test fun categoryDefaultUnserved() {
-        assertEquals(503, http.toCode(Codes.UNREACHABLE))
-        assertEquals(503, http.toCode(Codes.UNDER_MAINTENANCE))
+        assertEquals(503, http.toCode(Unserved.UNREACHABLE))
+        assertEquals(503, http.toCode(Unserved.UNDER_MAINTENANCE))
     }
 
     // -------------------------------------------------------------------------
@@ -138,75 +157,71 @@ class CodesToHttpTest {
     // -------------------------------------------------------------------------
 
     @Test fun overrideCreated() {
-        assertEquals(201, http.toCode(Codes.CREATED))
+        assertEquals(201, http.toCode(Succeeded.CREATED))
     }
 
     @Test fun overrideHandled() {
-        assertEquals(204, http.toCode(Codes.HANDLED))
+        assertEquals(204, http.toCode(Succeeded.HANDLED))
     }
 
     @Test fun overrideNotFound() {
-        assertEquals(404, http.toCode(Codes.NOT_FOUND))
+        assertEquals(404, http.toCode(Invalid.NOT_FOUND))
     }
 
     @Test fun overrideForbidden() {
-        assertEquals(403, http.toCode(Codes.FORBIDDEN))
+        assertEquals(403, http.toCode(Restricted.FORBIDDEN))
     }
 
     @Test fun overrideExpired() {
-        assertEquals(410, http.toCode(Codes.EXPIRED))
+        assertEquals(410, http.toCode(Rejected.EXPIRED))
     }
 
     @Test fun overrideGone() {
-        assertEquals(410, http.toCode(Codes.GONE))
+        assertEquals(410, http.toCode(Rejected.GONE))
     }
 
     @Test fun overrideNotExists() {
-        assertEquals(404, http.toCode(Codes.NOT_EXISTS))
+        assertEquals(404, http.toCode(Rejected.NOT_EXISTS))
     }
 
     @Test fun overrideCancelled() {
-        assertEquals(499, http.toCode(Codes.CANCELLED))
+        assertEquals(499, http.toCode(Excluded.CANCELLED))
     }
 
     @Test fun overrideRedirected() {
-        assertEquals(307, http.toCode(Codes.REDIRECTED))
+        assertEquals(307, http.toCode(Pending.REDIRECTED))
     }
 
     @Test fun overridePayloadTooLarge() {
-        assertEquals(413, http.toCode(Codes.PAYLOAD_TOO_LARGE))
+        assertEquals(413, http.toCode(Invalid.PAYLOAD_TOO_LARGE))
     }
 
     @Test fun overrideConflict() {
-        assertEquals(409, http.toCode(Codes.CONFLICT))
+        assertEquals(409, http.toCode(Rejected.CONFLICT))
     }
 
     @Test fun overrideLocked() {
-        assertEquals(423, http.toCode(Codes.LOCKED))
+        assertEquals(423, http.toCode(Restricted.LOCKED))
     }
 
     @Test fun overrideSuspended() {
-        assertEquals(403, http.toCode(Codes.SUSPENDED))
-    }
-
-    @Test fun overrideInvalidEntity() {
-        assertEquals(422, http.toCode(Codes.INVALID_ENTITY))
+        assertEquals(403, http.toCode(Restricted.SUSPENDED))
     }
 
     @Test fun overrideResourceLimited() {
-        assertEquals(429, http.toCode(Codes.RESOURCE_LIMITED))
+        assertEquals(429, http.toCode(Unserved.RESOURCE_LIMITED))
     }
 
     @Test fun overrideTimeout() {
-        assertEquals(504, http.toCode(Codes.TIMEOUT))
+        assertEquals(504, http.toCode(Unserved.TIMEOUT))
     }
 
     @Test fun overrideRateLimited() {
-        assertEquals(429, http.toCode(Codes.RATE_LIMITED))
+        assertEquals(429, http.toCode(Unserved.RATE_LIMITED))
     }
 
     @Test fun overrideUnexpected() {
-        assertEquals(500, http.toCode(Codes.UNEXPECTED))
+        assertEquals(500, http.toCode(Unserved.UNEXPECTED))
     }
 
     /**
@@ -227,7 +242,7 @@ class CodesToHttpTest {
     fun toStatusFindsRegisteredStatusForUniqueHttpCode() {
         val status = http.toStatus(201)
         assertNotNull(status)
-        assertEquals(Codes.CREATED.name, status.name)
+        assertEquals(Succeeded.CREATED.name, status.name)
     }
 
     @Test
@@ -240,7 +255,7 @@ class CodesToHttpTest {
     fun toStatusRoundTripsForOverriddenCode() {
         val status = http.toStatus(404)
         assertNotNull(status)
-        assertEquals(Codes.NOT_FOUND.name, status.name)
+        assertEquals(Invalid.NOT_FOUND.name, status.name)
     }
 
     // -------------------------------------------------------------------------
@@ -253,12 +268,12 @@ class CodesToHttpTest {
      */
     @Test
     fun httpRoundTripDoesNotPreserveTheOriginalStatus() {
-        val original = Codes.UPDATED
+        val original = Succeeded.UPDATED
         val code = http.toCode(original)
         val restored = http.toStatus(code)
 
         assertEquals(200, code)
-        assertSame(Codes.SUCCESS, restored)
+        assertSame(Succeeded.SUCCESS, restored)
         assertNotEquals<Status?>(original, restored)
     }
 
@@ -268,43 +283,54 @@ class CodesToHttpTest {
      */
     @Test
     fun toStatus200ResolvesToSuccessNotOtherSharedStatuses() {
-        assertSame(Codes.SUCCESS, http.toStatus(200))
+        assertSame(Succeeded.SUCCESS, http.toStatus(200))
     }
 
     /** NOT_FOUND and NOT_EXISTS both resolve to 404; NOT_FOUND wins. */
     @Test
     fun toStatus404ResolvesToNotFoundNotNotExists() {
-        assertSame(Codes.NOT_FOUND, http.toStatus(404))
+        assertSame(Invalid.NOT_FOUND, http.toStatus(404))
     }
 
     /** EXPIRED and GONE both resolve to 410; GONE wins — its name and message are the literal HTTP 410 concept. */
     @Test
     fun toStatus410ResolvesToGoneNotExpired() {
-        assertSame(Codes.GONE, http.toStatus(410))
+        assertSame(Rejected.GONE, http.toStatus(410))
     }
 
     /** RULE_VIOLATION, PRECONDITION_FAILED, and UNEXPECTED all resolve to 500; UNEXPECTED wins. */
     @Test
     fun toStatus500ResolvesToUnexpectedNotRuleViolationOrPreconditionFailed() {
-        assertSame(Codes.UNEXPECTED, http.toStatus(500))
+        assertSame(Unserved.UNEXPECTED, http.toStatus(500))
     }
 
-    /** UNIMPLEMENTED and UNSUPPORTED both resolve to 501; UNIMPLEMENTED wins. */
+    /** Only UNSUPPORTED resolves to 501 now that UNIMPLEMENTED was removed — no tie to break. */
     @Test
-    fun toStatus501ResolvesToUnimplementedNotUnsupported() {
-        assertSame(Codes.UNIMPLEMENTED, http.toStatus(501))
+    fun toStatus501ResolvesToUnsupported() {
+        assertSame(Unserved.UNSUPPORTED, http.toStatus(501))
+    }
+
+    /**
+     * `INVALID_ENTITY` was removed from the registry, so `422` has no dedicated [Status] mapping
+     * again — a known, accepted regression, not a bug. Anything converting [Invalid.INVALID_VALUE]
+     * to HTTP falls through to its category default, 400, same place it sat before `INVALID_ENTITY`
+     * ever existed.
+     */
+    @Test
+    fun toStatus422ReturnsNullSinceInvalidEntityWasRemoved() {
+        assertNull(http.toStatus(422))
     }
 
     /** DENIED, UNAUTHENTICATED, and UNAUTHORIZED all resolve to 401; UNAUTHENTICATED wins. */
     @Test
     fun toStatus401ResolvesToUnauthenticatedNotDeniedOrUnauthorized() {
-        assertSame(Codes.UNAUTHENTICATED, http.toStatus(401))
+        assertSame(Restricted.UNAUTHENTICATED, http.toStatus(401))
     }
 
     /** FORBIDDEN and SUSPENDED both resolve to 403; FORBIDDEN wins. */
     @Test
     fun toStatus403ResolvesToForbiddenNotSuspended() {
-        assertSame(Codes.FORBIDDEN, http.toStatus(403))
+        assertSame(Restricted.FORBIDDEN, http.toStatus(403))
     }
 
     /**
@@ -313,8 +339,8 @@ class CodesToHttpTest {
      */
     @Test
     fun toStatusStaysInSyncWithCustomOverridesNotJustDefaults() {
-        val custom = CodesToHttp(overrides = mapOf(Codes.TIMEOUT to 599))
-        assertSame(Codes.TIMEOUT, custom.toStatus(599))
+        val custom = CodesToHttp(overrides = mapOf(Unserved.TIMEOUT to 599))
+        assertSame(Unserved.TIMEOUT, custom.toStatus(599))
         assertNull(custom.toStatus(504)) // TIMEOUT no longer resolves to 504 for this instance
     }
 }
@@ -327,89 +353,90 @@ class CodesToGrpcTest {
     private val grpc = CodesToGrpc()
 
     @Test fun categoryDefaultPassedIsOk() {
-        assertEquals(0, grpc.toCode(Codes.SUCCESS))
-        assertEquals(0, grpc.toCode(Codes.PROCESSING))
-        assertEquals(0, grpc.toCode(Codes.SKIPPED))
-        assertEquals(0, grpc.toCode(Codes.HELP))
+        assertEquals(0, grpc.toCode(Succeeded.SUCCESS))
+        assertEquals(0, grpc.toCode(Pending.PROCESSING))
+        assertEquals(0, grpc.toCode(Excluded.SKIPPED))
+        assertEquals(0, grpc.toCode(Information.HELP))
     }
 
     @Test fun categoryDefaultRestrictedIsPermissionDenied() {
-        assertEquals(7, grpc.toCode(Codes.DENIED))
-        assertEquals(7, grpc.toCode(Codes.UNAUTHORIZED))
-        assertEquals(7, grpc.toCode(Codes.FORBIDDEN))
+        assertEquals(7, grpc.toCode(Restricted.DENIED))
+        assertEquals(7, grpc.toCode(Restricted.UNAUTHORIZED))
+        assertEquals(7, grpc.toCode(Restricted.FORBIDDEN))
     }
 
     @Test fun categoryDefaultInvalidIsInvalidArgument() {
-        assertEquals(3, grpc.toCode(Codes.BAD_REQUEST))
-        assertEquals(3, grpc.toCode(Codes.MISSING_FIELD))
+        assertEquals(3, grpc.toCode(Invalid.BAD_REQUEST))
+        assertEquals(3, grpc.toCode(Invalid.MISSING_FIELD))
     }
 
     @Test fun categoryDefaultRejectedIsFailedPrecondition() {
-        assertEquals(9, grpc.toCode(Codes.RULE_VIOLATION))
-        assertEquals(9, grpc.toCode(Codes.NOT_EXISTS))
-        assertEquals(9, grpc.toCode(Codes.EXPIRED))
-        assertEquals(9, grpc.toCode(Codes.GONE))
+        assertEquals(9, grpc.toCode(Rejected.RULE_VIOLATION))
+        assertEquals(9, grpc.toCode(Rejected.NOT_EXISTS))
+        assertEquals(9, grpc.toCode(Rejected.EXPIRED))
+        assertEquals(9, grpc.toCode(Rejected.GONE))
     }
 
     @Test fun categoryDefaultUnservedIsInternal() {
-        assertEquals(13, grpc.toCode(Codes.UNSUPPORTED))
-        assertEquals(13, grpc.toCode(Codes.UNDER_MAINTENANCE))
+        // UNSUPPORTED is overridden to 12 (see overrideUnsupported) and no longer falls here.
+        assertEquals(13, grpc.toCode(Unserved.UNDER_MAINTENANCE))
     }
 
     @Test fun overrideCancelled() {
-        assertEquals(1, grpc.toCode(Codes.CANCELLED))
+        assertEquals(1, grpc.toCode(Excluded.CANCELLED))
     }
 
     @Test fun overrideUnauthenticated() {
-        assertEquals(16, grpc.toCode(Codes.UNAUTHENTICATED))
+        assertEquals(16, grpc.toCode(Restricted.UNAUTHENTICATED))
     }
 
     @Test fun overrideNotFound() {
-        assertEquals(5, grpc.toCode(Codes.NOT_FOUND))
+        assertEquals(5, grpc.toCode(Invalid.NOT_FOUND))
     }
 
     @Test fun overrideOutOfRange() {
-        assertEquals(11, grpc.toCode(Codes.OUT_OF_RANGE))
+        assertEquals(11, grpc.toCode(Invalid.OUT_OF_RANGE))
     }
 
     @Test fun overrideConflict() {
-        assertEquals(6, grpc.toCode(Codes.CONFLICT))
+        assertEquals(6, grpc.toCode(Rejected.CONFLICT))
     }
 
-    @Test fun overrideUnimplemented() {
-        assertEquals(12, grpc.toCode(Codes.UNIMPLEMENTED))
+    /** Takes over gRPC's UNIMPLEMENTED (12) slot now that UNIMPLEMENTED and UNSUPPORTED merged. */
+    @Test fun overrideUnsupported() {
+        assertEquals(12, grpc.toCode(Unserved.UNSUPPORTED))
     }
 
     @Test fun overrideUnreachable() {
-        assertEquals(14, grpc.toCode(Codes.UNREACHABLE))
+        assertEquals(14, grpc.toCode(Unserved.UNREACHABLE))
     }
 
     @Test fun overrideTimeout() {
-        assertEquals(4, grpc.toCode(Codes.TIMEOUT))
+        assertEquals(4, grpc.toCode(Unserved.TIMEOUT))
     }
 
     @Test fun overrideRateLimited() {
-        assertEquals(8, grpc.toCode(Codes.RATE_LIMITED))
+        assertEquals(8, grpc.toCode(Unserved.RATE_LIMITED))
     }
 
     @Test fun overrideUnexpected() {
-        assertEquals(2, grpc.toCode(Codes.UNEXPECTED))
+        assertEquals(2, grpc.toCode(Unserved.UNEXPECTED))
     }
 
     @Test fun overrideDataLoss() {
-        assertEquals(15, grpc.toCode(Codes.DATA_LOSS))
+        assertEquals(15, grpc.toCode(Unserved.DATA_LOSS))
     }
 
     /** Not an official gRPC mapping, shares RESOURCE_EXHAUSTED (8) with RATE_LIMITED deliberately. */
     @Test
     fun overridePayloadTooLargeSharesResourceExhausted() {
-        assertEquals(8, grpc.toCode(Codes.PAYLOAD_TOO_LARGE))
+        assertEquals(8, grpc.toCode(Invalid.PAYLOAD_TOO_LARGE))
     }
 
     /** Genuine sibling of RATE_LIMITED, same axis, shares RESOURCE_EXHAUSTED (8) too. */
     @Test
     fun overrideResourceLimited() {
-        assertEquals(8, grpc.toCode(Codes.RESOURCE_LIMITED))
+        assertEquals(8, grpc.toCode(Unserved.RESOURCE_LIMITED))
     }
 
     // -------------------------------------------------------------------------
@@ -419,43 +446,52 @@ class CodesToGrpcTest {
     /** Every non-overridden Passed status resolves to 0 (OK); SUCCESS wins. */
     @Test
     fun toStatus0ResolvesToSuccess() {
-        assertSame(Codes.SUCCESS, grpc.toStatus(0))
+        assertSame(Succeeded.SUCCESS, grpc.toStatus(0))
     }
 
-    /** BAD_REQUEST, INVALID_VALUE, MISSING_FIELD, and INVALID_ENTITY all resolve to 3; INVALID_VALUE wins. */
+    /** BAD_REQUEST, INVALID_VALUE, and MISSING_FIELD all resolve to 3; INVALID_VALUE wins. */
     @Test
     fun toStatus3ResolvesToInvalidValue() {
-        assertSame(Codes.INVALID_VALUE, grpc.toStatus(3))
+        assertSame(Invalid.INVALID_VALUE, grpc.toStatus(3))
     }
 
     /** ALREADY_EXISTS — only CONFLICT resolves to 6, no tie to break. */
     @Test
     fun toStatus6ResolvesToConflict() {
-        assertSame(Codes.CONFLICT, grpc.toStatus(6))
+        assertSame(Rejected.CONFLICT, grpc.toStatus(6))
     }
 
     /** DENIED, UNAUTHORIZED, and FORBIDDEN all resolve to 7; DENIED wins. */
     @Test
     fun toStatus7ResolvesToDenied() {
-        assertSame(Codes.DENIED, grpc.toStatus(7))
+        assertSame(Restricted.DENIED, grpc.toStatus(7))
     }
 
     /** RATE_LIMITED, PAYLOAD_TOO_LARGE, and RESOURCE_LIMITED all resolve to 8; RATE_LIMITED wins. */
     @Test
     fun toStatus8ResolvesToRateLimitedNotPayloadTooLargeOrResourceLimited() {
-        assertSame(Codes.RATE_LIMITED, grpc.toStatus(8))
+        assertSame(Unserved.RATE_LIMITED, grpc.toStatus(8))
     }
 
     /** RULE_VIOLATION, NOT_EXISTS, PRECONDITION_FAILED, EXPIRED, and GONE all resolve to 9; PRECONDITION_FAILED wins. */
     @Test
     fun toStatus9ResolvesToPreconditionFailed() {
-        assertSame(Codes.PRECONDITION_FAILED, grpc.toStatus(9))
+        assertSame(Rejected.PRECONDITION_FAILED, grpc.toStatus(9))
     }
 
-    /** UNSUPPORTED, UNDER_MAINTENANCE, and INTERNAL all resolve to 13; INTERNAL wins. */
+    /** UNDER_MAINTENANCE and INTERNAL both resolve to 13; INTERNAL wins. */
     @Test
     fun toStatus13ResolvesToInternal() {
-        assertSame(Codes.INTERNAL, grpc.toStatus(13))
+        assertSame(Unserved.INTERNAL, grpc.toStatus(13))
+    }
+
+    /**
+     * Only UNSUPPORTED resolves to 12 — it took over gRPC's UNIMPLEMENTED slot now that the two
+     * built-in concepts merged into one Status code. No tie to break.
+     */
+    @Test
+    fun toStatus12ResolvesToUnsupported() {
+        assertSame(Unserved.UNSUPPORTED, grpc.toStatus(12))
     }
 
     /** ABORTED (10) has no dedicated Status and nothing falls through to it by default; null. */
@@ -471,8 +507,8 @@ class CodesToGrpcTest {
 
     @Test
     fun toStatusStaysInSyncWithCustomOverridesNotJustDefaults() {
-        val custom = CodesToGrpc(overrides = mapOf(Codes.TIMEOUT to 99))
-        assertSame(Codes.TIMEOUT, custom.toStatus(99))
+        val custom = CodesToGrpc(overrides = mapOf(Unserved.TIMEOUT to 99))
+        assertSame(Unserved.TIMEOUT, custom.toStatus(99))
         assertNull(custom.toStatus(4)) // TIMEOUT no longer resolves to 4 for this instance
     }
 }
@@ -495,8 +531,8 @@ class CompositeLookupTest {
 
     @Test
     fun fallsBackToBaseForRegisteredCodes() {
-        assertEquals(401, lookup.toCode(Codes.DENIED))
-        assertSame(Codes.CREATED, lookup.toStatus(201))
+        assertEquals(401, lookup.toCode(Restricted.DENIED))
+        assertSame(Succeeded.CREATED, lookup.toStatus(201))
     }
 
     @Test
