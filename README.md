@@ -2,7 +2,7 @@
 
 # kiit.codes
 
-A library to classify and handle success and failure at any layer of an app. Compatible with all gRPC and most common HTTP status codes. Usable as a plain status, validation or structured exceptions.
+A library to classify and handle success and failure at any layer of an app. Compatible with all gRPC and most common HTTP status codes. Usable as a plain status, validation, structured exceptions or result type handling.
 
 [![Maven Central](https://img.shields.io/maven-central/v/dev.kiit/kiit-codes?color=blue)](https://central.sonatype.com/artifact/dev.kiit/kiit-codes)
 [![Build](https://img.shields.io/github/actions/workflow/status/slatekit/kiit-codes/build.yml?branch=main)](https://github.com/slatekit/kiit-codes/actions)
