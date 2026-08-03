@@ -21,6 +21,15 @@ gpg --import dev.kiit.seckey.asc
 gpg --list-secret-keys --keyid-format LONG
 ```
 
+> **Why this import step matters:** `kiit-codes/build.gradle.kts`'s `signing { useGpgCmd() }` doesn't
+> reference `dev.kiit.seckey.asc` (or any file) directly — it tells Gradle's signing plugin to shell
+> out to the external `gpg` binary on your `PATH` instead of using its default in-memory PGP
+> implementation. That external `gpg` process reads from your local keyring (`~/.gnupg/`) and
+> selects/unlocks the key via the `signing.gnupg.keyName` / `signing.gnupg.passphrase` properties
+> (see [Setup](#setup) below). So the import above is what actually makes the key available —
+> Gradle itself never touches the raw key material. This is also why `useGpgCmd()` is required
+> instead of `useInMemoryPgpKeys` — see the ["Could not read PGP secret key"](#could-not-read-pgp-secret-key) FAQ entry.
+
 ---
 
 ## Setup
@@ -169,6 +178,9 @@ Maven Local artifacts are saved to:
 ---
 
 ## Publish
+
+Published artifacts (once a version has actually gone through `publishAndReleaseToMavenCentral`):
+[central.sonatype.com/artifact/dev.kiit/kiit-codes](https://central.sonatype.com/artifact/dev.kiit/kiit-codes)
 
 ### Publish to Maven Local
 

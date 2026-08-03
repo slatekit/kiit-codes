@@ -50,7 +50,7 @@ android {
 
 // Single source of truth for the published version — also read by the release workflow via
 // the printVersion task below, so the git tag and GitHub release always match what's published.
-val libraryVersion = "0.1.2"
+val libraryVersion = "0.2.0"
 
 /**
  * Store the following in ~/.gradle/gradle.properties
