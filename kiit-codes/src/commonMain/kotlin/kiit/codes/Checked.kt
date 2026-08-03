@@ -40,14 +40,14 @@ class Checked private constructor(val status: Status, override val errors: List<
     }
 }
 
+/** [collect] over varargs instead of a [List]. */
+fun collect(vararg checks: Checked): Checked = collect(checks.toList())
+
 /**
  * Collects multiple [checks] into one: passes only if every one of them passed, otherwise fails
  * with [Invalid.INVALID_VALUE] and every error from every failing entry pooled together, in order.
  */
-fun collect(vararg checks: Checked): Checked {
+fun collect(checks: List<Checked>): Checked {
     val errors = checks.flatMap { it.errors }
     return if (errors.isEmpty()) Checked.success() else Checked.failure(Invalid.INVALID_VALUE, errors)
 }
-
-/** [collect] over a [List] instead of varargs. */
-fun collect(checks: List<Checked>): Checked = collect(*checks.toTypedArray())

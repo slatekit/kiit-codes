@@ -29,16 +29,13 @@ interface HasErrors {
  * 4. list of strings or Errs
  */
 sealed class Err {
-
     abstract val msg: String
     abstract val cause: Throwable?
     abstract val ref: Any?
 
     /**
-     * Different implementations for Error
-     */
-
-    /**
+     * Different implementations for Error.
+     *
      * Default Error implementation to represent an error with message and optional throwable
      */
     data class ErrorInfo(
@@ -75,7 +72,6 @@ sealed class Err {
      * Provides easy ways to build the Err type from various sources such as strings, exceptions, field errors
      */
     companion object {
-
         fun of(msg: String, ex: Throwable? = null): Err {
             return ErrorInfo(msg, ex)
         }
