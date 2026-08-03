@@ -71,7 +71,14 @@ Pass them as `-P` flags because dots in the property names are not valid bash va
 
 ## CI — GitHub Actions
 
-CI runners are ephemeral — there is no persistent GPG keyring. The secret key must be imported at the start of every run.
+Two workflows live under [`.github/workflows`](.github/workflows):
+
+| Workflow | File | Trigger | What it does |
+|----------|------|---------|---------------|
+| CI | `ci.yml` | Every PR into `main` | `ktlintCheck`, `detekt`, `jvmTest`, `jsNodeTest` on `ubuntu-latest`. iOS tests are not run in CI (no macOS runner). |
+| Release | `release.yml` | Manual (`workflow_dispatch`) | Builds, tests, publishes to Maven Central, tags, and cuts a GitHub release. Runs on `macos-latest` — required to build/sign the iOS targets. |
+
+CI runners are ephemeral — there is no persistent GPG keyring. The secret key must be imported at the start of every release run.
 
 ### 1. Repository secrets
 
@@ -90,44 +97,25 @@ Encode your secret key for the `KIIT_GPG_SECRET_KEY` secret (run locally):
 gpg --armor --export-secret-keys <your-key-id> | base64 | pbcopy
 ```
 
-### 2. Workflow
+### 2. Cutting a release
 
-```yaml
-name: Publish kiit-codes
+Releases are **not** triggered by pushing a tag — `release.yml` creates the tag itself, from the
+version already in Gradle:
 
-on:
-  workflow_dispatch:
-  push:
-    tags: [ 'v*' ]
+1. Bump `libraryVersion` in [`kiit-codes/build.gradle.kts`](kiit-codes/build.gradle.kts) (see the
+   FAQ entry below) and merge that change to `main`.
+2. From the GitHub Actions tab, run the **Release** workflow (`workflow_dispatch`, no inputs).
+3. It reads the version via `./gradlew :kiit-codes:printVersion`, verifies a tag for that version
+   doesn't already exist, runs the same lint/test gate as CI, publishes to Maven Central, then
+   pushes tag `v<version>` and creates a GitHub release with auto-generated notes
+   (`gh release create --generate-notes`) covering everything since the previous release.
 
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Import GPG key
-        run: |
-          echo "${{ secrets.KIIT_GPG_SECRET_KEY }}" | base64 --decode | gpg --import
-          gpg --list-secret-keys --keyid-format LONG
-
-      - name: Publish to Maven Central
-        run: |
-          ./gradlew :kiit-codes:publishAndReleaseToMavenCentral \
-            -Psigning.gnupg.keyName=${{ secrets.KIIT_MAVEN_GPGNAME }} \
-            -Psigning.gnupg.passphrase=${{ secrets.KIIT_MAVEN_GPGPASS }} \
-            -PmavenCentralUsername=${{ secrets.KIIT_MAVEN_USER }} \
-            -PmavenCentralPassword=${{ secrets.KIIT_MAVEN_PSWD }}
-```
+A failed publish never leaves behind a tag or a release — tagging and the GitHub release both
+happen only after `publishAndReleaseToMavenCentral` succeeds.
 
 ### 3. GPG pinentry on Linux (if signing hangs)
 
-GPG 2.1+ on Linux defaults to a GUI pinentry dialog which blocks in CI. If the passphrase is silently rejected, add this before the import step:
+Not applicable to `release.yml` (it runs on `macos-latest`) — this is for local Linux dev machines only. GPG 2.1+ on Linux defaults to a GUI pinentry dialog which blocks in CI. If the passphrase is silently rejected, add this before the import step:
 
 ```bash
 echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
@@ -244,11 +232,8 @@ The `mavenCentralUsername` and `mavenCentralPassword` are **portal token** crede
 
 ### How do I bump the version?
 
-Edit the `coordinates(...)` block in `kiit-codes/build.gradle.kts`:
+Edit the `libraryVersion` val near the top of the `mavenPublishing {}` block in `kiit-codes/build.gradle.kts`:
 ```kotlin
-coordinates(
-    groupId    = "dev.kiit",
-    artifactId = "kiit-codes",
-    version    = "0.1.2"   // ← bump here
-)
+val libraryVersion = "0.1.2"   // ← bump here
 ```
+This single value feeds both the published Maven coordinates and the `printVersion` task the release workflow reads to tag and name the GitHub release — see [CI — GitHub Actions](#ci--github-actions) above.

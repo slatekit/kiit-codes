@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest   # required for iOS target build/sign — Kotlin/Native iOS needs Xcode
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, needed for --generate-notes to diff from the last tag
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Read version from Gradle
+        id: version
+        run: echo "value=$(./gradlew :kiit-codes:printVersion -q)" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag does not already exist
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.value }}" >/dev/null 2>&1; then
+            echo "Tag v${{ steps.version.outputs.value }} already exists — bump the version first." >&2
+            exit 1
+          fi
+
+      - name: Verification checks (lint + tests)
+        run: |
+          ./gradlew :kiit-codes:ktlintCheck :kiit-codes:detekt \
+            :kiit-codes:jvmTest :kiit-codes:jsNodeTest
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.KIIT_GPG_SECRET_KEY }}" | base64 --decode | gpg --import
+          gpg --list-secret-keys --keyid-format LONG
+
+      - name: Publish to Maven Central
+        run: |
+          ./gradlew :kiit-codes:publishAndReleaseToMavenCentral \
+            -Psigning.gnupg.keyName=${{ secrets.KIIT_MAVEN_GPGNAME }} \
+            -Psigning.gnupg.passphrase=${{ secrets.KIIT_MAVEN_GPGPASS }} \
+            -PmavenCentralUsername=${{ secrets.KIIT_MAVEN_USER }} \
+            -PmavenCentralPassword=${{ secrets.KIIT_MAVEN_PSWD }}
+
+      - name: Tag release
+        run: |
+          git tag "v${{ steps.version.outputs.value }}"
+          git push origin "v${{ steps.version.outputs.value }}"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.version.outputs.value }}" \
+            --title "v${{ steps.version.outputs.value }}" \
+            --generate-notes
