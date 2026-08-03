@@ -46,7 +46,13 @@ jobs:
 
       - name: Import GPG key
         run: |
-          echo "${{ secrets.KIIT_GPG_SECRET_KEY }}" | base64 --decode | gpg --import
+          # Headless runner has no terminal — importing secret key material makes gpg-agent try to
+          # spawn an interactive/GUI pinentry to protect it, which fails with "Inappropriate ioctl
+          # for device" with no tty attached. Force loopback pinentry mode so it never tries.
+          mkdir -p ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
+          echo "${{ secrets.KIIT_GPG_SECRET_KEY }}" | base64 --decode | gpg --batch --yes --pinentry-mode loopback --import
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Publish to Maven Central

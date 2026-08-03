@@ -122,9 +122,22 @@ version already in Gradle:
 A failed publish never leaves behind a tag or a release — tagging and the GitHub release both
 happen only after `publishAndReleaseToMavenCentral` succeeds.
 
-### 3. GPG pinentry on Linux (if signing hangs)
+### 3. GPG pinentry (if import or signing hangs / fails)
 
-Not applicable to `release.yml` (it runs on `macos-latest`) — this is for local Linux dev machines only. GPG 2.1+ on Linux defaults to a GUI pinentry dialog which blocks in CI. If the passphrase is silently rejected, add this before the import step:
+Headless runners have no terminal, so anything that makes `gpg-agent` try to spawn an interactive
+or GUI pinentry (a prompt for a passphrase, or to protect newly-imported secret key material)
+fails outright — on macOS this shows up as `error sending to agent: Inappropriate ioctl for
+device` during import; on Linux it more often just hangs. `release.yml`'s "Import GPG key" step
+already works around this (forces loopback pinentry mode before importing):
+
+```bash
+mkdir -p ~/.gnupg
+echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+gpgconf --kill gpg-agent
+gpg --batch --yes --pinentry-mode loopback --import ...
+```
+
+If you hit the same class of error locally (not in CI), add the equivalent to `~/.gnupg/gpg.conf` and `~/.gnupg/gpg-agent.conf`:
 
 ```bash
 echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
@@ -132,7 +145,7 @@ echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
 gpgconf --kill gpg-agent
 ```
 
-Ubuntu runners usually work without this because Gradle passes `--batch --pinentry-mode loopback` automatically when shelling out to `gpg`.
+Gradle itself already passes `--batch --pinentry-mode loopback` automatically when it shells out to `gpg` for signing, so this is normally only needed for the raw `gpg --import` step, not the actual signing step.
 
 ---
 
