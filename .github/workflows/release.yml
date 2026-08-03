@@ -20,6 +20,14 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      # Forces the Gradle wrapper to download/extract its distribution here, with output we don't
+      # parse — the wrapper's own download progress bar prints to stdout and isn't covered by any
+      # Gradle-level quiet flag, since it runs before Gradle itself starts. Without this warm-up,
+      # the very next step (the first real ./gradlew invocation otherwise) captures that progress
+      # bar as part of its output and breaks $GITHUB_OUTPUT's single-line key=value format.
+      - name: Warm up Gradle wrapper
+        run: ./gradlew --version
+
       - name: Read version from Gradle
         id: version
         run: echo "value=$(./gradlew :kiit-codes:printVersion -q)" >> "$GITHUB_OUTPUT"
