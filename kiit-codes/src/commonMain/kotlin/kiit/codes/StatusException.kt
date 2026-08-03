@@ -47,8 +47,11 @@ sealed class StatusException(
     val errors: List<Err> get() = checked.errors
 
     /** Thrown for a [Failed.Restricted] status — security / access-control failure. */
-    open class RestrictedException(status: Failed.Restricted, errors: List<Err> = emptyList(), cause: Throwable? = null) :
-        StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
+    open class RestrictedException(
+        status: Failed.Restricted,
+        errors: List<Err> = emptyList(),
+        cause: Throwable? = null,
+    ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 
     /** Thrown for a [Failed.Invalid] status — the request as given cannot be satisfied. */
     open class InvalidException(status: Failed.Invalid, errors: List<Err> = emptyList(), cause: Throwable? = null) :

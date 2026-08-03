@@ -12,11 +12,14 @@ import kotlin.test.assertTrue
 
 class CheckedTest {
     fun validatePhone(phone: String): Checked {
-        return if (phone.length >= 10) Checked.success()
-        else Checked.failure(
-            Invalid.INVALID_VALUE,
-            listOf(Err.on("phone", "too short"))
-        )
+        return if (phone.length >= 10) {
+            Checked.success()
+        } else {
+            Checked.failure(
+                Invalid.INVALID_VALUE,
+                listOf(Err.on("phone", "too short")),
+            )
+        }
     }
 
     // -------------------------------------------------------------------------

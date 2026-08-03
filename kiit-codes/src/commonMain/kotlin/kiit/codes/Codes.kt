@@ -35,25 +35,18 @@ object Codes {
         listOf(
             Succeeded.SUCCESS, Succeeded.CREATED, Succeeded.UPDATED, Succeeded.PATCHED,
             Succeeded.FETCHED, Succeeded.DELETED, Succeeded.HANDLED, Succeeded.REFERRED, Succeeded.EXITED,
-
             Pending.ACCEPTED, Pending.QUEUED, Pending.PROCESSING, Pending.CONFIRM,
             Pending.REDIRECTED, Pending.SCHEDULED,
-
             Excluded.OMITTED, Excluded.SKIPPED, Excluded.DISCARDED, Excluded.CANCELLED,
             Excluded.DEDUPLICATED, Excluded.DISQUALIFIED,
-
             Information.NOTICE, Information.ADVISORY, Information.HELP, Information.ABOUT,
             Information.VERSION, Information.MOVED,
-
             Restricted.DENIED, Restricted.UNAUTHENTICATED, Restricted.UNAUTHORIZED,
             Restricted.FORBIDDEN, Restricted.LOCKED, Restricted.SUSPENDED,
-
             Invalid.INVALID_VALUE, Invalid.BAD_REQUEST, Invalid.NOT_FOUND, Invalid.OUT_OF_RANGE,
             Invalid.PAYLOAD_TOO_LARGE, Invalid.MISSING_FIELD,
-
             Rejected.RULE_VIOLATION, Rejected.CONFLICT, Rejected.NOT_EXISTS,
             Rejected.PRECONDITION_FAILED, Rejected.EXPIRED, Rejected.GONE,
-
             Unserved.UNEXPECTED, Unserved.UNSUPPORTED, Unserved.TIMEOUT, Unserved.RATE_LIMITED,
             Unserved.RESOURCE_LIMITED, Unserved.UNREACHABLE, Unserved.UNDER_MAINTENANCE,
             Unserved.INTERNAL, Unserved.DATA_LOSS,

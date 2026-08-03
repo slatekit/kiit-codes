@@ -48,6 +48,10 @@ android {
     }
 }
 
+// Single source of truth for the published version — also read by the release workflow via
+// the printVersion task below, so the git tag and GitHub release always match what's published.
+val libraryVersion = "0.1.2"
+
 /**
  * Store the following in ~/.gradle/gradle.properties
  *
@@ -64,7 +68,7 @@ mavenPublishing {
     coordinates(
         groupId = "dev.kiit",
         artifactId = "kiit-codes",
-        version = "0.1.2",
+        version = libraryVersion,
     )
     pom {
         name = "kiit-codes"
@@ -104,4 +108,10 @@ detekt {
 signing {
     useGpgCmd()
     sign(publishing.publications)
+}
+
+// Read by the release workflow (`./gradlew :kiit-codes:printVersion -q`) to derive the git tag
+// and GitHub release name from the same version published to Maven Central.
+tasks.register("printVersion") {
+    doLast { println(libraryVersion) }
 }

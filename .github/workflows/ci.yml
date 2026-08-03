@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: ktlint
+        run: ./gradlew :kiit-codes:ktlintCheck
+
+      - name: detekt
+        run: ./gradlew :kiit-codes:detekt
+
+      - name: JVM tests (commonTest)
+        run: ./gradlew :kiit-codes:jvmTest
+
+      - name: JS tests (commonTest, Node)
+        run: ./gradlew :kiit-codes:jsNodeTest
