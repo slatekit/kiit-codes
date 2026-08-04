@@ -208,7 +208,7 @@ graph TD
 
 Each built-in code lives on its own type's companion object (e.g. `Succeeded.CREATED`, `Restricted.DENIED`), not on `Codes` — this keeps autocomplete scoped, typing `Restricted.` shows only `Restricted`'s own members. `Codes` is just the aggregate list + lookup layer over those instances; using it, or the codes at all, is optional — you can construct any `Passed`/`Failed` subtype directly for domain-specific outcomes.
 
-Some examples: `SUCCESS`, `CREATED`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMITED`, `UNEXPECTED` — see [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) and [`Status.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Status.kt) for the full registry (54 codes across 8 categories).
+Some examples: `SUCCESS`, `CREATED`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMITED`, `UNEXPECTED` — see [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) and [`Status.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Status.kt) for the full registry (57 codes across 8 categories).
 
 A few pairs worth distinguishing on sight:
 
@@ -270,7 +270,7 @@ grpc.toCode(Restricted.DENIED)          // 7
 grpc.toStatus(9)?.name             // "PRECONDITION_FAILED" — deterministic canonical winner for that code
 ```
 
-One gap worth knowing: gRPC's `ABORTED` (10) has no dedicated `Status`, so `toStatus(10)` returns `null` — callers need to handle that explicitly.
+Every gRPC code (0-16) resolves to a `Status` — the one gap (`ABORTED`) closed once `Unserved.ABORTED` was added.
 
 ## 🧾 Err & Checked
 

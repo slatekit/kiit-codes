@@ -82,6 +82,32 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
+    // groupDescription — runtime-accessible version of each category's meaning
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun groupDescriptionIsNonBlankAndDistinctForAllSubtypes() {
+        val descriptions =
+            listOf(
+                Passed.Succeeded("S", "S").groupDescription,
+                Passed.Pending("P", "P").groupDescription,
+                Passed.Excluded("F", "F").groupDescription,
+                Passed.Information("N", "N").groupDescription,
+                Failed.Restricted("R", "R").groupDescription,
+                Failed.Invalid("I", "I").groupDescription,
+                Failed.Rejected("E", "E").groupDescription,
+                Failed.Unserved("U", "U").groupDescription,
+            )
+        assertTrue(descriptions.all { it.isNotBlank() })
+        assertEquals(descriptions.size, descriptions.toSet().size)
+    }
+
+    @Test
+    fun groupDescriptionIsConsistentAcrossInstancesOfTheSameSubtype() {
+        assertEquals(Failed.Restricted("A", "A").groupDescription, Failed.Restricted("B", "B").groupDescription)
+    }
+
+    // -------------------------------------------------------------------------
     // id — "$origin.$name", derived, usable as a map/lookup key
     // -------------------------------------------------------------------------
 

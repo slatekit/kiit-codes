@@ -82,6 +82,16 @@ class CodesTest {
     }
 
     @Test
+    fun degradedLegalBlockAndAbortedAreUnserved() {
+        assertFalse(Unserved.DEGRADED.success)
+        assertFalse(Unserved.LEGAL_BLOCK.success)
+        assertFalse(Unserved.ABORTED.success)
+        assertTrue(Unserved.DEGRADED is Failed.Unserved)
+        assertTrue(Unserved.LEGAL_BLOCK is Failed.Unserved)
+        assertTrue(Unserved.ABORTED is Failed.Unserved)
+    }
+
+    @Test
     fun everyBuiltInCodeHasKiitOrigin() {
         assertTrue(Codes.all.all { it.origin == StatusConstants.KIIT })
     }
@@ -220,6 +230,16 @@ class CodesToHttpTest {
 
     @Test fun overrideUnexpected() {
         assertEquals(500, http.toCode(Unserved.UNEXPECTED))
+    }
+
+    @Test fun overrideLegalBlock() {
+        assertEquals(451, http.toCode(Unserved.LEGAL_BLOCK))
+    }
+
+    @Test fun categoryDefaultCoversDegradedAndAborted() {
+        // Neither has a closer HTTP equivalent — deliberately fall through to Unserved's default.
+        assertEquals(503, http.toCode(Unserved.DEGRADED))
+        assertEquals(503, http.toCode(Unserved.ABORTED))
     }
 
     /**
@@ -396,6 +416,9 @@ class CodesToGrpcTest {
     @Test fun categoryDefaultUnservedIsInternal() {
         // UNSUPPORTED is overridden to 12 (see overrideUnsupported) and no longer falls here.
         assertEquals(13, grpc.toCode(Unserved.UNDER_MAINTENANCE))
+        // No closer gRPC equivalent for either — deliberately fall through to the category default.
+        assertEquals(13, grpc.toCode(Unserved.DEGRADED))
+        assertEquals(13, grpc.toCode(Unserved.LEGAL_BLOCK))
     }
 
     @Test fun overrideCancelled() {
@@ -441,6 +464,11 @@ class CodesToGrpcTest {
 
     @Test fun overrideDataLoss() {
         assertEquals(15, grpc.toCode(Unserved.DATA_LOSS))
+    }
+
+    /** Exact match — closes what used to be an honest null gap at gRPC's own ABORTED (10). */
+    @Test fun overrideAborted() {
+        assertEquals(10, grpc.toCode(Unserved.ABORTED))
     }
 
     /** Not an official gRPC mapping, shares RESOURCE_EXHAUSTED (8) with RATE_LIMITED deliberately. */
@@ -510,10 +538,10 @@ class CodesToGrpcTest {
         assertSame(Unserved.UNSUPPORTED, grpc.toStatus(12))
     }
 
-    /** ABORTED (10) has no dedicated Status and nothing falls through to it by default; null. */
+    /** ABORTED now maps directly to gRPC 10, closing what used to be an honest null gap. */
     @Test
-    fun toStatus10ReturnsNullSinceAbortedHasNoDedicatedCode() {
-        assertNull(grpc.toStatus(10))
+    fun toStatus10ResolvesToAborted() {
+        assertSame(Unserved.ABORTED, grpc.toStatus(10))
     }
 
     @Test

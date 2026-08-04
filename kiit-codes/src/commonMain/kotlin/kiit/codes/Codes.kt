@@ -49,7 +49,7 @@ object Codes {
             Rejected.PRECONDITION_FAILED, Rejected.EXPIRED, Rejected.GONE,
             Unserved.UNEXPECTED, Unserved.UNSUPPORTED, Unserved.TIMEOUT, Unserved.RATE_LIMITED,
             Unserved.RESOURCE_LIMITED, Unserved.UNREACHABLE, Unserved.UNDER_MAINTENANCE,
-            Unserved.INTERNAL, Unserved.DATA_LOSS,
+            Unserved.INTERNAL, Unserved.DATA_LOSS, Unserved.DEGRADED, Unserved.LEGAL_BLOCK, Unserved.ABORTED,
         )
 
     private val byId: Map<String, Status> = all.associateBy { it.id }
@@ -152,6 +152,7 @@ open class CodesToHttp(
                 // same axis as RATE_LIMITED — HTTP doesn't distinguish the two
                 Unserved.RESOURCE_LIMITED.id to 429,
                 Unserved.UNEXPECTED.id to 500,
+                Unserved.LEGAL_BLOCK.id to 451,
             )
 
         /**
@@ -181,7 +182,7 @@ open class CodesToHttp(
  * Category -> gRPC default: Passed (all) -> 0 (OK)   Restricted -> 7 (PERMISSION_DENIED)
  *   Invalid -> 3 (INVALID_ARGUMENT)   Rejected -> 9 (FAILED_PRECONDITION)   Unserved -> 13 (INTERNAL)
  *
- * gRPC's `ABORTED` (10) has no dedicated [Status]; [toStatus] returns null for it.
+ * gRPC's `ABORTED` (10) maps to [Unserved.ABORTED] — previously an honest `null` gap, now closed.
  */
 open class CodesToGrpc(
     private val overrides: Map<String, Int> = DEFAULT_OVERRIDES,
@@ -234,6 +235,10 @@ open class CodesToGrpc(
                 Unserved.DATA_LOSS.id to 15,
                 // RESOURCE_EXHAUSTED — widely used real-world convention, not an official mapping
                 Invalid.PAYLOAD_TOO_LARGE.id to 8,
+                // exact match, closes the previously honest null gap at 10
+                Unserved.ABORTED.id to 10,
+                // DEGRADED and LEGAL_BLOCK have no closer gRPC equivalent — fall through to
+                // Unserved's own category default (13, INTERNAL)
             )
 
         /** One canonical winner per gRPC code with more than one resolving [Status] — see [toStatus]. */
