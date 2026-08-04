@@ -1,11 +1,11 @@
 <mxfile host="app.diagrams.net">
   <diagram name="kiit-codes taxonomy" id="0">
-    <mxGraphModel dx="3080" dy="1937" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="706" pageHeight="860" math="0" shadow="0">
+    <mxGraphModel dx="2723" dy="1732" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="706" pageHeight="860" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="4W4321a3CSNWhuaMP-gN-82" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;strokeWidth=2;" value="" vertex="1">
-          <mxGeometry height="1068" width="870" x="25" y="-28" as="geometry" />
+          <mxGeometry height="1104" width="870" x="25" y="-28" as="geometry" />
         </mxCell>
         <mxCell id="2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbf7d0;fontColor=#14532d;fontSize=14;strokeColor=none;fontStyle=1;" value="PASSED" vertex="1">
           <mxGeometry height="28" width="150" x="40" y="150" as="geometry" />
@@ -190,7 +190,7 @@
         <mxCell id="62" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;fontColor=#B5739D;fontSize=10.5;strokeColor=#B5739D;strokeWidth=2;fontStyle=1" value="UNREACHABLE" vertex="1">
           <mxGeometry height="24" width="150" x="721.5" y="959" as="geometry" />
         </mxCell>
-        <mxCell id="63" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;fontColor=#B5739D;fontSize=10.5;strokeColor=#B5739D;strokeWidth=2;fontStyle=1" value="UNDER_MAINTENANCE" vertex="1">
+        <mxCell id="63" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;fontColor=#B5739D;fontSize=10.5;strokeColor=#B5739D;strokeWidth=2;fontStyle=1" value="ABORTED" vertex="1">
           <mxGeometry height="24" width="150" x="380.5" y="989" as="geometry" />
         </mxCell>
         <mxCell id="64" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;fontColor=#B5739D;fontSize=10.5;strokeColor=#B5739D;strokeWidth=2;fontStyle=1" value="INTERNAL" vertex="1">
@@ -242,13 +242,13 @@
           <mxGeometry height="30" width="143" x="721" y="-5" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-88" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontColor=#FF0000;" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b style=&quot;color: rgb(0, 127, 255);&quot;&gt;Status&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="119" x="64" y="1147" as="geometry" />
+          <mxGeometry height="30" width="119" x="64" y="1175" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-95" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;color: rgb(128, 128, 128);&quot;&gt;HTTP / gRPC compatible&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="64" width="143" x="62.5" y="1177" as="geometry" />
+          <mxGeometry height="64" width="143" x="62.5" y="1205" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-101" connectable="0" parent="1" style="group" value="" vertex="1">
-          <mxGeometry height="210" width="664" x="214.5" y="1147" as="geometry" />
+          <mxGeometry height="210" width="664" x="214.5" y="1175" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-85" parent="4W4321a3CSNWhuaMP-gN-101" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66B2FF;" value="" vertex="1">
           <mxGeometry height="210" width="664" as="geometry" />
@@ -257,33 +257,33 @@
           <mxGeometry height="179" width="636" x="15" y="17" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-104" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontColor=#FF0000;" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b style=&quot;color: rgb(0, 127, 255);&quot;&gt;Validation&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="119" x="62" y="1442" as="geometry" />
+          <mxGeometry height="30" width="119" x="62" y="1470" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-105" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;color: rgb(128, 128, 128);&quot;&gt;Validate and collect errors&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="64" width="150" x="63.5" y="1472" as="geometry" />
+          <mxGeometry height="64" width="150" x="63.5" y="1500" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-106" connectable="0" parent="1" style="group" value="" vertex="1">
-          <mxGeometry height="210" width="664" x="215.5" y="1442" as="geometry" />
+          <mxGeometry height="210" width="664" x="215.5" y="1470" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-107" parent="4W4321a3CSNWhuaMP-gN-106" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;" value="" vertex="1">
           <mxGeometry height="210" width="664" as="geometry" />
         </mxCell>
-        <mxCell id="4W4321a3CSNWhuaMP-gN-108" parent="4W4321a3CSNWhuaMP-gN-106" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;fontColor=#FFFFFF;align=left;spacingTop=0;spacingLeft=0;spacingRight=0;spacingBottom=0;spacing=10;" value="&lt;div style=&quot;background-color: rgb(30, 31, 34); color: rgb(188, 190, 196);&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;div&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;fun &lt;/span&gt;&lt;span style=&quot;color: rgb(86, 168, 245);&quot;&gt;validatePhone&lt;/span&gt;(phone: String): Checked {&lt;br&gt;    &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;return if &lt;/span&gt;(phone.&lt;span style=&quot;color: rgb(199, 125, 187);&quot;&gt;length &lt;/span&gt;&amp;gt;= &lt;span style=&quot;color: rgb(42, 172, 184);&quot;&gt;10&lt;/span&gt;) Checked.success().    &lt;br&gt;    &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;else &lt;/span&gt;Checked.failure(&lt;br&gt;        Invalid.&lt;span style=&quot;color: rgb(199, 125, 187);&quot;&gt;INVALID_VALUE&lt;/span&gt;,&lt;br&gt;        &lt;span style=&quot;font-style: italic;&quot;&gt;listOf&lt;/span&gt;(Err.on(&lt;span style=&quot;color: rgb(106, 171, 115);&quot;&gt;&quot;phone&quot;&lt;/span&gt;, &lt;span style=&quot;color: rgb(106, 171, 115);&quot;&gt;&quot;too short&quot;&lt;/span&gt;)))&lt;br&gt;}&lt;br&gt;&lt;br&gt;&lt;/font&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="4W4321a3CSNWhuaMP-gN-108" parent="4W4321a3CSNWhuaMP-gN-106" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;fontColor=#FFFFFF;align=left;spacingTop=0;spacingLeft=0;spacingRight=0;spacingBottom=0;spacing=10;" value="&lt;div style=&quot;background-color: rgb(30, 31, 34); color: rgb(188, 190, 196);&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;div&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;&lt;br&gt;fun &lt;/span&gt;&lt;span style=&quot;color: rgb(86, 168, 245);&quot;&gt;validatePhone&lt;/span&gt;(phone: String): Checked {&lt;br&gt;    &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;return if &lt;/span&gt;(phone.&lt;span style=&quot;color: rgb(199, 125, 187);&quot;&gt;length &lt;/span&gt;&amp;gt;= &lt;span style=&quot;color: rgb(42, 172, 184);&quot;&gt;10&lt;/span&gt;) Checked.success().    &lt;br&gt;    &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;else &lt;/span&gt;Checked.failure(&lt;br&gt;        Invalid.&lt;span style=&quot;color: rgb(199, 125, 187);&quot;&gt;INVALID_VALUE&lt;/span&gt;,&lt;br&gt;        &lt;span style=&quot;font-style: italic;&quot;&gt;listOf&lt;/span&gt;(Err.on(&lt;span style=&quot;color: rgb(106, 171, 115);&quot;&gt;&quot;phone&quot;&lt;/span&gt;, &lt;span style=&quot;color: rgb(106, 171, 115);&quot;&gt;&quot;too short&quot;&lt;/span&gt;)))&lt;br&gt;}&lt;br&gt;&lt;/font&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="179" width="636" x="15" y="17" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-109" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontColor=#FF0000;" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b style=&quot;color: rgb(0, 127, 255);&quot;&gt;Exceptions&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="119" x="62" y="1734" as="geometry" />
+          <mxGeometry height="30" width="119" x="62" y="1762" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-110" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;color: rgb(128, 128, 128);&quot;&gt;Throw typed Exceptions&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="85" width="150" x="63.5" y="1768" as="geometry" />
+          <mxGeometry height="85" width="150" x="63.5" y="1796" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-111" connectable="0" parent="1" style="group" value="" vertex="1">
-          <mxGeometry height="210" width="664" x="215" y="1734" as="geometry" />
+          <mxGeometry height="210" width="664" x="215" y="1762" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-112" parent="4W4321a3CSNWhuaMP-gN-111" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9999;" value="" vertex="1">
           <mxGeometry height="210" width="664" as="geometry" />
         </mxCell>
-        <mxCell id="4W4321a3CSNWhuaMP-gN-113" parent="4W4321a3CSNWhuaMP-gN-111" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;fontColor=#FFFFFF;align=left;spacingTop=0;spacingLeft=0;spacingRight=0;spacingBottom=0;spacing=10;" value="&lt;div style=&quot;background-color: rgb(30, 31, 34); color: rgb(188, 190, 196);&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;try &lt;/span&gt;{&lt;br&gt;    &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;throw &lt;/span&gt;RejectedException(Rejected.&lt;span style=&quot;color: rgb(199, 125, 187);&quot;&gt;CONFLICT&lt;/span&gt;)          &lt;br&gt;} &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;catch &lt;/span&gt;(e: StatusException.RestrictedException) {&lt;br&gt;   ... &lt;br&gt;&lt;span style=&quot;font-style: italic;&quot;&gt;   &lt;/span&gt;&lt;span style=&quot;color: rgb(106, 171, 115);&quot;&gt;// RestrictedException catch block&lt;/span&gt;&lt;br&gt;}&lt;/font&gt;&lt;span style=&quot;font-size: 9.8pt;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="4W4321a3CSNWhuaMP-gN-113" parent="4W4321a3CSNWhuaMP-gN-111" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;fontColor=#FFFFFF;align=left;spacingTop=0;spacingLeft=0;spacingRight=0;spacingBottom=0;spacing=10;" value="&lt;div style=&quot;background-color: rgb(30, 31, 34); color: rgb(188, 190, 196);&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;pre style=&quot;font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace;&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;try &lt;/span&gt;{&lt;br&gt;    &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;throw &lt;/span&gt;RejectedException(Rejected.&lt;span style=&quot;color: rgb(199, 125, 187);&quot;&gt;CONFLICT&lt;/span&gt;)          &lt;br&gt;} &lt;span style=&quot;color: rgb(207, 142, 109);&quot;&gt;catch &lt;/span&gt;(e: StatusException.RejectedException) {&lt;br&gt;   ... &lt;br&gt;&lt;span style=&quot;font-style: italic;&quot;&gt;   &lt;/span&gt;&lt;span style=&quot;color: rgb(106, 171, 115);&quot;&gt;// RestrictedException catch block&lt;/span&gt;&lt;br&gt;}&lt;/font&gt;&lt;span style=&quot;font-size: 9.8pt;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/pre&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="179" width="636" x="15" y="17" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-114" edge="1" parent="1" source="4W4321a3CSNWhuaMP-gN-82" style="edgeStyle=elbowEdgeStyle;elbow=vertical;endArrow=classic;html=1;curved=0;rounded=0;endSize=8;startSize=8;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeWidth=2;" target="4W4321a3CSNWhuaMP-gN-95" value="">
@@ -314,13 +314,13 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-117" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontColor=#FF0000;" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b style=&quot;color: rgb(0, 127, 255);&quot;&gt;Result&amp;lt;T,E&amp;gt;&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="119" x="63.5" y="2022" as="geometry" />
+          <mxGeometry height="30" width="119" x="63.5" y="2050" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-118" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font color=&quot;#808080&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;Optional use within a Result&amp;nbsp;&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="85" width="150" x="65" y="2060" as="geometry" />
+          <mxGeometry height="85" width="150" x="65" y="2088" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-119" connectable="0" parent="1" style="group" value="" vertex="1">
-          <mxGeometry height="210" width="664" x="216.5" y="2022" as="geometry" />
+          <mxGeometry height="210" width="664" x="216.5" y="2050" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-120" parent="4W4321a3CSNWhuaMP-gN-119" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#99FFCC;" value="" vertex="1">
           <mxGeometry height="210" width="664" as="geometry" />
@@ -362,7 +362,7 @@
           <mxGeometry height="12" width="13" x="517.5" y="929" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-135" connectable="0" parent="1" style="group" value="" vertex="1">
-          <mxGeometry height="24" width="150" x="274" y="1068" as="geometry" />
+          <mxGeometry height="24" width="150" x="274" y="1099" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-133" parent="4W4321a3CSNWhuaMP-gN-135" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;fontColor=#15803d;fontSize=10.5;strokeColor=#86efac;strokeWidth=2;fontStyle=1;" value="SUCCESS" vertex="1">
           <mxGeometry height="24" width="150" as="geometry" />
@@ -371,25 +371,34 @@
           <mxGeometry height="12" width="13" x="137" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-136" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;color: rgb(128, 128, 128);&quot;&gt;Default Code for Group&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="64" width="231.62" x="33" y="1048" as="geometry" />
+          <mxGeometry height="64" width="231.62" x="33" y="1079" as="geometry" />
         </mxCell>
-        <mxCell id="4W4321a3CSNWhuaMP-gN-139" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Tahoma;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;&lt;b style=&quot;color: rgb(204, 0, 0);&quot;&gt;Hand crafted code, design, and diagrams. AI used for tests and documentation.&lt;/b&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="43" width="441" x="4" y="2305" as="geometry" />
+        <mxCell id="4W4321a3CSNWhuaMP-gN-139" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Tahoma;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;&lt;b style=&quot;color: rgb(204, 0, 0);&quot;&gt;Hand crafted design, code, and diagrams.&amp;nbsp;&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 20px;&quot;&gt;&lt;b style=&quot;color: rgb(204, 0, 0);&quot;&gt;AI used for review, tests and docs.&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="43" width="508" x="4" y="2333" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-140" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font&gt;&lt;span style=&quot;font-size: 18px; color: rgb(0, 0, 0);&quot;&gt;&lt;b style=&quot;&quot;&gt;WIP&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="38" width="150" x="56" y="2145" as="geometry" />
+          <mxGeometry height="38" width="150" x="56" y="2173" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-141" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font color=&quot;#808080&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;A separate module&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="43" width="238" x="326.5" y="2232" as="geometry" />
+          <mxGeometry height="43" width="238" x="326.5" y="2260" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-142" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontStyle=1" value="&lt;font&gt;&lt;span style=&quot;font-size: 18px; color: rgb(77, 77, 77);&quot;&gt;kiit-result :&lt;/span&gt;&lt;/font&gt;" vertex="1">
-          <mxGeometry height="43" width="119" x="225.5" y="2232" as="geometry" />
+          <mxGeometry height="43" width="119" x="225.5" y="2260" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-143" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontColor=#CC0000;" value="&lt;font&gt;&lt;span style=&quot;font-size: 36px;&quot;&gt;&lt;b&gt;kiit-codes&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" vertex="1">
           <mxGeometry height="30" width="305.88" x="25" y="-124" as="geometry" />
         </mxCell>
         <mxCell id="4W4321a3CSNWhuaMP-gN-145" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font color=&quot;#808080&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;A library for classifying and handling success and failure&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" vertex="1">
           <mxGeometry height="40" width="672" x="25" y="-84" as="geometry" />
+        </mxCell>
+        <mxCell id="4W4321a3CSNWhuaMP-gN-147" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;fontColor=#B5739D;fontSize=10.5;strokeColor=#B5739D;strokeWidth=2;fontStyle=1" value="UNDER_MAINTENANCE" vertex="1">
+          <mxGeometry height="24" width="150" x="380.5" y="1019" as="geometry" />
+        </mxCell>
+        <mxCell id="4W4321a3CSNWhuaMP-gN-148" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;fontColor=#B5739D;fontSize=10.5;strokeColor=#B5739D;strokeWidth=2;fontStyle=1" value="DEGRADED" vertex="1">
+          <mxGeometry height="24" width="150" x="551.5" y="1019" as="geometry" />
+        </mxCell>
+        <mxCell id="4W4321a3CSNWhuaMP-gN-149" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;fontColor=#B5739D;fontSize=10.5;strokeColor=#B5739D;strokeWidth=2;fontStyle=1" value="LEGAL_BLOCK" vertex="1">
+          <mxGeometry height="24" width="150" x="721.5" y="1019" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

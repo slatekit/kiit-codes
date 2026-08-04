@@ -123,7 +123,19 @@ sealed class Passed : Status {
                 is Information -> "Information"
             }
 
-    /** Operation's primary purpose completed (e.g. a value was created, fetched, updated). */
+    /** Runtime-accessible version of each category's meaning — see the subtypes' own KDoc for detail. */
+    val groupDescription: String
+        get() =
+            when (this) {
+                is Succeeded -> "The operation's primary purpose was completed successfully."
+                is Pending -> "The operation was accepted, but has not yet fully resolved."
+                is Excluded ->
+                    "The item was left out of the operation's normal output, never processed, " +
+                        "processed and discarded, or excluded for another reason."
+                is Information -> "An informational or metadata response; no primary operation was performed."
+            }
+
+    /** See [Passed.groupDescription] for this category's definition. */
     data class Succeeded(
         override val name: String,
         override val message: String,
@@ -152,7 +164,7 @@ sealed class Passed : Status {
         }
     }
 
-    /** Operation accepted but not yet fully processed (e.g. queued, waiting, confirmed). */
+    /** See [Passed.groupDescription] for this category's definition. */
     data class Pending(
         override val name: String,
         override val message: String,
@@ -194,10 +206,10 @@ sealed class Passed : Status {
     }
 
     /**
-     * Item was excluded from the operation's normal output — not processed at all (e.g.
-     * SKIPPED), processed then discarded (e.g. DISCARDED), or omitted for any other reason.
-     * The distinction is carried by [name], not by separate types — see [Excluded.SKIPPED]
-     * and [Excluded.DISCARDED].
+     * See [Passed.groupDescription] for this category's definition.
+     *
+     * The distinction between e.g. [Excluded.SKIPPED] and [Excluded.DISCARDED] is carried by
+     * [name], not by separate types.
      */
     data class Excluded(
         override val name: String,
@@ -234,10 +246,7 @@ sealed class Passed : Status {
         }
     }
 
-    /**
-     * Informational / metadata response — no primary operation was performed.
-     * E.g. HELP, ABOUT, VERSION output from a CLI command.
-     */
+    /** See [Passed.groupDescription] for this category's definition. */
     data class Information(
         override val name: String,
         override val message: String,
@@ -288,7 +297,21 @@ sealed class Failed : Status {
                 is Unserved -> "Unserved"
             }
 
-    /** Security / access-control failure — the caller is not permitted to perform this action. */
+    /** Runtime-accessible version of each category's meaning — see the subtypes' own KDoc for detail. */
+    val groupDescription: String
+        get() =
+            when (this) {
+                is Restricted -> "An access-control failure — the caller is not permitted to perform this action."
+                is Invalid ->
+                    "The request as given cannot be satisfied — malformed input, invalid values, " +
+                        "or an unknown route."
+                is Rejected -> "A known, expected business-rule failure — understood and permitted, but refused."
+                is Unserved ->
+                    "The request is valid and permitted, but cannot be serviced right now, " +
+                        "for reasons unrelated to what was sent."
+            }
+
+    /** See [Failed.groupDescription] for this category's definition. */
     data class Restricted(
         override val name: String,
         override val message: String,
@@ -321,7 +344,7 @@ sealed class Failed : Status {
         }
     }
 
-    /** The request as given cannot be satisfied — malformed input, invalid values, or not found. */
+    /** See [Failed.groupDescription] for this category's definition. */
     data class Invalid(
         override val name: String,
         override val message: String,
@@ -359,7 +382,7 @@ sealed class Failed : Status {
         }
     }
 
-    /** A known, expected business-rule failure — understood and handled by the caller. */
+    /** See [Failed.groupDescription] for this category's definition. */
     data class Rejected(
         override val name: String,
         override val message: String,
@@ -402,9 +425,11 @@ sealed class Failed : Status {
     }
 
     /**
-     * The request is valid and permitted, but cannot be serviced right now for reasons unrelated
-     * to what was sent — capacity, timeout, an unsupported capability, planned
-     * maintenance, or a genuinely unexpected/unhandled failure (see [Unserved.UNEXPECTED]).
+     * See [Failed.groupDescription] for this category's definition.
+     *
+     * E.g. capacity, timeout, an unsupported capability, planned maintenance, a degraded or
+     * aborted dependency, a legal/regulatory block, or a genuinely unexpected/unhandled failure
+     * (see [Unserved.UNEXPECTED]).
      */
     data class Unserved(
         override val name: String,
@@ -442,6 +467,24 @@ sealed class Failed : Status {
                 )
             val DATA_LOSS =
                 Unserved("DATA_LOSS", "Unrecoverable data loss or corruption occurred.", origin = StatusConstants.KIIT)
+            val DEGRADED =
+                Unserved(
+                    "DEGRADED",
+                    "This dependency is degraded; some calls may be refused.",
+                    origin = StatusConstants.KIIT,
+                )
+            val LEGAL_BLOCK =
+                Unserved(
+                    "LEGAL_BLOCK",
+                    "Access is restricted due to legal or regulatory requirements.",
+                    origin = StatusConstants.KIIT,
+                )
+            val ABORTED =
+                Unserved(
+                    "ABORTED",
+                    "The operation was aborted before it could complete; retrying may succeed.",
+                    origin = StatusConstants.KIIT,
+                )
         }
     }
 }
