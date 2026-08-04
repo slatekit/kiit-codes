@@ -70,9 +70,6 @@ sealed interface Status {
     /** The category discriminant, e.g. "Restricted", "Rejected" — see the hierarchy above. */
     val group: String
 
-    /** Returns a copy of this status with an updated [msg] and [origin], preserving name and group. */
-    fun copyAll(msg: String, origin: String): Status
-
     companion object {
         /**
          * Resolves a status from an optional [msg] override and an optional [rawStatus] override,
@@ -82,8 +79,25 @@ sealed interface Status {
         @Suppress("UNCHECKED_CAST")
         fun <T : Status> ofStatus(msg: String?, rawStatus: T?, status: T): T {
             val base = rawStatus ?: status
-            return if (msg == null) base else base.copyAll(msg, base.origin) as T
+            return if (msg == null) base else withMessage(base, msg) as T
         }
+
+        /**
+         * Internal-only, narrower stand-in for the copy capability [Status] used to expose
+         * publicly (removed — an immutable [Status] shouldn't offer a general mutation escape
+         * hatch). Only [ofStatus] needs this, and only ever to override [message], never [origin].
+         */
+        private fun withMessage(status: Status, msg: String): Status =
+            when (status) {
+                is Passed.Succeeded -> status.copy(message = msg)
+                is Passed.Pending -> status.copy(message = msg)
+                is Passed.Excluded -> status.copy(message = msg)
+                is Passed.Information -> status.copy(message = msg)
+                is Failed.Restricted -> status.copy(message = msg)
+                is Failed.Invalid -> status.copy(message = msg)
+                is Failed.Rejected -> status.copy(message = msg)
+                is Failed.Unserved -> status.copy(message = msg)
+            }
     }
 }
 
@@ -253,14 +267,6 @@ sealed class Passed : Status {
                 )
         }
     }
-
-    override fun copyAll(msg: String, origin: String): Status =
-        when (this) {
-            is Succeeded -> copy(message = msg, origin = origin)
-            is Pending -> copy(message = msg, origin = origin)
-            is Excluded -> copy(message = msg, origin = origin)
-            is Information -> copy(message = msg, origin = origin)
-        }
 }
 
 /**
@@ -438,14 +444,6 @@ sealed class Failed : Status {
                 Unserved("DATA_LOSS", "Unrecoverable data loss or corruption occurred.", origin = StatusConstants.KIIT)
         }
     }
-
-    override fun copyAll(msg: String, origin: String): Status =
-        when (this) {
-            is Restricted -> copy(message = msg, origin = origin)
-            is Invalid -> copy(message = msg, origin = origin)
-            is Rejected -> copy(message = msg, origin = origin)
-            is Unserved -> copy(message = msg, origin = origin)
-        }
 }
 
 // Package-level shorthands, fully transparent — e.g. `Restricted` and `Failed.Restricted` are the
@@ -461,6 +459,3 @@ typealias Restricted = Failed.Restricted
 typealias Invalid = Failed.Invalid
 typealias Rejected = Failed.Rejected
 typealias Unserved = Failed.Unserved
-
-/** True only for [Passed.Excluded]/[Passed.Information] — every other subtype is a genuine success or failure. */
-val Status.isNeutral: Boolean get() = this is Passed.Excluded || this is Passed.Information

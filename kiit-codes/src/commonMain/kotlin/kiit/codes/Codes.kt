@@ -91,7 +91,7 @@ interface CodeLookup {
  *
  * Category -> HTTP default:
  *   Succeeded / Excluded / Information -> 200      Pending -> 202
- *   Restricted -> 401  Invalid -> 400   Rejected -> 500        Unserved -> 503
+ *   Restricted -> 401  Invalid -> 400   Rejected -> 409        Unserved -> 503
  *
  * Individual codes can differ from their category's default via [overrides] (e.g. CREATED -> 201,
  * NOT_FOUND -> 404). [toStatus] is derived from [toCode] and is lossy — see its own doc.
@@ -100,10 +100,10 @@ interface CodeLookup {
  * subclassing this type directly — see [CompositeLookup] for why.
  */
 open class CodesToHttp(
-    private val overrides: Map<Status, Int> = DEFAULT_OVERRIDES,
+    private val overrides: Map<String, Int> = DEFAULT_OVERRIDES,
 ) : CodeLookup {
     override fun toCode(status: Status): Int {
-        overrides[status]?.let { return it }
+        overrides[status.id]?.let { return it }
         return when (status) {
             is Passed.Succeeded -> 200
             is Passed.Pending -> 202
@@ -111,7 +111,7 @@ open class CodesToHttp(
             is Passed.Information -> 200
             is Failed.Restricted -> 401
             is Failed.Invalid -> 400
-            is Failed.Rejected -> 500
+            is Failed.Rejected -> 409
             is Failed.Unserved -> 503
         }
     }
@@ -127,31 +127,31 @@ open class CodesToHttp(
             ?: Codes.all.firstOrNull { toCode(it) == code }
 
     companion object {
-        val DEFAULT_OVERRIDES: Map<Status, Int> =
+        val DEFAULT_OVERRIDES: Map<String, Int> =
             mapOf(
-                Succeeded.CREATED to 201,
-                Succeeded.HANDLED to 204,
-                Pending.CONFIRM to 200,
-                Excluded.CANCELLED to 499,
-                Pending.REDIRECTED to 307,
-                Invalid.NOT_FOUND to 404,
-                Rejected.NOT_EXISTS to 404,
-                Restricted.FORBIDDEN to 403,
+                Succeeded.CREATED.id to 201,
+                Succeeded.HANDLED.id to 204,
+                Pending.CONFIRM.id to 200,
+                Excluded.CANCELLED.id to 499,
+                Pending.REDIRECTED.id to 307,
+                Invalid.NOT_FOUND.id to 404,
+                Rejected.NOT_EXISTS.id to 404,
+                Restricted.FORBIDDEN.id to 403,
                 // closer to Forbidden than Unauthenticated — the caller is known
-                Restricted.SUSPENDED to 403,
-                Restricted.LOCKED to 423,
-                Rejected.EXPIRED to 410,
-                Rejected.GONE to 410,
-                Rejected.CONFLICT to 409,
-                Invalid.PAYLOAD_TOO_LARGE to 413,
+                Restricted.SUSPENDED.id to 403,
+                Restricted.LOCKED.id to 423,
+                Rejected.EXPIRED.id to 410,
+                Rejected.GONE.id to 410,
+                // CONFLICT needs no override — 409 is Rejected's own category default now
+                Invalid.PAYLOAD_TOO_LARGE.id to 413,
                 // HTTP has no separate "unsupported" code
-                Unserved.UNSUPPORTED to 501,
+                Unserved.UNSUPPORTED.id to 501,
                 // deadline exceeded waiting on something else, not a slow client (408)
-                Unserved.TIMEOUT to 504,
-                Unserved.RATE_LIMITED to 429,
+                Unserved.TIMEOUT.id to 504,
+                Unserved.RATE_LIMITED.id to 429,
                 // same axis as RATE_LIMITED — HTTP doesn't distinguish the two
-                Unserved.RESOURCE_LIMITED to 429,
-                Unserved.UNEXPECTED to 500,
+                Unserved.RESOURCE_LIMITED.id to 429,
+                Unserved.UNEXPECTED.id to 500,
             )
 
         /**
@@ -167,8 +167,10 @@ open class CodesToHttp(
                 Succeeded.SUCCESS, Succeeded.CREATED, Succeeded.HANDLED, Pending.PROCESSING,
                 Restricted.UNAUTHENTICATED, Restricted.FORBIDDEN,
                 Invalid.INVALID_VALUE, Invalid.NOT_FOUND, Rejected.GONE,
+                // RULE_VIOLATION and PRECONDITION_FAILED also fall through to 409, Rejected's
+                // own category default — CONFLICT wins as the most literal match for the concept
                 Rejected.CONFLICT, Unserved.TIMEOUT, Unserved.RATE_LIMITED,
-                Unserved.UNDER_MAINTENANCE, Unserved.UNEXPECTED,
+                Unserved.UNDER_MAINTENANCE,
             )
     }
 }
@@ -182,10 +184,10 @@ open class CodesToHttp(
  * gRPC's `ABORTED` (10) has no dedicated [Status]; [toStatus] returns null for it.
  */
 open class CodesToGrpc(
-    private val overrides: Map<Status, Int> = DEFAULT_OVERRIDES,
+    private val overrides: Map<String, Int> = DEFAULT_OVERRIDES,
 ) : CodeLookup {
     override fun toCode(status: Status): Int {
-        overrides[status]?.let { return it }
+        overrides[status.id]?.let { return it }
         return when (status) {
             is Passed.Succeeded -> 0
             is Passed.Pending -> 0
@@ -208,30 +210,30 @@ open class CodesToGrpc(
             ?: Codes.all.firstOrNull { toCode(it) == code }
 
     companion object {
-        val DEFAULT_OVERRIDES: Map<Status, Int> =
+        val DEFAULT_OVERRIDES: Map<String, Int> =
             mapOf(
-                Excluded.CANCELLED to 1,
-                Restricted.UNAUTHENTICATED to 16,
-                Invalid.INVALID_VALUE to 3,
-                Invalid.NOT_FOUND to 5,
-                Invalid.OUT_OF_RANGE to 11,
-                Restricted.DENIED to 7,
+                Excluded.CANCELLED.id to 1,
+                Restricted.UNAUTHENTICATED.id to 16,
+                Invalid.INVALID_VALUE.id to 3,
+                Invalid.NOT_FOUND.id to 5,
+                Invalid.OUT_OF_RANGE.id to 11,
+                Restricted.DENIED.id to 7,
                 // ALREADY_EXISTS — was previously falling through to Rejected's category default
-                Rejected.CONFLICT to 6,
-                Rejected.PRECONDITION_FAILED to 9,
+                Rejected.CONFLICT.id to 6,
+                Rejected.PRECONDITION_FAILED.id to 9,
                 // takes over gRPC's UNIMPLEMENTED slot now that UNIMPLEMENTED and UNSUPPORTED have
-                // merged into one Status code — an inference, not an explicit protocol mapping
-                Unserved.UNSUPPORTED to 12,
-                Unserved.UNREACHABLE to 14,
-                Unserved.TIMEOUT to 4,
-                Unserved.RATE_LIMITED to 8,
+                // merged into one Status code — confirmed, not just an inference
+                Unserved.UNSUPPORTED.id to 12,
+                Unserved.UNREACHABLE.id to 14,
+                Unserved.TIMEOUT.id to 4,
+                Unserved.RATE_LIMITED.id to 8,
                 // RESOURCE_EXHAUSTED, same axis as RATE_LIMITED
-                Unserved.RESOURCE_LIMITED to 8,
-                Unserved.UNEXPECTED to 2,
-                Unserved.INTERNAL to 13,
-                Unserved.DATA_LOSS to 15,
+                Unserved.RESOURCE_LIMITED.id to 8,
+                Unserved.UNEXPECTED.id to 2,
+                Unserved.INTERNAL.id to 13,
+                Unserved.DATA_LOSS.id to 15,
                 // RESOURCE_EXHAUSTED — widely used real-world convention, not an official mapping
-                Invalid.PAYLOAD_TOO_LARGE to 8,
+                Invalid.PAYLOAD_TOO_LARGE.id to 8,
             )
 
         /** One canonical winner per gRPC code with more than one resolving [Status] — see [toStatus]. */
@@ -252,8 +254,12 @@ open class CodesToGrpc(
  * subclassing the base implementation (composition over inheritance). [extensions] take
  * precedence over [base] for both directions.
  *
- * [extensions] is keyed by the actual [Status] instance so that [toStatus] can be answered
- * correctly for custom statuses that aren't part of the [Codes.all] registry.
+ * [extensions] is keyed by the actual [Status] instance (not [Status.id]) so that [toStatus] can
+ * hand back the specific custom instance for statuses that aren't part of the [Codes.all]
+ * registry — there's no other place to recover it from. [toCode]'s forward lookup deliberately
+ * doesn't rely on [Map]'s built-in `equals`/`hashCode`-based `[]` access, though: [Status] is a
+ * data class, so that would compare every field including [Status.message], and a status sharing
+ * the same [Status.id] but a slightly different message would silently miss the override.
  *
  * ```kotlin
  * val MY_DOMAIN_CODE = Failed.Rejected("PAYMENT_DECLINED", "Payment declined")
@@ -264,7 +270,9 @@ class CompositeLookup(
     private val base: CodeLookup,
     private val extensions: Map<Status, Int>,
 ) : CodeLookup {
-    override fun toCode(status: Status): Int = extensions[status] ?: base.toCode(status)
+    override fun toCode(status: Status): Int =
+        extensions.entries.firstOrNull { it.key.id == status.id }?.value
+            ?: base.toCode(status)
 
     override fun toStatus(code: Int): Status? {
         val extended = extensions.entries.firstOrNull { it.value == code }?.key

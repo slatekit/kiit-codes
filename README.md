@@ -34,6 +34,7 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 | **Guidance** | |
 | 🛠️ [Use cases](#️-use-cases) | Where this fits — services, APIs, background jobs, logging |
 | ✅ [When to use this](#-when-to-use-this-and-when-not-to) | Good-fit and not-necessary scenarios, so you can decide quickly |
+| ❓ [FAQ](#-faq) | Design rationale, comparisons to alternatives, adoption, and maturity |
 | **Project** | |
 | 📦 [Requirements](#-requirements) | Supported platforms and the (lack of) runtime dependencies |
 | 🗺️ [Roadmap](#️-roadmap) | Publishing pipelines and CI work planned but not yet done |
@@ -196,7 +197,6 @@ graph TD
 | **Failed** | `Restricted`, `Invalid`, `Rejected`, `Unserved` — a failure. |
 | **id** | `"$origin.$name"`, derived, unique across every `Status` — a map key. |
 | **origin** | Where a code came from — `"kiit"` for built-ins, custom name otherwise. |
-| **isNeutral** | `true` only for `Excluded`/`Information` — never success or failure. |
 | **Codes** | Aggregate list + lookup over the built-in codes; duplicate-checked at init time. |
 | **Restricted, Invalid, ...** | Package-level shorthand for `Failed.Restricted`, etc. — same type, not a copy. |
 | **CodeLookup** | Converts a `Status` to/from a protocol code (`toCode`/`toStatus`). |
@@ -398,6 +398,39 @@ fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
 **Probably not necessary if:**
 1. Your app is entirely internal, single-platform, and exceptions already communicate everything you need.
 2. You want explicit, monadic return values (`Result<T, E>`) rather than throw/catch, in which case see [kiit-results](https://github.com/slatekit/kiit), which builds on this same taxonomy.
+
+## ❓ FAQ
+
+| Question | Answer |
+|---|---|
+| **Philosophy & Design** | |
+| Why not just use exceptions or booleans? | Exceptions are thrown inconsistently across a codebase, and a boolean can't say why. This gives every outcome a shared shape, closed categories, open codes underneath. |
+| Why a closed taxonomy but open codes? | Closed categories keep generic handling, exhaustive matching, logging, and protocol mappings consistent everywhere. Codes stay open so each domain can extend it freely. |
+| Why classify outcomes if my domain errors already explain what happened? | Domain errors explain *what* happened in one domain. The taxonomy explains *what kind* of outcome it was, consistently, across every domain in the app. |
+| Does this replace domain modeling? | No. It classifies outcomes; it doesn't replace aggregates, value objects, or domain events. An infrastructure-level vocabulary, not a competing one. |
+| **Comparisons & Alternatives** | |
+| How is this different from Arrow's `Either`/`Validated` or `kotlin-result`? | Those give you a `Result` type with no taxonomy underneath, you supply the meaning yourself. This provides the taxonomy those types can build on, plus a working exception path. |
+| Why not just use raw HTTP status codes everywhere? | A background job or CLI command doesn't have an HTTP status. HTTP was the closest precedent, and the taxonomy is validated against it, but it isn't scoped to HTTP. |
+| Doesn't this lock me into Kiit's taxonomy? | The eight categories are closed and cross-validated against HTTP and gRPC. Every code inside them is yours to extend, and you're free to ignore the built-in ones entirely. |
+| **API & Taxonomy Details** | |
+| Why not just use strings for status names? | Strings don't give you compiler-checked exhaustiveness, discoverability, or protocol mappings. The goal is consistent classification, not just naming. |
+| Why isn't `Status` just an enum? | Enums can't be extended by consumers. This lets every application define its own statuses while still participating in the same taxonomy. |
+| Why exactly eight categories? | Every gRPC code and the most common HTTP codes map onto these eight without needing a ninth, tested directly against both. |
+| Why was the numeric status code field removed? | An earlier version had one, and it invited the wrong inference, a number resembling an HTTP code but meaning something else. Real protocol numbers are available on demand, never implied. |
+| Isn't 50+ codes a steep learning curve? | Most of the real cost is the eight categories, not the codes. Each category's default is a safe fallback; the rest is opt-in precision you reach for as needed. |
+| Why is `Unserved` so much bigger than the others? | Independent evidence, not an oversight, both HTTP and gRPC show the same clustering on their own for capacity and infrastructure failures. |
+| Why isn't retry logic or severity built in? | Retryability cuts across categories rather than aligning with them; `Unserved` alone has both retryable and non-retryable codes. A dedicated `Retry` category was considered and rejected. |
+| Doesn't a generic category lose domain-specific detail? | No, the category is deliberately coarse while the code stays domain-specific. `PAYMENT_DECLINED` and `ORDER_CONFLICT` can both be `Rejected` and still keep distinct identities. |
+| **Adoption in Practice** | |
+| What if I classify something incorrectly? | Nothing catastrophic, a status can be moved to a more appropriate category later. The taxonomy improves consistency, it doesn't enforce absolute correctness upfront. |
+| What if my company already has its own status system? | You don't have to replace it overnight. Existing statuses can map into the taxonomy incrementally while keeping their original names and meanings. |
+| How does this work across microservices? | Services don't need identical codes, only the shared categories. Each service keeps its own domain-specific statuses while exposing consistent high-level semantics. |
+| **The AI Angle** | |
+| Is the "built for AI" angle just marketing? | The design decisions are justified on ordinary engineering grounds first, consistency, exhaustive matching, explicit semantics. AI benefits from the same properties, but the library stands on its own without them. |
+| What evidence supports the AI-related claims? | Intentionally modest. Stable names and explicit classification are expected to reduce ambiguity for AI tooling, but that's a hypothesis to validate with real benchmarks, not an assumed result. |
+| **Maturity & Trust** | |
+| Is this production-ready at 0.2.x? | The version reflects the public package's youth, not the underlying design's. The core classification has years of internal production use prior to extraction; newer pieces have less track record. |
+| What about single-maintainer risk? | Real risk, worth being upfront about. Apache 2.0 licensed and source available, but there's currently no second maintainer or organizational backing. |
 
 ## 📦 Requirements
 
