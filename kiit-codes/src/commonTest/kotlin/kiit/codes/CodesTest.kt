@@ -143,8 +143,10 @@ class CodesToHttpTest {
     }
 
     @Test fun categoryDefaultRejected() {
-        assertEquals(500, http.toCode(Rejected.RULE_VIOLATION))
-        assertEquals(500, http.toCode(Rejected.PRECONDITION_FAILED))
+        assertEquals(409, http.toCode(Rejected.RULE_VIOLATION))
+        // CONFLICT needs no override — 409 is the category default it would've resolved to anyway.
+        assertEquals(409, http.toCode(Rejected.CONFLICT))
+        assertEquals(409, http.toCode(Rejected.PRECONDITION_FAILED))
     }
 
     @Test fun categoryDefaultUnserved() {
@@ -196,10 +198,6 @@ class CodesToHttpTest {
         assertEquals(413, http.toCode(Invalid.PAYLOAD_TOO_LARGE))
     }
 
-    @Test fun overrideConflict() {
-        assertEquals(409, http.toCode(Rejected.CONFLICT))
-    }
-
     @Test fun overrideLocked() {
         assertEquals(423, http.toCode(Restricted.LOCKED))
     }
@@ -231,7 +229,19 @@ class CodesToHttpTest {
     @Test
     fun toCodeFallsBackToCategoryDefaultForCustomStatus() {
         val custom = Failed.Rejected("CUSTOM", "Custom error")
-        assertEquals(500, http.toCode(custom)) // Rejected's category default
+        assertEquals(409, http.toCode(custom)) // Rejected's category default
+    }
+
+    /**
+     * [overrides] is keyed by [Status.id] (origin+name), not full structural equality — a status
+     * sharing NOT_FOUND's identity but a different message still resolves to its override. Before
+     * this fix, [Status] being a data class meant the override map compared every field, including
+     * [Status.message], so this would have silently missed and fallen through to a wrong default.
+     */
+    @Test
+    fun overrideMatchesByIdentityNotFullStatusEquality() {
+        val differentMessage = Failed.Invalid("NOT_FOUND", "A completely different message.", origin = StatusConstants.KIIT)
+        assertEquals(404, http.toCode(differentMessage))
     }
 
     // -------------------------------------------------------------------------
@@ -298,10 +308,16 @@ class CodesToHttpTest {
         assertSame(Rejected.GONE, http.toStatus(410))
     }
 
-    /** RULE_VIOLATION, PRECONDITION_FAILED, and UNEXPECTED all resolve to 500; UNEXPECTED wins. */
+    /** Only UNEXPECTED resolves to 500 now that Rejected's default moved to 409 — no tie to break. */
     @Test
-    fun toStatus500ResolvesToUnexpectedNotRuleViolationOrPreconditionFailed() {
+    fun toStatus500ResolvesToUnexpected() {
         assertSame(Unserved.UNEXPECTED, http.toStatus(500))
+    }
+
+    /** RULE_VIOLATION, CONFLICT, and PRECONDITION_FAILED all resolve to 409; CONFLICT wins. */
+    @Test
+    fun toStatus409ResolvesToConflictNotRuleViolationOrPreconditionFailed() {
+        assertSame(Rejected.CONFLICT, http.toStatus(409))
     }
 
     /** Only UNSUPPORTED resolves to 501 now that UNIMPLEMENTED was removed — no tie to break. */
@@ -339,7 +355,7 @@ class CodesToHttpTest {
      */
     @Test
     fun toStatusStaysInSyncWithCustomOverridesNotJustDefaults() {
-        val custom = CodesToHttp(overrides = mapOf(Unserved.TIMEOUT to 599))
+        val custom = CodesToHttp(overrides = mapOf(Unserved.TIMEOUT.id to 599))
         assertSame(Unserved.TIMEOUT, custom.toStatus(599))
         assertNull(custom.toStatus(504)) // TIMEOUT no longer resolves to 504 for this instance
     }
@@ -507,7 +523,7 @@ class CodesToGrpcTest {
 
     @Test
     fun toStatusStaysInSyncWithCustomOverridesNotJustDefaults() {
-        val custom = CodesToGrpc(overrides = mapOf(Unserved.TIMEOUT to 99))
+        val custom = CodesToGrpc(overrides = mapOf(Unserved.TIMEOUT.id to 99))
         assertSame(Unserved.TIMEOUT, custom.toStatus(99))
         assertNull(custom.toStatus(4)) // TIMEOUT no longer resolves to 4 for this instance
     }
@@ -538,5 +554,15 @@ class CompositeLookupTest {
     @Test
     fun fallsBackToBaseNullWhenNeitherKnows() {
         assertNull(lookup.toStatus(999))
+    }
+
+    /**
+     * [CompositeLookup.toCode] matches by [Status.id], not full [Status] equality — a status
+     * sharing [customCode]'s identity but a different message still resolves to its extension.
+     */
+    @Test
+    fun extensionMatchesByIdentityNotFullStatusEquality() {
+        val differentMessage = Failed.Rejected("PAYMENT_DECLINED", "A completely different message.", origin = customCode.origin)
+        assertEquals(402, lookup.toCode(differentMessage))
     }
 }

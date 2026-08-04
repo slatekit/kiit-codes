@@ -196,7 +196,6 @@ graph TD
 | **Failed** | `Restricted`, `Invalid`, `Rejected`, `Unserved` — a failure. |
 | **id** | `"$origin.$name"`, derived, unique across every `Status` — a map key. |
 | **origin** | Where a code came from — `"kiit"` for built-ins, custom name otherwise. |
-| **isNeutral** | `true` only for `Excluded`/`Information` — never success or failure. |
 | **Codes** | Aggregate list + lookup over the built-in codes; duplicate-checked at init time. |
 | **Restricted, Invalid, ...** | Package-level shorthand for `Failed.Restricted`, etc. — same type, not a copy. |
 | **CodeLookup** | Converts a `Status` to/from a protocol code (`toCode`/`toStatus`). |

@@ -8,7 +8,7 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 // =================================================================================================
-// StatusTest — Passed/Failed subtypes, copy helpers, ofStatus companion function
+// StatusTest — Passed/Failed subtypes, ofStatus companion function
 // =================================================================================================
 
 class StatusTest {
@@ -89,68 +89,6 @@ class StatusTest {
     fun idIsOriginDotName() {
         val s = Failed.Restricted("RESTRICTED", "Restricted", origin = StatusConstants.KIIT)
         assertEquals("kiit.RESTRICTED", s.id)
-    }
-
-    @Test
-    fun idReflectsUpdatedOriginAfterCopyAll() {
-        val s = Passed.Succeeded("SUCCESS", "Success", origin = StatusConstants.KIIT)
-        val copy = s.copyAll("Custom", "external")
-        assertEquals("external.SUCCESS", copy.id)
-    }
-
-    // -------------------------------------------------------------------------
-    // isNeutral — true only for Excluded/Information, false for every other subtype
-    // -------------------------------------------------------------------------
-
-    @Test
-    fun isNeutralIsTrueForExcludedAndInformation() {
-        assertTrue(Passed.Excluded("F", "F").isNeutral)
-        assertTrue(Passed.Information("I", "I").isNeutral)
-    }
-
-    @Test
-    fun isNeutralIsFalseForSucceededAndPending() {
-        assertFalse(Passed.Succeeded("S", "S").isNeutral)
-        assertFalse(Passed.Pending("P", "P").isNeutral)
-    }
-
-    @Test
-    fun isNeutralIsFalseForEveryFailedSubtype() {
-        assertFalse(Failed.Restricted("R", "R").isNeutral)
-        assertFalse(Failed.Invalid("I", "I").isNeutral)
-        assertFalse(Failed.Rejected("E", "E").isNeutral)
-        assertFalse(Failed.Unserved("U", "U").isNeutral)
-    }
-
-    // -------------------------------------------------------------------------
-    // copyAll — updates both message and origin, preserves name and group
-    // -------------------------------------------------------------------------
-
-    @Test
-    fun copyAllOnSucceeded() {
-        val s = Passed.Succeeded("SUCCESS", "Success", origin = StatusConstants.KIIT)
-        val copy = s.copyAll("Custom", "external")
-        assertEquals("Custom", copy.message)
-        assertEquals("external", copy.origin)
-        assertEquals(s.name, copy.name)
-    }
-
-    @Test
-    fun copyAllOnRestricted() {
-        val s = Failed.Restricted("RESTRICTED", "Restricted", origin = StatusConstants.KIIT)
-        val copy = s.copyAll("Custom", "external")
-        assertEquals("Custom", copy.message)
-        assertEquals("external", copy.origin)
-        assertEquals(s.name, copy.name)
-    }
-
-    @Test
-    fun copyAllOnUnserved() {
-        val s = Failed.Unserved("TIMEOUT", "Timeout", origin = StatusConstants.KIIT)
-        val copy = s.copyAll("Custom", "external")
-        assertEquals("Custom", copy.message)
-        assertEquals("external", copy.origin)
-        assertEquals(s.name, copy.name)
     }
 
     // -------------------------------------------------------------------------
