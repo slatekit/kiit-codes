@@ -127,12 +127,10 @@ sealed class Passed : Status {
     val groupDescription: String
         get() =
             when (this) {
-                is Succeeded -> "The operation's primary purpose was completed successfully."
-                is Pending -> "The operation was accepted, but has not yet fully resolved."
-                is Excluded ->
-                    "The item was left out of the operation's normal output, never processed, " +
-                        "processed and discarded, or excluded for another reason."
-                is Information -> "An informational or metadata response; no primary operation was performed."
+                is Succeeded -> "The operation completed successfully."
+                is Pending -> "The operation was accepted but has not yet fully resolved."
+                is Excluded -> "The item was intentionally excluded from the operation."
+                is Information -> "The response provides information; no operation was performed."
             }
 
     /** See [Passed.groupDescription] for this category's definition. */
@@ -142,25 +140,60 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
-            val SUCCESS = Succeeded("SUCCESS", "The operation completed successfully.", origin = StatusConstants.KIIT)
-            val CREATED = Succeeded("CREATED", "A new resource was created.", origin = StatusConstants.KIIT)
-            val UPDATED = Succeeded("UPDATED", "The resource was fully updated.", origin = StatusConstants.KIIT)
-            val PATCHED = Succeeded("PATCHED", "The resource was partially updated.", origin = StatusConstants.KIIT)
-            val FETCHED = Succeeded("FETCHED", "The requested resource was retrieved.", origin = StatusConstants.KIIT)
-            val DELETED = Succeeded("DELETED", "The resource was deleted.", origin = StatusConstants.KIIT)
+            val SUCCESS =
+                Succeeded(
+                    "SUCCESS",
+                    "The operation completed successfully.",
+                    origin = StatusConstants.KIIT,
+                )
+            val CREATED =
+                Succeeded(
+                    "CREATED",
+                    "A new resource was created.",
+                    origin = StatusConstants.KIIT,
+                )
+            val UPDATED =
+                Succeeded(
+                    "UPDATED",
+                    "The resource was fully updated.",
+                    origin = StatusConstants.KIIT,
+                )
+            val PATCHED =
+                Succeeded(
+                    "PATCHED",
+                    "The resource was partially updated.",
+                    origin = StatusConstants.KIIT,
+                )
+            val FETCHED =
+                Succeeded(
+                    "FETCHED",
+                    "The resource was retrieved.",
+                    origin = StatusConstants.KIIT,
+                )
+            val DELETED =
+                Succeeded(
+                    "DELETED",
+                    "The resource was deleted.",
+                    origin = StatusConstants.KIIT,
+                )
             val HANDLED =
                 Succeeded(
                     "HANDLED",
-                    "The request was handled successfully, with no content to return.",
+                    "The request was handled; nothing to return.",
                     origin = StatusConstants.KIIT,
                 )
             val REFERRED =
                 Succeeded(
                     "REFERRED",
-                    "The operation completed; see the referenced location for the result.",
+                    "The result is at another location.",
                     origin = StatusConstants.KIIT,
                 )
-            val EXITED = Succeeded("EXITED", "The application exited cleanly.", origin = StatusConstants.KIIT)
+            val EXITED =
+                Succeeded(
+                    "EXITED",
+                    "The application exited cleanly.",
+                    origin = StatusConstants.KIIT,
+                )
         }
     }
 
@@ -171,35 +204,40 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
-            val ACCEPTED = Pending("ACCEPTED", "The request was accepted.", origin = StatusConstants.KIIT)
+            val ACCEPTED =
+                Pending(
+                    "ACCEPTED",
+                    "The request was accepted.",
+                    origin = StatusConstants.KIIT,
+                )
             val QUEUED =
                 Pending(
                     "QUEUED",
-                    "The request was accepted and is waiting to be processed.",
+                    "The request is waiting to be processed.",
                     origin = StatusConstants.KIIT,
                 )
             val PROCESSING =
                 Pending(
                     "PROCESSING",
-                    "The request is actively being processed.",
+                    "The request is being processed.",
                     origin = StatusConstants.KIIT,
                 )
             val CONFIRM =
                 Pending(
                     "CONFIRM",
-                    "The request was accepted and is awaiting confirmation.",
+                    "The request is awaiting confirmation.",
                     origin = StatusConstants.KIIT,
                 )
             val REDIRECTED =
                 Pending(
                     "REDIRECTED",
-                    "The operation is being completed at another location for this request only.",
+                    "This request is being handled elsewhere.",
                     origin = StatusConstants.KIIT,
                 )
             val SCHEDULED =
                 Pending(
                     "SCHEDULED",
-                    "The operation is scheduled to run at a future time.",
+                    "The operation is scheduled for later.",
                     origin = StatusConstants.KIIT,
                 )
         }
@@ -217,12 +255,22 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
-            val OMITTED = Excluded("OMITTED", "The item was excluded from the result.", origin = StatusConstants.KIIT)
-            val SKIPPED = Excluded("SKIPPED", "The item was not processed.", origin = StatusConstants.KIIT)
+            val OMITTED =
+                Excluded(
+                    "OMITTED",
+                    "The item was left out.",
+                    origin = StatusConstants.KIIT,
+                )
+            val SKIPPED =
+                Excluded(
+                    "SKIPPED",
+                    "The item was not processed.",
+                    origin = StatusConstants.KIIT,
+                )
             val DISCARDED =
                 Excluded(
                     "DISCARDED",
-                    "The item was processed, but excluded for reasons unrelated to its own state.",
+                    "The item was processed, then excluded for unrelated reasons.",
                     origin = StatusConstants.KIIT,
                 )
             val CANCELLED =
@@ -234,13 +282,13 @@ sealed class Passed : Status {
             val DEDUPLICATED =
                 Excluded(
                     "DEDUPLICATED",
-                    "The item was identified as a duplicate and was not processed again.",
+                    "The duplicate item was not processed.",
                     origin = StatusConstants.KIIT,
                 )
             val DISQUALIFIED =
                 Excluded(
                     "DISQUALIFIED",
-                    "The item did not meet the required criteria and was excluded.",
+                    "The item was disqualified.",
                     origin = StatusConstants.KIIT,
                 )
         }
@@ -253,21 +301,36 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
-            val NOTICE = Information("NOTICE", "An informational notice.", origin = StatusConstants.KIIT)
+            val NOTICE =
+                Information(
+                    "NOTICE",
+                    "An informational notice.",
+                    origin = StatusConstants.KIIT,
+                )
             val ADVISORY =
                 Information(
                     "ADVISORY",
-                    "An advisory that may require attention or action.",
+                    "A notice that may need attention.",
                     origin = StatusConstants.KIIT,
                 )
-            val HELP = Information("HELP", "Help information was returned.", origin = StatusConstants.KIIT)
+            val HELP =
+                Information(
+                    "HELP",
+                    "Help content was returned.",
+                    origin = StatusConstants.KIIT,
+                )
             val ABOUT =
                 Information(
                     "ABOUT",
                     "Information about this application was returned.",
                     origin = StatusConstants.KIIT,
                 )
-            val VERSION = Information("VERSION", "The current version was returned.", origin = StatusConstants.KIIT)
+            val VERSION =
+                Information(
+                    "VERSION",
+                    "The current version was returned.",
+                    origin = StatusConstants.KIIT,
+                )
             val MOVED =
                 Information(
                     "MOVED",
@@ -301,14 +364,10 @@ sealed class Failed : Status {
     val groupDescription: String
         get() =
             when (this) {
-                is Restricted -> "An access-control failure — the caller is not permitted to perform this action."
-                is Invalid ->
-                    "The request as given cannot be satisfied — malformed input, invalid values, " +
-                        "or an unknown route."
-                is Rejected -> "A known, expected business-rule failure — understood and permitted, but refused."
-                is Unserved ->
-                    "The request is valid and permitted, but cannot be serviced right now, " +
-                        "for reasons unrelated to what was sent."
+                is Restricted -> "The caller is not allowed."
+                is Invalid -> "The request itself is wrong."
+                is Rejected -> "The caller was allowed, but the business refuses it."
+                is Unserved -> "The system can't serve it right now, though nothing was wrong with the request."
             }
 
     /** See [Failed.groupDescription] for this category's definition. */
@@ -318,21 +377,30 @@ sealed class Failed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Failed() {
         companion object {
-            val DENIED = Restricted("DENIED", "The request was denied.", origin = StatusConstants.KIIT)
+            val DENIED =
+                Restricted(
+                    "DENIED",
+                    "The request was denied.",
+                    origin = StatusConstants.KIIT,
+                )
             val UNAUTHENTICATED =
                 Restricted(
                     "UNAUTHENTICATED",
-                    "Valid authentication credentials are required.",
+                    "Authentication is required.",
                     origin = StatusConstants.KIIT,
                 )
             val UNAUTHORIZED =
                 Restricted(
                     "UNAUTHORIZED",
-                    "The caller does not have permission to perform this action.",
+                    "The caller lacks permission.",
                     origin = StatusConstants.KIIT,
                 )
             val FORBIDDEN =
-                Restricted("FORBIDDEN", "Access to this resource is forbidden.", origin = StatusConstants.KIIT)
+                Restricted(
+                    "FORBIDDEN",
+                    "Access to this resource is forbidden.",
+                    origin = StatusConstants.KIIT,
+                )
             val LOCKED =
                 Restricted(
                     "LOCKED",
@@ -340,7 +408,11 @@ sealed class Failed : Status {
                     origin = StatusConstants.KIIT,
                 )
             val SUSPENDED =
-                Restricted("SUSPENDED", "Access has been administratively suspended.", origin = StatusConstants.KIIT)
+                Restricted(
+                    "SUSPENDED",
+                    "Access has been administratively suspended.",
+                    origin = StatusConstants.KIIT,
+                )
         }
     }
 
@@ -354,17 +426,21 @@ sealed class Failed : Status {
             val INVALID_VALUE =
                 Invalid(
                     "INVALID_VALUE",
-                    "The request was well-formed, but contained invalid values.",
+                    "The request had an invalid value.",
                     origin = StatusConstants.KIIT,
                 )
             val BAD_REQUEST =
                 Invalid(
                     "BAD_REQUEST",
-                    "The request was malformed and could not be understood.",
+                    "The request was malformed.",
                     origin = StatusConstants.KIIT,
                 )
             val NOT_FOUND =
-                Invalid("NOT_FOUND", "The requested route or endpoint does not exist.", origin = StatusConstants.KIIT)
+                Invalid(
+                    "NOT_FOUND",
+                    "The requested route or endpoint does not exist.",
+                    origin = StatusConstants.KIIT,
+                )
             val OUT_OF_RANGE =
                 Invalid(
                     "OUT_OF_RANGE",
@@ -374,11 +450,15 @@ sealed class Failed : Status {
             val PAYLOAD_TOO_LARGE =
                 Invalid(
                     "PAYLOAD_TOO_LARGE",
-                    "The request payload exceeds the allowed size.",
+                    "The payload is too large.",
                     origin = StatusConstants.KIIT,
                 )
             val MISSING_FIELD =
-                Invalid("MISSING_FIELD", "A required field was not provided.", origin = StatusConstants.KIIT)
+                Invalid(
+                    "MISSING_FIELD",
+                    "A required field was not provided.",
+                    origin = StatusConstants.KIIT,
+                )
         }
     }
 
@@ -392,33 +472,37 @@ sealed class Failed : Status {
             val RULE_VIOLATION =
                 Rejected(
                     "RULE_VIOLATION",
-                    "The request was understood but rejected by a business rule.",
+                    "A business rule rejected the request.",
                     origin = StatusConstants.KIIT,
                 )
             val CONFLICT =
                 Rejected(
                     "CONFLICT",
-                    "The request conflicts with the current state of the resource.",
+                    "The request conflicts with the current state.",
                     origin = StatusConstants.KIIT,
                 )
             val NOT_EXISTS =
                 Rejected(
                     "NOT_EXISTS",
-                    "The request was valid, but the referenced item does not exist.",
+                    "The referenced item does not exist.",
                     origin = StatusConstants.KIIT,
                 )
             val PRECONDITION_FAILED =
-                Rejected("PRECONDITION_FAILED", "A required precondition was not met.", origin = StatusConstants.KIIT)
+                Rejected(
+                    "PRECONDITION_FAILED",
+                    "A required precondition was not met.",
+                    origin = StatusConstants.KIIT,
+                )
             val EXPIRED =
                 Rejected(
                     "EXPIRED",
-                    "The referenced item is no longer valid; it has expired.",
+                    "The item has expired.",
                     origin = StatusConstants.KIIT,
                 )
             val GONE =
                 Rejected(
                     "GONE",
-                    "This resource was deliberately removed and is no longer available.",
+                    "The resource was removed and is no longer available.",
                     origin = StatusConstants.KIIT,
                 )
         }
@@ -438,21 +522,41 @@ sealed class Failed : Status {
     ) : Failed() {
         companion object {
             val UNEXPECTED =
-                Unserved("UNEXPECTED", "An unexpected, unclassified error occurred.", origin = StatusConstants.KIIT)
+                Unserved(
+                    "UNEXPECTED",
+                    "An unexpected, unclassified error occurred.",
+                    origin = StatusConstants.KIIT,
+                )
             val UNSUPPORTED =
-                Unserved("UNSUPPORTED", "This capability is not currently available.", origin = StatusConstants.KIIT)
+                Unserved(
+                    "UNSUPPORTED",
+                    "This capability is not currently available.",
+                    origin = StatusConstants.KIIT,
+                )
             val TIMEOUT =
                 Unserved(
                     "TIMEOUT",
-                    "The operation did not complete within the allotted time.",
+                    "The operation timed out.",
                     origin = StatusConstants.KIIT,
                 )
             val RATE_LIMITED =
-                Unserved("RATE_LIMITED", "Too many requests; try again later.", origin = StatusConstants.KIIT)
+                Unserved(
+                    "RATE_LIMITED",
+                    "Too many requests; try again later.",
+                    origin = StatusConstants.KIIT,
+                )
             val RESOURCE_LIMITED =
-                Unserved("RESOURCE_LIMITED", "A resource limit has been reached.", origin = StatusConstants.KIIT)
+                Unserved(
+                    "RESOURCE_LIMITED",
+                    "A resource limit has been reached.",
+                    origin = StatusConstants.KIIT,
+                )
             val UNREACHABLE =
-                Unserved("UNREACHABLE", "A required dependency could not be reached.", origin = StatusConstants.KIIT)
+                Unserved(
+                    "UNREACHABLE",
+                    "A required dependency could not be reached.",
+                    origin = StatusConstants.KIIT,
+                )
             val UNDER_MAINTENANCE =
                 Unserved(
                     "UNDER_MAINTENANCE",
@@ -462,11 +566,15 @@ sealed class Failed : Status {
             val INTERNAL =
                 Unserved(
                     "INTERNAL",
-                    "An internal system invariant was violated.",
+                    "An internal invariant was violated.",
                     origin = StatusConstants.KIIT,
                 )
             val DATA_LOSS =
-                Unserved("DATA_LOSS", "Unrecoverable data loss or corruption occurred.", origin = StatusConstants.KIIT)
+                Unserved(
+                    "DATA_LOSS",
+                    "Unrecoverable data loss or corruption occurred.",
+                    origin = StatusConstants.KIIT,
+                )
             val DEGRADED =
                 Unserved(
                     "DEGRADED",
@@ -476,13 +584,13 @@ sealed class Failed : Status {
             val LEGAL_BLOCK =
                 Unserved(
                     "LEGAL_BLOCK",
-                    "Access is restricted due to legal or regulatory requirements.",
+                    "Access is blocked for legal reasons.",
                     origin = StatusConstants.KIIT,
                 )
             val ABORTED =
                 Unserved(
                     "ABORTED",
-                    "The operation was aborted before it could complete; retrying may succeed.",
+                    "The operation was aborted; retrying may help.",
                     origin = StatusConstants.KIIT,
                 )
         }
