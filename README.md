@@ -399,6 +399,27 @@ fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
 1. Your app is entirely internal, single-platform, and exceptions already communicate everything you need.
 2. You want explicit, monadic return values (`Result<T, E>`) rather than throw/catch, in which case see [kiit-results](https://github.com/slatekit/kiit), which builds on this same taxonomy.
 
+**Out of scope:**
+- **Resolution strategy, in general.** Retry policy, fallback logic, circuit breaking thresholds, and alerting are all decisions about what to do with a classified outcome, not part of classifying it. Source and kind of failure is this library's job, resolution is the caller's. `DEGRADED` doesn't violate this, they let a circuit breaker report its state as a `Status`, the breaker itself lives entirely in the consuming application.
+
+  Not part of this library, but easy to layer on top, entirely outside it:
+
+  ```kotlin
+  data class ErrorPolicy(
+      val code: Status,
+      val retryDelaysSeconds: List<Int> = listOf(1, 2, 5, 10, 30, 60),
+  ) {
+      val canRetry: Boolean get() = retryDelaysSeconds.isNotEmpty()
+      val retryCount: Int get() = retryDelaysSeconds.size
+  }
+
+  val policies: Map<Status, ErrorPolicy> = mapOf(
+      Unserved.TIMEOUT to ErrorPolicy(Unserved.TIMEOUT, listOf(1, 5, 10, 30)),
+  )
+  ```
+
+- **Classification by origin.** The taxonomy classifies *what kind* of outcome occurred, not *where* it came from or who's responsible for it. Network, third-party, and infrastructure failures aren't distinct kinds of failure, a timeout is a timeout regardless of which system it happened talking to, so they don't get their own categories or codes. `origin` exists specifically for this: tag any code, built-in or custom, with where it came from, without forking the taxonomy into a second, competing classification scheme.
+
 ## ❓ FAQ
 
 | Question | Answer |

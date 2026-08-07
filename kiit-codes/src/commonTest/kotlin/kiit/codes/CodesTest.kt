@@ -56,9 +56,9 @@ class CodesTest {
 
     @Test
     fun informationCodesHaveSuccessTrue() {
-        assertTrue(Information.HELP.success)
-        assertTrue(Information.ABOUT.success)
-        assertTrue(Information.VERSION.success)
+        assertTrue(Information.METADATA.success)
+        assertTrue(Information.HEALTH.success)
+        assertTrue(Information.DIAGNOSTICS.success)
     }
 
     @Test
@@ -138,7 +138,7 @@ class CodesToHttpTest {
     }
 
     @Test fun categoryDefaultInformation() {
-        assertEquals(200, http.toCode(Information.ABOUT))
+        assertEquals(200, http.toCode(Information.METADATA))
     }
 
     @Test fun categoryDefaultRestricted() {
@@ -392,7 +392,7 @@ class CodesToGrpcTest {
         assertEquals(0, grpc.toCode(Succeeded.SUCCESS))
         assertEquals(0, grpc.toCode(Pending.PROCESSING))
         assertEquals(0, grpc.toCode(Excluded.SKIPPED))
-        assertEquals(0, grpc.toCode(Information.HELP))
+        assertEquals(0, grpc.toCode(Information.METADATA))
     }
 
     @Test fun categoryDefaultRestrictedIsPermissionDenied() {

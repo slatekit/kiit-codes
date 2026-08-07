@@ -313,22 +313,22 @@ sealed class Passed : Status {
                     "A notice that may need attention.",
                     origin = StatusConstants.KIIT,
                 )
-            val HELP =
+            val METADATA =
                 Information(
-                    "HELP",
-                    "Help content was returned.",
+                    "METADATA",
+                    "Information about the application itself was returned.",
                     origin = StatusConstants.KIIT,
                 )
-            val ABOUT =
+            val HEALTH =
                 Information(
-                    "ABOUT",
-                    "Information about this application was returned.",
+                    "HEALTH",
+                    "The service is healthy and operational.",
                     origin = StatusConstants.KIIT,
                 )
-            val VERSION =
+            val DIAGNOSTICS =
                 Information(
-                    "VERSION",
-                    "The current version was returned.",
+                    "DIAGNOSTICS",
+                    "Diagnostic or operational information was returned.",
                     origin = StatusConstants.KIIT,
                 )
             val MOVED =
