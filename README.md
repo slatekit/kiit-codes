@@ -210,6 +210,8 @@ Each built-in code lives on its own type's companion object (e.g. `Succeeded.CRE
 
 Some examples: `SUCCESS`, `CREATED`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMITED`, `UNEXPECTED` — see [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) and [`Status.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Status.kt) for the full registry (57 codes across 8 categories).
 
+![Codes tiers](assets/kiit-codes-custom.png)
+
 A few pairs worth distinguishing on sight:
 
 - **`RATE_LIMITED` vs `RESOURCE_LIMITED`** — too many requests, vs a fixed amount used.
@@ -237,6 +239,8 @@ Uniqueness over `id` (`origin.name`) is enforced at object-init time, a collisio
 ## 🌐 HTTP conversion
 
 `CodesToHttp` maps `Status` to HTTP status codes: a category default (`Restricted` → 401, `Invalid` → 400, etc.) plus a small overrides table for codes that differ (`CREATED` → 201, `NOT_FOUND` → 404). `toStatus` is derived from `toCode`, so it's always in sync but lossy — it returns a deterministic canonical status, not necessarily the one you originally converted. See [`Codes.kt`](kiit-codes/src/commonMain/kotlin/kiit/codes/Codes.kt) for the full overrides table.
+
+![Codes tiers](assets/kiit-codes-protocols.png)
 
 ```kotlin
 import kiit.codes.*
