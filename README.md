@@ -43,6 +43,8 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 
 ---
 
+![Codes tiers](assets/kiit-codes-lite.png)
+
 ## ℹ️ About
 
 **kiit.codes** is a platform-agnostic set of status and error code types for Kotlin Multiplatform. It describes the outcome of any operation — a service call, a background job step, an API request, a CLI command — using a consistent, structured shape instead of raw exceptions or ad-hoc booleans.
