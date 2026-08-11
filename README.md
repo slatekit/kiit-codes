@@ -15,6 +15,8 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 
 ---
 
+![Codes tiers](assets/kiit-codes-lite.png)
+
 ## 📚 Table of Contents
 
 | Topic | Description |
@@ -42,8 +44,6 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 | 📄 [License](#-license) | Licensing terms for this project |
 
 ---
-
-![Codes tiers](assets/kiit-codes-lite.png)
 
 ## ℹ️ About
 
