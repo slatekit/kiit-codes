@@ -172,6 +172,23 @@ Gradle itself already passes `--batch --pinentry-mode loopback` automatically wh
 ./gradlew :samples:sample-java:run
 ```
 
+### Run the Swift sample app
+
+Requires Xcode (for `swiftc`/`xcrun`/the iOS Simulator). Not Gradle-driven — SKIE compiles its
+generated Swift wrapper code directly into the framework's own `.swiftmodule`, so the sample only
+needs `import KiitCodes`, no separately-compiled SKIE source files.
+
+```bash
+./gradlew :kiit-codes:linkDebugFrameworkIosSimulatorArm64
+cd samples/sample-swift && ./run.sh
+```
+
+`run.sh` compiles `Sources/sample-swift/main.swift` against the built `KiitCodes.framework` with
+`swiftc`, targeting `arm64-apple-ios-simulator` to match how the framework was built, then runs
+the binary inside a booted iOS Simulator via `xcrun simctl spawn` (running an
+iOS-simulator-targeted binary directly on the host, without a simulator, fails — it needs
+`dyld_sim`, only available inside an actual booted simulator).
+
 ---
 
 ## Test (local)

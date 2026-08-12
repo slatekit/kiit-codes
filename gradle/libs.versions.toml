@@ -8,6 +8,7 @@ ktlint                  = "12.1.2"
 detekt                  = "1.23.7"
 dokka                   = "2.0.0"
 kover                   = "0.9.1"
+skie                    = "0.10.14"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -21,3 +22,4 @@ ktlint                  = { id = "org.jlleitschuh.gradle.ktlint",    version.ref
 detekt                  = { id = "io.gitlab.arturbosch.detekt",      version.ref = "detekt"  }
 dokka                   = { id = "org.jetbrains.dokka",              version.ref = "dokka"   }
 kover                   = { id = "org.jetbrains.kotlinx.kover",      version.ref = "kover"   }
+skie                    = { id = "co.touchlab.skie",                 version.ref = "skie"    }
