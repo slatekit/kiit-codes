@@ -9,7 +9,13 @@
  * about: A Kotlin Tool-Kit for Server + Android
  *  </kiit_header>
  */
+@file:JvmName("Checks")
+
 package kiit.codes
+
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
 
 /**
  * Non-monadic result of a validation-style check that reports every problem found rather than
@@ -30,9 +36,12 @@ class Checked private constructor(val status: Status, override val errors: List<
 
     companion object {
         /** A passing check with no errors. */
+        @JvmStatic
+        @JvmOverloads
         fun success(status: Passed = Succeeded.SUCCESS): Checked = Checked(status, emptyList())
 
         /** A failing check with one or more [errors]. */
+        @JvmStatic
         fun failure(status: Failed, errors: List<Err>): Checked {
             require(errors.isNotEmpty()) { "failure requires at least one Err" }
             return Checked(status, errors)

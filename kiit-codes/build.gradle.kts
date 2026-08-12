@@ -10,10 +10,21 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        // src/jvmTest/java (see JavaInteropTest) is compiled automatically — Kotlin's jvm()
+        // target compiles Java sources by default now, no withJava() needed.
+        compilerOptions {
+            // JVM 21 so Kotlin emits PermittedSubclasses for the sealed Status/Err/StatusException
+            // hierarchies, enabling exhaustive Java pattern-matching `switch` for JVM consumers.
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
+    }
 
     androidTarget {
         publishLibraryVariants("release")
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     js(IR) {
@@ -45,6 +56,10 @@ android {
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -93,6 +108,29 @@ mavenPublishing {
             developerConnection = "scm:git:ssh://git@github.com/slatekit/kiit-codes.git"
         }
     }
+}
+
+// Kotlin's jvm() target compiles Java sources by default (see the jvm{} block above), but the
+// resulting JavaCompile tasks don't inherit jvmTarget automatically — point them at a JDK 21
+// toolchain (auto-provisioned via the foojay resolver in settings.gradle.kts if not installed
+// locally) so src/jvmTest/java can use JDK 21 syntax (e.g. pattern-matching switch).
+tasks.withType<JavaCompile>().configureEach {
+    if (name == "compileJvmMainJava" || name == "compileJvmTestJava") {
+        javaCompiler.set(
+            javaToolchains.compilerFor {
+                languageVersion.set(JavaLanguageVersion.of(21))
+            },
+        )
+    }
+}
+
+// The compiled jvmTest classes are now JDK 21 bytecode (see above) — run them on a matching JVM.
+tasks.named<Test>("jvmTest") {
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        },
+    )
 }
 
 detekt {

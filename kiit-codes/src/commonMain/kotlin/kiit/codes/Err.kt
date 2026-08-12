@@ -12,6 +12,9 @@
 
 package kiit.codes
 
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
+
 /**
  * Capability interface for any type that carries a list of [Err]. Implemented by [Checked] so a
  * validation-style result can be worked with generically alongside other error-carrying types.
@@ -38,48 +41,59 @@ sealed class Err {
      *
      * Default Error implementation to represent an error with message and optional throwable
      */
-    data class ErrorInfo(
-        override val msg: String,
-        override val cause: Throwable? = null,
-        override val ref: Any? = null,
-    ) : Err()
+    data class ErrorInfo
+        @JvmOverloads
+        constructor(
+            override val msg: String,
+            override val cause: Throwable? = null,
+            override val ref: Any? = null,
+        ) : Err()
 
     /**
      * Error implementation to represent an error on a specific field
      * @param field: Name of the field causing the error e.g. "email"
      * @param value: Value of the field causing the error e.g. "some_invalid_value"
      */
-    data class ErrorField(
-        val field: String,
-        val value: String,
-        override val msg: String,
-        override val cause: Throwable? = null,
-        override val ref: Any? = null,
-    ) : Err()
+    data class ErrorField
+        @JvmOverloads
+        constructor(
+            val field: String,
+            val value: String,
+            override val msg: String,
+            override val cause: Throwable? = null,
+            override val ref: Any? = null,
+        ) : Err()
 
     /**
      * Error implementation to store list of errors
      * @param errors: List of all the errors
      */
-    data class ErrorList(
-        val errors: List<Err>,
-        override val msg: String,
-        override val cause: Throwable? = null,
-        override val ref: Any? = null,
-    ) : Err()
+    data class ErrorList
+        @JvmOverloads
+        constructor(
+            val errors: List<Err>,
+            override val msg: String,
+            override val cause: Throwable? = null,
+            override val ref: Any? = null,
+        ) : Err()
 
     /**
      * Provides easy ways to build the Err type from various sources such as strings, exceptions, field errors
      */
     companion object {
+        @JvmStatic
+        @JvmOverloads
         fun of(msg: String, ex: Throwable? = null): Err {
             return ErrorInfo(msg, ex)
         }
 
+        @JvmStatic
         fun of(status: Status): Err {
             return ErrorInfo(status.message)
         }
 
+        @JvmStatic
+        @JvmOverloads
         fun on(field: String, value: String, msg: String, ex: Throwable? = null): Err {
             return ErrorField(field, value, msg, ex)
         }
@@ -89,22 +103,28 @@ sealed class Err {
          * Use this instead of [on] when the value itself could be sensitive (e.g. a password or
          * token) and shouldn't be carried on the error.
          */
+        @JvmStatic
+        @JvmOverloads
         fun on(field: String, msg: String, ex: Throwable? = null): Err {
             return ErrorField(field, "", msg, ex)
         }
 
+        @JvmStatic
         fun ex(ex: Throwable): Err {
             return ErrorInfo(ex.message ?: "", ex)
         }
 
+        @JvmStatic
         fun obj(err: Any): Err {
             return ErrorInfo(err.toString(), null, err)
         }
 
+        @JvmStatic
         fun list(errors: List<String>, msg: String?): ErrorList {
             return ErrorList(errors.map { ErrorInfo(it) }, msg ?: "Error occurred")
         }
 
+        @JvmStatic
         fun build(error: Any?): Err {
             return when (error) {
                 null -> of(Unserved.UNEXPECTED.message)

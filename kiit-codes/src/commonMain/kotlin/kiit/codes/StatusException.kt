@@ -1,4 +1,9 @@
+@file:JvmName("StatusExceptions")
+
 package kiit.codes
+
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 
 /**
  * Sealed exception hierarchy carrying a [Checked] instead of a plain message string.
@@ -47,23 +52,40 @@ sealed class StatusException(
     val errors: List<Err> get() = checked.errors
 
     /** Thrown for a [Failed.Restricted] status — security / access-control failure. */
-    open class RestrictedException(
-        status: Failed.Restricted,
-        errors: List<Err> = emptyList(),
-        cause: Throwable? = null,
-    ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
+    open class RestrictedException
+        @JvmOverloads
+        constructor(
+            status: Failed.Restricted,
+            errors: List<Err> = emptyList(),
+            cause: Throwable? = null,
+        ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 
     /** Thrown for a [Failed.Invalid] status — the request as given cannot be satisfied. */
-    open class InvalidException(status: Failed.Invalid, errors: List<Err> = emptyList(), cause: Throwable? = null) :
-        StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
+    open class InvalidException
+        @JvmOverloads
+        constructor(
+            status: Failed.Invalid,
+            errors: List<Err> = emptyList(),
+            cause: Throwable? = null,
+        ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 
     /** Thrown for a [Failed.Rejected] status — a known, expected business-rule failure. */
-    open class RejectedException(status: Failed.Rejected, errors: List<Err> = emptyList(), cause: Throwable? = null) :
-        StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
+    open class RejectedException
+        @JvmOverloads
+        constructor(
+            status: Failed.Rejected,
+            errors: List<Err> = emptyList(),
+            cause: Throwable? = null,
+        ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 
     /** Thrown for a [Failed.Unserved] status — valid & permitted, but can't be serviced right now. */
-    open class UnservedException(status: Failed.Unserved, errors: List<Err> = emptyList(), cause: Throwable? = null) :
-        StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
+    open class UnservedException
+        @JvmOverloads
+        constructor(
+            status: Failed.Unserved,
+            errors: List<Err> = emptyList(),
+            cause: Throwable? = null,
+        ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 }
 
 /**
@@ -73,6 +95,7 @@ sealed class StatusException(
  * Deliberately has no `else` branch: if [Failed] ever gains a new subtype, this becomes a
  * compile error to fix here, not something a wildcard branch would silently mishandle.
  */
+@JvmOverloads
 fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
     when (this) {
         is Failed.Restricted -> StatusException.RestrictedException(this, errors)

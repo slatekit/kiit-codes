@@ -11,6 +11,9 @@
  */
 package kiit.codes
 
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
+
 /** Well-known [Status.origin] values. */
 object StatusConstants {
     /** Origin for every built-in [Codes] entry. */
@@ -76,6 +79,7 @@ sealed interface Status {
          * falling back to [status] when neither is supplied. [rawStatus], if present, is used as
          * the base instead of [status]; [msg], if present, is then applied on top of that base.
          */
+        @JvmStatic
         @Suppress("UNCHECKED_CAST")
         fun <T : Status> ofStatus(msg: String?, rawStatus: T?, status: T): T {
             val base = rawStatus ?: status
@@ -140,54 +144,71 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
+            @JvmField
             val SUCCESS =
                 Succeeded(
                     "SUCCESS",
                     "The operation completed successfully.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val CREATED =
                 Succeeded(
                     "CREATED",
                     "A new resource was created.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val UPDATED =
                 Succeeded(
                     "UPDATED",
                     "The resource was fully updated.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val PATCHED =
                 Succeeded(
                     "PATCHED",
                     "The resource was partially updated.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val FETCHED =
                 Succeeded(
                     "FETCHED",
                     "The resource was retrieved.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val DELETED =
                 Succeeded(
                     "DELETED",
                     "The resource was deleted.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val HANDLED =
                 Succeeded(
                     "HANDLED",
                     "The request was handled; nothing to return.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val REFERRED =
                 Succeeded(
                     "REFERRED",
                     "The result is at another location.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val EXITED =
                 Succeeded(
                     "EXITED",
@@ -204,36 +225,47 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
+            @JvmField
             val ACCEPTED =
                 Pending(
                     "ACCEPTED",
                     "The request was accepted.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val QUEUED =
                 Pending(
                     "QUEUED",
                     "The request is waiting to be processed.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val PROCESSING =
                 Pending(
                     "PROCESSING",
                     "The request is being processed.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val CONFIRM =
                 Pending(
                     "CONFIRM",
                     "The request is awaiting confirmation.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val REDIRECTED =
                 Pending(
                     "REDIRECTED",
                     "This request is being handled elsewhere.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val SCHEDULED =
                 Pending(
                     "SCHEDULED",
@@ -255,36 +287,47 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
+            @JvmField
             val OMITTED =
                 Excluded(
                     "OMITTED",
                     "The item was left out.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val SKIPPED =
                 Excluded(
                     "SKIPPED",
                     "The item was not processed.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val DISCARDED =
                 Excluded(
                     "DISCARDED",
                     "The item was processed, then excluded for unrelated reasons.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val CANCELLED =
                 Excluded(
                     "CANCELLED",
                     "The operation was cancelled by the caller before completion.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val DEDUPLICATED =
                 Excluded(
                     "DEDUPLICATED",
                     "The duplicate item was not processed.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val DISQUALIFIED =
                 Excluded(
                     "DISQUALIFIED",
@@ -301,36 +344,47 @@ sealed class Passed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Passed() {
         companion object {
+            @JvmField
             val NOTICE =
                 Information(
                     "NOTICE",
                     "An informational notice.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val ADVISORY =
                 Information(
                     "ADVISORY",
                     "A notice that may need attention.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val METADATA =
                 Information(
                     "METADATA",
                     "Information about the application itself was returned.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val HEALTH =
                 Information(
                     "HEALTH",
                     "The service is healthy and operational.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val DIAGNOSTICS =
                 Information(
                     "DIAGNOSTICS",
                     "Diagnostic or operational information was returned.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val MOVED =
                 Information(
                     "MOVED",
@@ -377,36 +431,47 @@ sealed class Failed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Failed() {
         companion object {
+            @JvmField
             val DENIED =
                 Restricted(
                     "DENIED",
                     "The request was denied.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val UNAUTHENTICATED =
                 Restricted(
                     "UNAUTHENTICATED",
                     "Authentication is required.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val UNAUTHORIZED =
                 Restricted(
                     "UNAUTHORIZED",
                     "The caller lacks permission.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val FORBIDDEN =
                 Restricted(
                     "FORBIDDEN",
                     "Access to this resource is forbidden.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val LOCKED =
                 Restricted(
                     "LOCKED",
                     "Access is locked; resolve the condition to restore access.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val SUSPENDED =
                 Restricted(
                     "SUSPENDED",
@@ -423,36 +488,47 @@ sealed class Failed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Failed() {
         companion object {
+            @JvmField
             val INVALID_VALUE =
                 Invalid(
                     "INVALID_VALUE",
                     "The request had an invalid value.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val BAD_REQUEST =
                 Invalid(
                     "BAD_REQUEST",
                     "The request was malformed.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val NOT_FOUND =
                 Invalid(
                     "NOT_FOUND",
                     "The requested route or endpoint does not exist.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val OUT_OF_RANGE =
                 Invalid(
                     "OUT_OF_RANGE",
                     "A value was outside the acceptable range.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val PAYLOAD_TOO_LARGE =
                 Invalid(
                     "PAYLOAD_TOO_LARGE",
                     "The payload is too large.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val MISSING_FIELD =
                 Invalid(
                     "MISSING_FIELD",
@@ -469,36 +545,47 @@ sealed class Failed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Failed() {
         companion object {
+            @JvmField
             val RULE_VIOLATION =
                 Rejected(
                     "RULE_VIOLATION",
                     "A business rule rejected the request.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val CONFLICT =
                 Rejected(
                     "CONFLICT",
                     "The request conflicts with the current state.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val NOT_EXISTS =
                 Rejected(
                     "NOT_EXISTS",
                     "The referenced item does not exist.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val PRECONDITION_FAILED =
                 Rejected(
                     "PRECONDITION_FAILED",
                     "A required precondition was not met.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val EXPIRED =
                 Rejected(
                     "EXPIRED",
                     "The item has expired.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val GONE =
                 Rejected(
                     "GONE",
@@ -521,72 +608,95 @@ sealed class Failed : Status {
         override val origin: String = StatusConstants.CUSTOM,
     ) : Failed() {
         companion object {
+            @JvmField
             val UNEXPECTED =
                 Unserved(
                     "UNEXPECTED",
                     "An unexpected, unclassified error occurred.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val UNSUPPORTED =
                 Unserved(
                     "UNSUPPORTED",
                     "This capability is not currently available.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val TIMEOUT =
                 Unserved(
                     "TIMEOUT",
                     "The operation timed out.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val RATE_LIMITED =
                 Unserved(
                     "RATE_LIMITED",
                     "Too many requests; try again later.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val RESOURCE_LIMITED =
                 Unserved(
                     "RESOURCE_LIMITED",
                     "A resource limit has been reached.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val UNREACHABLE =
                 Unserved(
                     "UNREACHABLE",
                     "A required dependency could not be reached.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val UNDER_MAINTENANCE =
                 Unserved(
                     "UNDER_MAINTENANCE",
                     "The service is temporarily under maintenance.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val INTERNAL =
                 Unserved(
                     "INTERNAL",
                     "An internal invariant was violated.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val DATA_LOSS =
                 Unserved(
                     "DATA_LOSS",
                     "Unrecoverable data loss or corruption occurred.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val DEGRADED =
                 Unserved(
                     "DEGRADED",
                     "This dependency is degraded; some calls may be refused.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val LEGAL_BLOCK =
                 Unserved(
                     "LEGAL_BLOCK",
                     "Access is blocked for legal reasons.",
                     origin = StatusConstants.KIIT,
                 )
+
+            @JvmField
             val ABORTED =
                 Unserved(
                     "ABORTED",
