@@ -15,7 +15,7 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 
 ---
 
-![Codes tiers](assets/kiit-codes-lite.png)
+![Codes tiers](assets/kiit-codes-overview.png)
 
 ## 📚 Table of Contents
 
@@ -141,7 +141,8 @@ try {
 }
 ```
 
-See [`samples/sample1`](./samples/sample1) for a runnable end-to-end example.
+See [`samples/sample-kotlin`](./samples/sample-kotlin) for a runnable end-to-end example, or
+[`samples/sample-java`](./samples/sample-java) for the same library used from plain Java.
 
 ## 🧠 Core concepts
 

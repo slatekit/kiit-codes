@@ -11,6 +11,10 @@
  */
 package kiit.codes
 
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
+
 /**
  * Built-in registry of standard [Status] codes covering common operation outcomes.
  *
@@ -31,6 +35,7 @@ package kiit.codes
  */
 object Codes {
     /** All built-in codes. Used for reverse lookups — see [CodesToHttp], [CompositeLookup]. */
+    @JvmField
     val all: List<Status> =
         listOf(
             Succeeded.SUCCESS, Succeeded.CREATED, Succeeded.UPDATED, Succeeded.PATCHED,
@@ -62,6 +67,7 @@ object Codes {
     }
 
     /** Looks up a built-in [Status] by its [Status.origin]/[Status.name] pair, or null if none matches. */
+    @JvmStatic
     fun statusFor(origin: String, name: String): Status? = byId["$origin.$name"]
 }
 
@@ -99,82 +105,85 @@ interface CodeLookup {
  * Clients needing additional/custom codes should compose with [CompositeLookup] rather than
  * subclassing this type directly — see [CompositeLookup] for why.
  */
-open class CodesToHttp(
-    private val overrides: Map<String, Int> = DEFAULT_OVERRIDES,
-) : CodeLookup {
-    override fun toCode(status: Status): Int {
-        overrides[status.id]?.let { return it }
-        return when (status) {
-            is Passed.Succeeded -> 200
-            is Passed.Pending -> 202
-            is Passed.Excluded -> 200
-            is Passed.Information -> 200
-            is Failed.Restricted -> 401
-            is Failed.Invalid -> 400
-            is Failed.Rejected -> 409
-            is Failed.Unserved -> 503
+open class CodesToHttp
+    @JvmOverloads
+    constructor(
+        private val overrides: Map<String, Int> = DEFAULT_OVERRIDES,
+    ) : CodeLookup {
+        override fun toCode(status: Status): Int {
+            overrides[status.id]?.let { return it }
+            return when (status) {
+                is Passed.Succeeded -> 200
+                is Passed.Pending -> 202
+                is Passed.Excluded -> 200
+                is Passed.Information -> 200
+                is Failed.Restricted -> 401
+                is Failed.Invalid -> 400
+                is Failed.Rejected -> 409
+                is Failed.Unserved -> 503
+            }
         }
-    }
-
-    /**
-     * Reverse lookup, derived from [toCode] so it can't drift out of sync with a custom
-     * [overrides] map. Lossy by nature (many statuses can share one code); ties are broken
-     * deterministically via [CANONICAL_PREFERENCE] rather than [Codes.all]'s declaration order.
-     * Only finds statuses registered in [Codes] — see [CompositeLookup] for custom ones.
-     */
-    override fun toStatus(code: Int): Status? =
-        CANONICAL_PREFERENCE.firstOrNull { toCode(it) == code }
-            ?: Codes.all.firstOrNull { toCode(it) == code }
-
-    companion object {
-        val DEFAULT_OVERRIDES: Map<String, Int> =
-            mapOf(
-                Succeeded.CREATED.id to 201,
-                Succeeded.HANDLED.id to 204,
-                Pending.CONFIRM.id to 200,
-                Excluded.CANCELLED.id to 499,
-                Pending.REDIRECTED.id to 307,
-                Invalid.NOT_FOUND.id to 404,
-                Rejected.NOT_EXISTS.id to 404,
-                Restricted.FORBIDDEN.id to 403,
-                // closer to Forbidden than Unauthenticated — the caller is known
-                Restricted.SUSPENDED.id to 403,
-                Restricted.LOCKED.id to 423,
-                Rejected.EXPIRED.id to 410,
-                Rejected.GONE.id to 410,
-                // CONFLICT needs no override — 409 is Rejected's own category default now
-                Invalid.PAYLOAD_TOO_LARGE.id to 413,
-                // HTTP has no separate "unsupported" code
-                Unserved.UNSUPPORTED.id to 501,
-                // deadline exceeded waiting on something else, not a slow client (408)
-                Unserved.TIMEOUT.id to 504,
-                Unserved.RATE_LIMITED.id to 429,
-                // same axis as RATE_LIMITED — HTTP doesn't distinguish the two
-                Unserved.RESOURCE_LIMITED.id to 429,
-                Unserved.UNEXPECTED.id to 500,
-                Unserved.LEGAL_BLOCK.id to 451,
-            )
 
         /**
-         * One canonical winner per HTTP code that more than one built-in [Status] can resolve
-         * to via [toCode] (under [DEFAULT_OVERRIDES] or a category default) — see [toStatus].
-         *
-         * `422 Unprocessable Entity` has no dedicated [Status] mapping — the code that previously
-         * held it (`INVALID_ENTITY`) was removed from the registry; [toStatus] returns null for
-         * 422, and anything converting [Invalid.INVALID_VALUE] to HTTP falls through to 400.
+         * Reverse lookup, derived from [toCode] so it can't drift out of sync with a custom
+         * [overrides] map. Lossy by nature (many statuses can share one code); ties are broken
+         * deterministically via [CANONICAL_PREFERENCE] rather than [Codes.all]'s declaration order.
+         * Only finds statuses registered in [Codes] — see [CompositeLookup] for custom ones.
          */
-        private val CANONICAL_PREFERENCE: List<Status> =
-            listOf(
-                Succeeded.SUCCESS, Succeeded.CREATED, Succeeded.HANDLED, Pending.PROCESSING,
-                Restricted.UNAUTHENTICATED, Restricted.FORBIDDEN,
-                Invalid.INVALID_VALUE, Invalid.NOT_FOUND, Rejected.GONE,
-                // RULE_VIOLATION and PRECONDITION_FAILED also fall through to 409, Rejected's
-                // own category default — CONFLICT wins as the most literal match for the concept
-                Rejected.CONFLICT, Unserved.TIMEOUT, Unserved.RATE_LIMITED,
-                Unserved.UNDER_MAINTENANCE,
-            )
+        override fun toStatus(code: Int): Status? =
+            CANONICAL_PREFERENCE.firstOrNull { toCode(it) == code }
+                ?: Codes.all.firstOrNull { toCode(it) == code }
+
+        companion object {
+            @JvmField
+            val DEFAULT_OVERRIDES: Map<String, Int> =
+                mapOf(
+                    Succeeded.CREATED.id to 201,
+                    Succeeded.HANDLED.id to 204,
+                    Pending.CONFIRM.id to 200,
+                    Excluded.CANCELLED.id to 499,
+                    Pending.REDIRECTED.id to 307,
+                    Invalid.NOT_FOUND.id to 404,
+                    Rejected.NOT_EXISTS.id to 404,
+                    Restricted.FORBIDDEN.id to 403,
+                    // closer to Forbidden than Unauthenticated — the caller is known
+                    Restricted.SUSPENDED.id to 403,
+                    Restricted.LOCKED.id to 423,
+                    Rejected.EXPIRED.id to 410,
+                    Rejected.GONE.id to 410,
+                    // CONFLICT needs no override — 409 is Rejected's own category default now
+                    Invalid.PAYLOAD_TOO_LARGE.id to 413,
+                    // HTTP has no separate "unsupported" code
+                    Unserved.UNSUPPORTED.id to 501,
+                    // deadline exceeded waiting on something else, not a slow client (408)
+                    Unserved.TIMEOUT.id to 504,
+                    Unserved.RATE_LIMITED.id to 429,
+                    // same axis as RATE_LIMITED — HTTP doesn't distinguish the two
+                    Unserved.RESOURCE_LIMITED.id to 429,
+                    Unserved.UNEXPECTED.id to 500,
+                    Unserved.LEGAL_BLOCK.id to 451,
+                )
+
+            /**
+             * One canonical winner per HTTP code that more than one built-in [Status] can resolve
+             * to via [toCode] (under [DEFAULT_OVERRIDES] or a category default) — see [toStatus].
+             *
+             * `422 Unprocessable Entity` has no dedicated [Status] mapping — the code that previously
+             * held it (`INVALID_ENTITY`) was removed from the registry; [toStatus] returns null for
+             * 422, and anything converting [Invalid.INVALID_VALUE] to HTTP falls through to 400.
+             */
+            private val CANONICAL_PREFERENCE: List<Status> =
+                listOf(
+                    Succeeded.SUCCESS, Succeeded.CREATED, Succeeded.HANDLED, Pending.PROCESSING,
+                    Restricted.UNAUTHENTICATED, Restricted.FORBIDDEN,
+                    Invalid.INVALID_VALUE, Invalid.NOT_FOUND, Rejected.GONE,
+                    // RULE_VIOLATION and PRECONDITION_FAILED also fall through to 409, Rejected's
+                    // own category default — CONFLICT wins as the most literal match for the concept
+                    Rejected.CONFLICT, Unserved.TIMEOUT, Unserved.RATE_LIMITED,
+                    Unserved.UNDER_MAINTENANCE,
+                )
+        }
     }
-}
 
 /**
  * [CodeLookup] implementation mapping [Status] to gRPC status codes (0-16).
@@ -184,75 +193,78 @@ open class CodesToHttp(
  *
  * gRPC's `ABORTED` (10) maps to [Unserved.ABORTED] — previously an honest `null` gap, now closed.
  */
-open class CodesToGrpc(
-    private val overrides: Map<String, Int> = DEFAULT_OVERRIDES,
-) : CodeLookup {
-    override fun toCode(status: Status): Int {
-        overrides[status.id]?.let { return it }
-        return when (status) {
-            is Passed.Succeeded -> 0
-            is Passed.Pending -> 0
-            is Passed.Excluded -> 0
-            is Passed.Information -> 0
-            is Failed.Restricted -> 7
-            is Failed.Invalid -> 3
-            is Failed.Rejected -> 9
-            is Failed.Unserved -> 13
+open class CodesToGrpc
+    @JvmOverloads
+    constructor(
+        private val overrides: Map<String, Int> = DEFAULT_OVERRIDES,
+    ) : CodeLookup {
+        override fun toCode(status: Status): Int {
+            overrides[status.id]?.let { return it }
+            return when (status) {
+                is Passed.Succeeded -> 0
+                is Passed.Pending -> 0
+                is Passed.Excluded -> 0
+                is Passed.Information -> 0
+                is Failed.Restricted -> 7
+                is Failed.Invalid -> 3
+                is Failed.Rejected -> 9
+                is Failed.Unserved -> 13
+            }
+        }
+
+        /**
+         * Reverse lookup, derived from [toCode] so it can't drift out of sync with a custom
+         * [overrides] map. Ties broken deterministically via [CANONICAL_PREFERENCE], same approach
+         * as [CodesToHttp.toStatus].
+         */
+        override fun toStatus(code: Int): Status? =
+            CANONICAL_PREFERENCE.firstOrNull { toCode(it) == code }
+                ?: Codes.all.firstOrNull { toCode(it) == code }
+
+        companion object {
+            @JvmField
+            val DEFAULT_OVERRIDES: Map<String, Int> =
+                mapOf(
+                    Excluded.CANCELLED.id to 1,
+                    Restricted.UNAUTHENTICATED.id to 16,
+                    Invalid.INVALID_VALUE.id to 3,
+                    Invalid.NOT_FOUND.id to 5,
+                    Invalid.OUT_OF_RANGE.id to 11,
+                    Restricted.DENIED.id to 7,
+                    // ALREADY_EXISTS — was previously falling through to Rejected's category default
+                    Rejected.CONFLICT.id to 6,
+                    Rejected.PRECONDITION_FAILED.id to 9,
+                    // takes over gRPC's UNIMPLEMENTED slot now that UNIMPLEMENTED and UNSUPPORTED have
+                    // merged into one Status code — confirmed, not just an inference
+                    Unserved.UNSUPPORTED.id to 12,
+                    Unserved.UNREACHABLE.id to 14,
+                    Unserved.TIMEOUT.id to 4,
+                    Unserved.RATE_LIMITED.id to 8,
+                    // RESOURCE_EXHAUSTED, same axis as RATE_LIMITED
+                    Unserved.RESOURCE_LIMITED.id to 8,
+                    Unserved.UNEXPECTED.id to 2,
+                    Unserved.INTERNAL.id to 13,
+                    Unserved.DATA_LOSS.id to 15,
+                    // RESOURCE_EXHAUSTED — widely used real-world convention, not an official mapping
+                    Invalid.PAYLOAD_TOO_LARGE.id to 8,
+                    // exact match, closes the previously honest null gap at 10
+                    Unserved.ABORTED.id to 10,
+                    // DEGRADED and LEGAL_BLOCK have no closer gRPC equivalent — fall through to
+                    // Unserved's own category default (13, INTERNAL)
+                )
+
+            /** One canonical winner per gRPC code with more than one resolving [Status] — see [toStatus]. */
+            private val CANONICAL_PREFERENCE: List<Status> =
+                listOf(
+                    Succeeded.SUCCESS,
+                    Invalid.INVALID_VALUE,
+                    Restricted.DENIED,
+                    Unserved.RATE_LIMITED,
+                    Rejected.PRECONDITION_FAILED,
+                    Unserved.INTERNAL,
+                )
         }
     }
-
-    /**
-     * Reverse lookup, derived from [toCode] so it can't drift out of sync with a custom
-     * [overrides] map. Ties broken deterministically via [CANONICAL_PREFERENCE], same approach
-     * as [CodesToHttp.toStatus].
-     */
-    override fun toStatus(code: Int): Status? =
-        CANONICAL_PREFERENCE.firstOrNull { toCode(it) == code }
-            ?: Codes.all.firstOrNull { toCode(it) == code }
-
-    companion object {
-        val DEFAULT_OVERRIDES: Map<String, Int> =
-            mapOf(
-                Excluded.CANCELLED.id to 1,
-                Restricted.UNAUTHENTICATED.id to 16,
-                Invalid.INVALID_VALUE.id to 3,
-                Invalid.NOT_FOUND.id to 5,
-                Invalid.OUT_OF_RANGE.id to 11,
-                Restricted.DENIED.id to 7,
-                // ALREADY_EXISTS — was previously falling through to Rejected's category default
-                Rejected.CONFLICT.id to 6,
-                Rejected.PRECONDITION_FAILED.id to 9,
-                // takes over gRPC's UNIMPLEMENTED slot now that UNIMPLEMENTED and UNSUPPORTED have
-                // merged into one Status code — confirmed, not just an inference
-                Unserved.UNSUPPORTED.id to 12,
-                Unserved.UNREACHABLE.id to 14,
-                Unserved.TIMEOUT.id to 4,
-                Unserved.RATE_LIMITED.id to 8,
-                // RESOURCE_EXHAUSTED, same axis as RATE_LIMITED
-                Unserved.RESOURCE_LIMITED.id to 8,
-                Unserved.UNEXPECTED.id to 2,
-                Unserved.INTERNAL.id to 13,
-                Unserved.DATA_LOSS.id to 15,
-                // RESOURCE_EXHAUSTED — widely used real-world convention, not an official mapping
-                Invalid.PAYLOAD_TOO_LARGE.id to 8,
-                // exact match, closes the previously honest null gap at 10
-                Unserved.ABORTED.id to 10,
-                // DEGRADED and LEGAL_BLOCK have no closer gRPC equivalent — fall through to
-                // Unserved's own category default (13, INTERNAL)
-            )
-
-        /** One canonical winner per gRPC code with more than one resolving [Status] — see [toStatus]. */
-        private val CANONICAL_PREFERENCE: List<Status> =
-            listOf(
-                Succeeded.SUCCESS,
-                Invalid.INVALID_VALUE,
-                Restricted.DENIED,
-                Unserved.RATE_LIMITED,
-                Rejected.PRECONDITION_FAILED,
-                Unserved.INTERNAL,
-            )
-    }
-}
 
 /**
  * Composes a [base] [CodeLookup] with client-supplied [extensions], without modifying or
