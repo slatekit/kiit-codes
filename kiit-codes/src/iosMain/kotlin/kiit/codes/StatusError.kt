@@ -7,17 +7,23 @@ package kiit.codes
  * `@ObjCName` prevents the auto-generated `KiitCodesXxxError` prefix in the ObjC header, giving
  * Swift consumers the clean names below.
  *
- * Swift usage (without SKIE):
+ * Swift usage — construction and property access work directly:
  * ```swift
- * do {
- *     try someKotlinApi()
- * } catch let e as RestrictedError {
- *     print(e.status.name)  // e.g. "UNAUTHORIZED"
- * }
+ * let e = RestrictedError(status: Failed.Restricted.companion.UNAUTHENTICATED, errors: [], cause: nil)
+ * print(e.status.name)  // "UNAUTHENTICATED"
  * ```
  *
- * With the SKIE plugin, functions annotated with `@Throws(...)` are automatically bridged to
- * idiomatic Swift `throws` with no manual NSError casting.
+ * Manually `throw`-ing a constructed instance does **not** work — confirmed by actually running
+ * it, not just compiling it: `throw restrictedError as! Error` compiles (the `Error` conformance
+ * is a dynamic cast the type-checker can't verify), but crashes at runtime with "Could not cast
+ * value of type 'KiitCodesRestrictedError' ... to 'Swift.Error'". Kotlin exception types do not
+ * bridge to Swift's `Error` protocol when manually thrown this way, SKIE or no SKIE. The SKIE
+ * plugin *is* applied to this module, and its real throws-bridging feature — a Kotlin function
+ * annotated `@Throws(SomeException::class)` automatically becomes a native Swift `throws`
+ * function at its call site, with no manual casting — genuinely works, but needs such a function
+ * to call. **kiit-codes doesn't have one yet** — there is currently no way to idiomatically
+ * `throw`/`catch` one of these error types from Swift. See `samples/sample-swift` for the
+ * verified-working subset (construction, property access, `onEnum(of:)` exhaustive matching).
  */
 @OptIn(kotlin.experimental.ExperimentalObjCName::class)
 @ObjCName("RestrictedError", swiftName = "RestrictedError")

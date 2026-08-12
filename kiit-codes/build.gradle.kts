@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
+    alias(libs.plugins.skie)
     id("signing")
 }
 
@@ -66,6 +67,14 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+// Disabled: SKIE's default analytics upload sends git/hardware/project data to Touchlab — off
+// until that's something we explicitly want, not because it's a default worth silently keeping.
+skie {
+    analytics {
+        enabled.set(false)
     }
 }
 

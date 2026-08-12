@@ -168,6 +168,34 @@ hierarchy the way Java 21 does — see [`samples/sample-ts`](./samples/sample-ts
 available idiom (`instanceof` narrowing + an `assertNever` fallback) and the full, type-checked
 `Checked`/`collect`/`Err` API.
 
+**Swift:** not yet distributed via SPM/XCFramework (see the [Roadmap](#️-roadmap) — the framework
+is `.framework`-only today, built locally). Companion constants need `.companion` (Kotlin/Native
+has no equivalent to `@JvmField`/`@JsStatic` that flattens this), and this module uses the
+[SKIE](https://skie.touchlab.co/) plugin for real, compiler-enforced Swift exhaustiveness over the
+sealed hierarchy — via one Swift `enum` **per** Kotlin sealed type, not one flat enum for the whole
+tree, so getting from `Status` to a concrete leaf type is two nested `switch`es, not one:
+
+```swift
+import KiitCodes
+
+func describe(_ status: Status) -> String {
+    switch onEnum(of: status) {
+    case .passed(let passed):
+        switch onEnum(of: passed) {
+        case .succeeded(let s): return "ok: \(s.name)"
+        default: return "ok: \(passed)"
+        }
+    case .failed(let failed):
+        return "failed: \(failed)"
+    }
+}
+```
+
+Manually `throw`/`catch`-ing one of the `RestrictedError`/`InvalidError`/etc. types does **not**
+work today (confirmed by running it, not just compiling it) — see
+[`samples/sample-swift`](./samples/sample-swift) for the full, verified-working subset and exactly
+what does and doesn't work.
+
 See [`samples/sample-kotlin`](./samples/sample-kotlin) for a runnable end-to-end Kotlin example, or
 [`samples/sample-java`](./samples/sample-java) for the same library used from plain Java.
 
@@ -496,7 +524,9 @@ fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
 
 - [x] npm publish pipeline for JS consumers (`@kiit/codes`) — local-only for now
       (`scripts/publish-npm.sh`); CI/GitHub Actions wiring is a separate follow-up
-- [ ] SPM / XCFramework pipeline for Swift consumers
+- [ ] SPM / XCFramework pipeline for Swift consumers — SKIE is now applied for real Swift
+      exhaustiveness (see Quick Start above and `samples/sample-swift`), but distribution itself
+      (an actual `.xcframework` + SPM package, publishing to `kiit-spm`) is still unbuilt
 - [ ] GitHub Actions workflow for CI + Maven Central publish
 
 Track progress or open a discussion in [Issues](https://github.com/slatekit/kiit-codes/issues).
