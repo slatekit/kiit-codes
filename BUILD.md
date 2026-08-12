@@ -13,6 +13,7 @@ All Gradle commands below are run from the **repository root**.
 | JDK  | 17+     | `java -version` to verify |
 | Android SDK | any | Required for `androidTarget` compilation |
 | GPG  | 2.x     | `gpg --version`; must have the dev.kiit secret key imported |
+| Node / npm | 18+ / 10+ | Only needed for `scripts/publish-npm.sh` and `samples/sample-ts` — not for the Kotlin build itself |
 
 Import the signing key if not already present:
 ```bash
@@ -232,6 +233,31 @@ Requires `~/.gradle/gradle.properties` populated per the Setup section above.
 
 ---
 
+## Publish — npm (`@kiit/codes`)
+
+Published artifacts (once a version has actually gone through `scripts/publish-npm.sh`):
+[npmjs.com/package/@kiit/codes](https://www.npmjs.com/package/@kiit/codes)
+
+**Local-only for now** — this is not wired into `.github/workflows/release.yml` yet (see the
+README roadmap). Publishing to npm today is a manual, local step:
+
+```bash
+npm login          # one-time, if not already authenticated
+./scripts/publish-npm.sh
+```
+
+The script builds the JS production library distribution
+(`./gradlew :kiit-codes:jsBrowserProductionLibraryDistribution`), previews exactly what would be
+published via `npm pack --dry-run`, asks for confirmation, then runs
+`npm publish --access public` from `kiit-codes/build/dist/js/productionLibrary` — the
+`--access public` flag is required the first time a new scoped (`@kiit/...`) package is
+published, since scoped packages default to private on npm otherwise.
+
+The package name/version are set in `kiit-codes/build.gradle.kts`'s `js(IR) { }` block (see the
+[version FAQ entry](#how-do-i-bump-the-version) below) — there's no separate npm version to track.
+
+---
+
 ## FAQ
 
 ### "Cannot perform signing task — has no configured signatory"
@@ -260,8 +286,11 @@ The `mavenCentralUsername` and `mavenCentralPassword` are **portal token** crede
 
 ### How do I bump the version?
 
-Edit the `libraryVersion` val near the top of the `mavenPublishing {}` block in `kiit-codes/build.gradle.kts`:
+Edit the `libraryVersion` val near the top of `kiit-codes/build.gradle.kts` (above the `kotlin { }` block):
 ```kotlin
-val libraryVersion = "0.1.2"   // ← bump here
+val libraryVersion = "0.2.1"   // ← bump here
 ```
-This single value feeds both the published Maven coordinates and the `printVersion` task the release workflow reads to tag and name the GitHub release — see [CI — GitHub Actions](#ci--github-actions) above.
+This single value feeds the published Maven coordinates, the npm `package.json` version (via the
+`js(IR) { }` block's `packageJson { }`), and the `printVersion` task the release workflow reads to
+tag and name the GitHub release — see [CI — GitHub Actions](#ci--github-actions) above. There's no
+separate npm version to track.
