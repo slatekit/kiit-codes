@@ -164,8 +164,11 @@ Gradle itself already passes `--batch --pinentry-mode loopback` automatically wh
 # Compile only — no tests
 ./gradlew :kiit-codes:assemble
 
-# Run the sample app
-./gradlew :samples:sample1:run
+# Run the Kotlin sample app
+./gradlew :samples:sample-kotlin:run
+
+# Run the Java sample app
+./gradlew :samples:sample-java:run
 ```
 
 ---

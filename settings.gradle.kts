@@ -22,5 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "kiit-codes"
 
 include(":kiit-codes")
-include(":samples:sample1")
+include(":samples:sample-kotlin")
 include(":samples:sample-java")
