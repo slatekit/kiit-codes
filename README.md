@@ -15,7 +15,7 @@ Part of the [Kiit](https://www.kiit.dev) framework · [kiit.dev/codes](https://w
 
 ---
 
-![Codes tiers](assets/kiit-codes-lite.png)
+![Codes tiers](assets/kiit-codes-overview.png)
 
 ## 📚 Table of Contents
 

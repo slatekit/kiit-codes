@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram name="kiit-codes taxonomy" id="0">
-    <mxGraphModel dx="2336" dy="1510" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="706" pageHeight="860" math="0" shadow="0">
+    <mxGraphModel dx="2578" dy="1649" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="706" pageHeight="860" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1081,7 +1081,7 @@
         <mxCell id="KEp1C4nC8QL8dAwknRSZ-65" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/ai_machine_learning/Bot_Services.svg;" value="" vertex="1">
           <mxGeometry height="40.94" width="40.94" x="1171.53" y="2125.53" as="geometry" />
         </mxCell>
-        <mxCell id="KEp1C4nC8QL8dAwknRSZ-66" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;spacing=10;" value="&lt;font&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(128, 128, 128), rgb(127, 127, 127));&quot;&gt;Easy for people to scan, precise for&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;color: rgb(0, 127, 255);&quot;&gt;AI&amp;nbsp;&lt;/span&gt;&lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;font-size: 18px;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(128, 128, 128), rgb(127, 127, 127));&quot;&gt;to&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(128, 128, 128), rgb(127, 127, 127));&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(0, 127, 255), rgb(127, 127, 127));&quot;&gt;search&lt;/span&gt;&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" vertex="1">
+        <mxCell id="KEp1C4nC8QL8dAwknRSZ-66" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;spacing=10;" value="&lt;font&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(128, 128, 128), rgb(127, 127, 127));&quot;&gt;Explicit &lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(0, 127, 255), rgb(127, 127, 127));&quot;&gt;names&lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(128, 128, 128), rgb(127, 127, 127));&quot;&gt;, precise &lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(0, 127, 255), rgb(127, 127, 127));&quot;&gt;search&lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(128, 128, 128), rgb(127, 127, 127));&quot;&gt;, exhaustive &lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(0, 127, 255), rgb(127, 127, 127));&quot;&gt;matches&lt;/span&gt;&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" vertex="1">
           <mxGeometry height="64" width="583" x="1396" y="2114" as="geometry" />
         </mxCell>
         <mxCell id="KEp1C4nC8QL8dAwknRSZ-67" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontColor=#4D4D4D;" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b style=&quot;&quot;&gt;AI Benefits&lt;/b&gt;&lt;/font&gt;" vertex="1">
