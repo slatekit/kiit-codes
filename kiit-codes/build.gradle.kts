@@ -9,6 +9,11 @@ plugins {
     id("signing")
 }
 
+// Single source of truth for the published version — feeds Maven Central (below), the JS
+// package.json (in the js(IR) block below), and the release workflow's printVersion task, so
+// the git tag, GitHub release, Maven artifact, and npm package version can never drift apart.
+val libraryVersion = "0.2.1"
+
 kotlin {
     jvm {
         // src/jvmTest/java (see JavaInteropTest) is compiled automatically — Kotlin's jvm()
@@ -32,6 +37,19 @@ kotlin {
         nodejs()
         binaries.library()
         generateTypeScriptDefinitions()
+
+        // Sets the npm-facing package identity. The raw compiled filenames stay
+        // "kiit-codes-kiit-codes.{js,d.ts}" (rootProject-subproject concatenation) — that's purely
+        // internal; package.json's "main"/"types" fields below already point at them correctly,
+        // and consumers only ever interact via `import { kiit } from '@kiit/codes'`, resolved
+        // through package.json, never by referencing the raw filename directly. (compilerOptions'
+        // `moduleName` was tried for cosmetically renaming the filename too, but confirmed via a
+        // clean build to have no effect on either the filename or the `.d.ts`'s `export as
+        // namespace` identifier — not worth chasing further since it has zero consumer impact.)
+        compilations["main"].packageJson {
+            name = "@kiit/codes"
+            version = libraryVersion
+        }
     }
 
     listOf(iosArm64(), iosSimulatorArm64(), iosX64()).forEach {
@@ -62,10 +80,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
-
-// Single source of truth for the published version — also read by the release workflow via
-// the printVersion task below, so the git tag and GitHub release always match what's published.
-val libraryVersion = "0.2.1"
 
 /**
  * Store the following in ~/.gradle/gradle.properties

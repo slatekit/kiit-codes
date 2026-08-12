@@ -9,12 +9,28 @@
  * about: A Kotlin Tool-Kit for Server + Android
  *  </kiit_header>
  */
+@file:OptIn(ExperimentalJsExport::class, ExperimentalJsStatic::class)
+
 package kiit.codes
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.ExperimentalJsStatic
+import kotlin.js.JsExport
+import kotlin.js.JsStatic
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmStatic
 
-/** Well-known [Status.origin] values. */
+/**
+ * Well-known [Status.origin] values.
+ *
+ * Not `@JsExport`ed — plain Kotlin `object`s can't get clean static-style member access in
+ * Kotlin/JS the way a class's companion object can via `@JsStatic` (which only applies to class
+ * companions, confirmed by the compiler — this is a hard constraint, not a missed annotation).
+ * JS/TS callers don't usually need this directly: every constructor's `origin` parameter already
+ * defaults to [CUSTOM], so it can simply be omitted; the rare case of needing it explicitly can
+ * pass the literal string `"custom"` instead. See [Codes] for the equivalent, more consequential
+ * case (a top-level proxy function is used there instead, since its members are actually useful).
+ */
 object StatusConstants {
     /** Origin for every built-in [Codes] entry. */
     const val KIIT = "kiit"
@@ -39,6 +55,7 @@ object StatusConstants {
  *   Passed  = Succeeded  | Pending | Excluded | Information
  *   Failed  = Restricted | Invalid | Rejected | Unserved
  */
+@JsExport
 sealed interface Status {
     /**
      * Unique domain label, e.g. "TOKEN_EXPIRED", "RATE_LIMITED".
@@ -115,6 +132,7 @@ sealed interface Status {
  * below (e.g. `Succeeded` for `Passed.Succeeded`) are the same type, not a copy — they exist purely
  * to avoid writing the `Passed.`/`Failed.` prefix at every call site.
  */
+@JsExport
 sealed class Passed : Status {
     final override val success: Boolean get() = true
 
@@ -145,6 +163,7 @@ sealed class Passed : Status {
     ) : Passed() {
         companion object {
             @JvmField
+            @JsStatic
             val SUCCESS =
                 Succeeded(
                     "SUCCESS",
@@ -153,6 +172,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val CREATED =
                 Succeeded(
                     "CREATED",
@@ -161,6 +181,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val UPDATED =
                 Succeeded(
                     "UPDATED",
@@ -169,6 +190,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val PATCHED =
                 Succeeded(
                     "PATCHED",
@@ -177,6 +199,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val FETCHED =
                 Succeeded(
                     "FETCHED",
@@ -185,6 +208,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val DELETED =
                 Succeeded(
                     "DELETED",
@@ -193,6 +217,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val HANDLED =
                 Succeeded(
                     "HANDLED",
@@ -201,6 +226,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val REFERRED =
                 Succeeded(
                     "REFERRED",
@@ -209,6 +235,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val EXITED =
                 Succeeded(
                     "EXITED",
@@ -226,6 +253,7 @@ sealed class Passed : Status {
     ) : Passed() {
         companion object {
             @JvmField
+            @JsStatic
             val ACCEPTED =
                 Pending(
                     "ACCEPTED",
@@ -234,6 +262,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val QUEUED =
                 Pending(
                     "QUEUED",
@@ -242,6 +271,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val PROCESSING =
                 Pending(
                     "PROCESSING",
@@ -250,6 +280,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val CONFIRM =
                 Pending(
                     "CONFIRM",
@@ -258,6 +289,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val REDIRECTED =
                 Pending(
                     "REDIRECTED",
@@ -266,6 +298,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val SCHEDULED =
                 Pending(
                     "SCHEDULED",
@@ -288,6 +321,7 @@ sealed class Passed : Status {
     ) : Passed() {
         companion object {
             @JvmField
+            @JsStatic
             val OMITTED =
                 Excluded(
                     "OMITTED",
@@ -296,6 +330,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val SKIPPED =
                 Excluded(
                     "SKIPPED",
@@ -304,6 +339,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val DISCARDED =
                 Excluded(
                     "DISCARDED",
@@ -312,6 +348,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val CANCELLED =
                 Excluded(
                     "CANCELLED",
@@ -320,6 +357,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val DEDUPLICATED =
                 Excluded(
                     "DEDUPLICATED",
@@ -328,6 +366,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val DISQUALIFIED =
                 Excluded(
                     "DISQUALIFIED",
@@ -345,6 +384,7 @@ sealed class Passed : Status {
     ) : Passed() {
         companion object {
             @JvmField
+            @JsStatic
             val NOTICE =
                 Information(
                     "NOTICE",
@@ -353,6 +393,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val ADVISORY =
                 Information(
                     "ADVISORY",
@@ -361,6 +402,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val METADATA =
                 Information(
                     "METADATA",
@@ -369,6 +411,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val HEALTH =
                 Information(
                     "HEALTH",
@@ -377,6 +420,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val DIAGNOSTICS =
                 Information(
                     "DIAGNOSTICS",
@@ -385,6 +429,7 @@ sealed class Passed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val MOVED =
                 Information(
                     "MOVED",
@@ -402,6 +447,7 @@ sealed class Passed : Status {
  * See [Passed]'s doc for why built-in constants live on each subtype's own companion object
  * rather than on [Codes].
  */
+@JsExport
 sealed class Failed : Status {
     final override val success: Boolean get() = false
 
@@ -432,6 +478,7 @@ sealed class Failed : Status {
     ) : Failed() {
         companion object {
             @JvmField
+            @JsStatic
             val DENIED =
                 Restricted(
                     "DENIED",
@@ -440,6 +487,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val UNAUTHENTICATED =
                 Restricted(
                     "UNAUTHENTICATED",
@@ -448,6 +496,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val UNAUTHORIZED =
                 Restricted(
                     "UNAUTHORIZED",
@@ -456,6 +505,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val FORBIDDEN =
                 Restricted(
                     "FORBIDDEN",
@@ -464,6 +514,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val LOCKED =
                 Restricted(
                     "LOCKED",
@@ -472,6 +523,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val SUSPENDED =
                 Restricted(
                     "SUSPENDED",
@@ -489,6 +541,7 @@ sealed class Failed : Status {
     ) : Failed() {
         companion object {
             @JvmField
+            @JsStatic
             val INVALID_VALUE =
                 Invalid(
                     "INVALID_VALUE",
@@ -497,6 +550,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val BAD_REQUEST =
                 Invalid(
                     "BAD_REQUEST",
@@ -505,6 +559,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val NOT_FOUND =
                 Invalid(
                     "NOT_FOUND",
@@ -513,6 +568,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val OUT_OF_RANGE =
                 Invalid(
                     "OUT_OF_RANGE",
@@ -521,6 +577,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val PAYLOAD_TOO_LARGE =
                 Invalid(
                     "PAYLOAD_TOO_LARGE",
@@ -529,6 +586,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val MISSING_FIELD =
                 Invalid(
                     "MISSING_FIELD",
@@ -546,6 +604,7 @@ sealed class Failed : Status {
     ) : Failed() {
         companion object {
             @JvmField
+            @JsStatic
             val RULE_VIOLATION =
                 Rejected(
                     "RULE_VIOLATION",
@@ -554,6 +613,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val CONFLICT =
                 Rejected(
                     "CONFLICT",
@@ -562,6 +622,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val NOT_EXISTS =
                 Rejected(
                     "NOT_EXISTS",
@@ -570,6 +631,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val PRECONDITION_FAILED =
                 Rejected(
                     "PRECONDITION_FAILED",
@@ -578,6 +640,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val EXPIRED =
                 Rejected(
                     "EXPIRED",
@@ -586,6 +649,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val GONE =
                 Rejected(
                     "GONE",
@@ -609,6 +673,7 @@ sealed class Failed : Status {
     ) : Failed() {
         companion object {
             @JvmField
+            @JsStatic
             val UNEXPECTED =
                 Unserved(
                     "UNEXPECTED",
@@ -617,6 +682,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val UNSUPPORTED =
                 Unserved(
                     "UNSUPPORTED",
@@ -625,6 +691,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val TIMEOUT =
                 Unserved(
                     "TIMEOUT",
@@ -633,6 +700,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val RATE_LIMITED =
                 Unserved(
                     "RATE_LIMITED",
@@ -641,6 +709,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val RESOURCE_LIMITED =
                 Unserved(
                     "RESOURCE_LIMITED",
@@ -649,6 +718,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val UNREACHABLE =
                 Unserved(
                     "UNREACHABLE",
@@ -657,6 +727,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val UNDER_MAINTENANCE =
                 Unserved(
                     "UNDER_MAINTENANCE",
@@ -665,6 +736,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val INTERNAL =
                 Unserved(
                     "INTERNAL",
@@ -673,6 +745,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val DATA_LOSS =
                 Unserved(
                     "DATA_LOSS",
@@ -681,6 +754,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val DEGRADED =
                 Unserved(
                     "DEGRADED",
@@ -689,6 +763,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val LEGAL_BLOCK =
                 Unserved(
                     "LEGAL_BLOCK",
@@ -697,6 +772,7 @@ sealed class Failed : Status {
                 )
 
             @JvmField
+            @JsStatic
             val ABORTED =
                 Unserved(
                     "ABORTED",

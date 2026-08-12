@@ -141,7 +141,34 @@ try {
 }
 ```
 
-See [`samples/sample-kotlin`](./samples/sample-kotlin) for a runnable end-to-end example, or
+**TypeScript / JavaScript:** not yet on the npm registry (see the [Roadmap](#️-roadmap) — publishing
+today is a local, manual step via `scripts/publish-npm.sh`), but the full taxonomy is exported and
+usable once installed, e.g. via a local `file:` dependency:
+
+```ts
+import { kiit } from '@kiit/codes'
+
+const { Status, Passed, Failed, Checked, Err, collect, RestrictedError } = kiit.codes
+
+function describe(status: Status): string {
+  return status instanceof Passed
+    ? `ok: ${status.name}`
+    : `failed: ${status.name} — ${status.message}`
+}
+
+try {
+  throw new RestrictedError(Failed.Restricted.UNAUTHORIZED)
+} catch (e) {
+  if (e instanceof RestrictedError) console.log(e.status.name)
+}
+```
+
+TypeScript gets no compiler-enforced exhaustiveness over the sealed `Status`/`Passed`/`Failed`
+hierarchy the way Java 21 does — see [`samples/sample-ts`](./samples/sample-ts) for the best
+available idiom (`instanceof` narrowing + an `assertNever` fallback) and the full, type-checked
+`Checked`/`collect`/`Err` API.
+
+See [`samples/sample-kotlin`](./samples/sample-kotlin) for a runnable end-to-end Kotlin example, or
 [`samples/sample-java`](./samples/sample-java) for the same library used from plain Java.
 
 ## 🧠 Core concepts
@@ -467,7 +494,8 @@ fun Failed.toException(errors: List<Err> = emptyList()): StatusException =
 
 ## 🗺️ Roadmap
 
-- [ ] npm publish pipeline for JS consumers (`@kiit/codes`)
+- [x] npm publish pipeline for JS consumers (`@kiit/codes`) — local-only for now
+      (`scripts/publish-npm.sh`); CI/GitHub Actions wiring is a separate follow-up
 - [ ] SPM / XCFramework pipeline for Swift consumers
 - [ ] GitHub Actions workflow for CI + Maven Central publish
 
