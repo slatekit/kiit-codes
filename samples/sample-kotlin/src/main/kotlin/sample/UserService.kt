@@ -13,7 +13,7 @@ data class User(val id: String, val email: String)
 
 /**
  * A tiny service that returns a [Status] for every outcome instead of throwing for
- * expected failures — [StatusException] is reserved for crossing a call boundary
+ * expected failures. [StatusException] is reserved for crossing a call boundary
  * that can only communicate via exceptions (see [SampleApp]).
  */
 class UserService {
@@ -30,12 +30,12 @@ class UserService {
 
     fun authorize(id: String, requesterId: String): Status =
         when {
-            !users.containsKey(id) -> Invalid.NOT_FOUND
+            !users.containsKey(id) -> Rejected.NOT_EXISTS
             id != requesterId -> Restricted.UNAUTHORIZED
             else -> Succeeded.SUCCESS
         }
 
-    /** Throws [StatusException] instead of returning [Status] — for callers that need an exception. */
+    /** Throws [StatusException] instead of returning [Status], for callers that need an exception. */
     fun requireAuthorized(id: String, requesterId: String) {
         val status = authorize(id, requesterId)
         if (status is Failed) throw status.toException()

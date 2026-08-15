@@ -20,17 +20,7 @@ import kotlin.js.JsStatic
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmStatic
 
-/**
- * Well-known [Status.origin] values.
- *
- * Not `@JsExport`ed — plain Kotlin `object`s can't get clean static-style member access in
- * Kotlin/JS the way a class's companion object can via `@JsStatic` (which only applies to class
- * companions, confirmed by the compiler — this is a hard constraint, not a missed annotation).
- * JS/TS callers don't usually need this directly: every constructor's `origin` parameter already
- * defaults to [CUSTOM], so it can simply be omitted; the rare case of needing it explicitly can
- * pass the literal string `"custom"` instead. See [Codes] for the equivalent, more consequential
- * case (a top-level proxy function is used there instead, since its members are actually useful).
- */
+/** Well-known [Status.origin] values. */
 object StatusConstants {
     /** Origin for every built-in [Codes] entry. */
     const val KIIT = "kiit"
@@ -40,15 +30,21 @@ object StatusConstants {
 }
 
 /**
- * Platform-agnostic status type describing the outcome of any operation — a service call,
+ * Platform-agnostic status type describing the outcome of any operation: a service call,
  * a background job step, an API request, or a CLI command.
  *
  * Shape (maps directly to JSON / API error responses):
- *   { "id": "kiit.TOKEN_EXPIRED", "name": "TOKEN_EXPIRED", "group": "Restricted", "origin": "kiit",
- *     "message": "Session token expired", "success": false }
+ * {
+ *      "id"      : "kiit.TOKEN_EXPIRED",
+ *      "name"    : "TOKEN_EXPIRED",
+ *      "group"   : "Restricted",
+ *      "origin"  : "kiit",
+ *      "message" : "Session token expired",
+ *      "success" : false
+ * }
  *
- * Hierarchy. Categories are closed/sealed and fixed by design, to enforce a consistent taxonomy
- * across every consumer. Individual codes *within* a category are open — create new domain codes
+ * Hierarchy. Groups are closed/sealed and fixed by design, to enforce a consistent taxonomy
+ * across every consumer. Individual codes *within* a group are open. Create new domain codes
  * by constructing a [Passed] or [Failed] subtype directly (see [Codes] for the built-in set):
  *
  *   Status  = Passed     | Failed
@@ -59,7 +55,7 @@ object StatusConstants {
 sealed interface Status {
     /**
      * Unique domain label, e.g. "TOKEN_EXPIRED", "RATE_LIMITED".
-     * SCREAMING_SNAKE_CASE, stable — used as a searchable/aggregable key in logs and metrics.
+     * SCREAMING_SNAKE_CASE and stable, used as a searchable/aggregable key in logs and metrics.
      */
     val name: String
 
@@ -70,14 +66,13 @@ sealed interface Status {
      */
     val origin: String
 
-    /** Stable identity, `"$origin.$name"` — unique across every [Status], usable as a map key. */
+    /** Stable identity, `"$origin.$name"`, unique across every [Status] and usable as a map key. */
     val id: String get() = "$origin.$name"
 
     /**
-     * Human-readable, constant description — never constructed from runtime data. Per-instance /
-     * runtime detail (e.g. "field X was invalid because...") belongs on whatever wraps this
-     * Status (an error/result type one layer up), not here — that keeps [message] safe to use
-     * as an aggregation key across every occurrence of this status.
+     * Human-readable constant description, never constructed from runtime data. Per-instance
+     * detail belongs on whatever wraps this Status, not here. Do not use this as a key, use
+     * [name] instead.
      */
     val message: String
 
@@ -87,37 +82,39 @@ sealed interface Status {
      */
     val success: Boolean
 
-    /** The category discriminant, e.g. "Restricted", "Rejected" — see the hierarchy above. */
+    /** The group discriminant, e.g. "Restricted", "Rejected". See the hierarchy above. */
     val group: String
 
     companion object {
         /**
-         * Resolves a status from an optional [msg] override and an optional [rawStatus] override,
-         * falling back to [status] when neither is supplied. [rawStatus], if present, is used as
-         * the base instead of [status]; [msg], if present, is then applied on top of that base.
+         * Resolves a status from an optional [message] override and an optional [rawStatus]
+         * override, falling back to [status] when neither is supplied. [rawStatus], if present,
+         * is used as the base instead of [status]; [message], if present, is then applied on top
+         * of that base.
          */
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
-        fun <T : Status> ofStatus(msg: String?, rawStatus: T?, status: T): T {
+        fun <T : Status> ofStatus(message: String?, rawStatus: T?, status: T): T {
             val base = rawStatus ?: status
-            return if (msg == null) base else withMessage(base, msg) as T
+            return if (message == null) base else withMessage(base, message) as T
         }
 
         /**
          * Internal-only, narrower stand-in for the copy capability [Status] used to expose
-         * publicly (removed — an immutable [Status] shouldn't offer a general mutation escape
-         * hatch). Only [ofStatus] needs this, and only ever to override [message], never [origin].
+         * publicly. That was removed since an immutable [Status] shouldn't offer a general way
+         * to mutate itself. Only [ofStatus] needs this, and only ever to override [message],
+         * never [origin].
          */
-        private fun withMessage(status: Status, msg: String): Status =
+        private fun withMessage(status: Status, message: String): Status =
             when (status) {
-                is Passed.Succeeded -> status.copy(message = msg)
-                is Passed.Pending -> status.copy(message = msg)
-                is Passed.Excluded -> status.copy(message = msg)
-                is Passed.Information -> status.copy(message = msg)
-                is Failed.Restricted -> status.copy(message = msg)
-                is Failed.Invalid -> status.copy(message = msg)
-                is Failed.Rejected -> status.copy(message = msg)
-                is Failed.Unserved -> status.copy(message = msg)
+                is Passed.Succeeded -> status.copy(message = message)
+                is Passed.Pending -> status.copy(message = message)
+                is Passed.Excluded -> status.copy(message = message)
+                is Passed.Information -> status.copy(message = message)
+                is Failed.Restricted -> status.copy(message = message)
+                is Failed.Invalid -> status.copy(message = message)
+                is Failed.Rejected -> status.copy(message = message)
+                is Failed.Unserved -> status.copy(message = message)
             }
     }
 }
@@ -126,11 +123,12 @@ sealed interface Status {
  * Parent sealed type for all non-failure statuses (success = true for every subtype).
  * Subtypes: [Succeeded], [Pending], [Excluded], [Information].
  *
- * Each subtype's built-in constants live on its own companion object, not on [Codes] — this keeps
- * IDE autocomplete scoped (typing `Succeeded.` shows only [Succeeded]'s own members). [Codes] is
- * an aggregate/lookup layer over these, not where they're declared. The package-level typealiases
- * below (e.g. `Succeeded` for `Passed.Succeeded`) are the same type, not a copy — they exist purely
- * to avoid writing the `Passed.`/`Failed.` prefix at every call site.
+ * 1. Each subtype's built-in constants live on its own companion object, not on [Codes]. This
+ *    keeps IDE autocomplete scoped, typing `Succeeded.` shows only [Succeeded]'s own members.
+ *    [Codes] is an aggregate/lookup layer over these, not where they're declared.
+ * 2. The package-level typealiases below (e.g. `Succeeded` for `Passed.Succeeded`) are the same
+ *    type, not a copy. They exist purely to avoid writing the `Passed.`/`Failed.` prefix at
+ *    every call site.
  */
 @JsExport
 sealed class Passed : Status {
@@ -145,7 +143,7 @@ sealed class Passed : Status {
                 is Information -> "Information"
             }
 
-    /** Runtime-accessible version of each category's meaning — see the subtypes' own KDoc for detail. */
+    /** Runtime-accessible version of each group's meaning, see the subtypes' own KDoc for detail. */
     val groupDescription: String
         get() =
             when (this) {
@@ -155,7 +153,7 @@ sealed class Passed : Status {
                 is Information -> "The response provides information; no operation was performed."
             }
 
-    /** See [Passed.groupDescription] for this category's definition. */
+    /** See [Passed.groupDescription] for this group's definition. */
     data class Succeeded(
         override val name: String,
         override val message: String,
@@ -245,7 +243,7 @@ sealed class Passed : Status {
         }
     }
 
-    /** See [Passed.groupDescription] for this category's definition. */
+    /** See [Passed.groupDescription] for this group's definition. */
     data class Pending(
         override val name: String,
         override val message: String,
@@ -309,10 +307,7 @@ sealed class Passed : Status {
     }
 
     /**
-     * See [Passed.groupDescription] for this category's definition.
-     *
-     * The distinction between e.g. [Excluded.SKIPPED] and [Excluded.DISCARDED] is carried by
-     * [name], not by separate types.
+     * See [Passed.groupDescription] for this group's definition.
      */
     data class Excluded(
         override val name: String,
@@ -376,7 +371,7 @@ sealed class Passed : Status {
         }
     }
 
-    /** See [Passed.groupDescription] for this category's definition. */
+    /** See [Passed.groupDescription] for this group's definition. */
     data class Information(
         override val name: String,
         override val message: String,
@@ -460,7 +455,7 @@ sealed class Failed : Status {
                 is Unserved -> "Unserved"
             }
 
-    /** Runtime-accessible version of each category's meaning — see the subtypes' own KDoc for detail. */
+    /** Runtime-accessible version of each group's meaning, see the subtypes' own KDoc for detail. */
     val groupDescription: String
         get() =
             when (this) {
@@ -470,7 +465,7 @@ sealed class Failed : Status {
                 is Unserved -> "The system can't serve it right now, though nothing was wrong with the request."
             }
 
-    /** See [Failed.groupDescription] for this category's definition. */
+    /** See [Failed.groupDescription] for this group's definition. */
     data class Restricted(
         override val name: String,
         override val message: String,
@@ -533,7 +528,7 @@ sealed class Failed : Status {
         }
     }
 
-    /** See [Failed.groupDescription] for this category's definition. */
+    /** See [Failed.groupDescription] for this group's definition. */
     data class Invalid(
         override val name: String,
         override val message: String,
@@ -596,7 +591,7 @@ sealed class Failed : Status {
         }
     }
 
-    /** See [Failed.groupDescription] for this category's definition. */
+    /** See [Failed.groupDescription] for this group's definition. */
     data class Rejected(
         override val name: String,
         override val message: String,
@@ -660,7 +655,7 @@ sealed class Failed : Status {
     }
 
     /**
-     * See [Failed.groupDescription] for this category's definition.
+     * See [Failed.groupDescription] for this group's definition.
      *
      * E.g. capacity, timeout, an unsupported capability, planned maintenance, a degraded or
      * aborted dependency, a legal/regulatory block, or a genuinely unexpected/unhandled failure
@@ -783,10 +778,9 @@ sealed class Failed : Status {
     }
 }
 
-// Package-level shorthands, fully transparent — e.g. `Restricted` and `Failed.Restricted` are the
-// same type, not a copy, so each alias inherits its target's companion members with nothing extra
-// needed. These exist purely for brevity at call sites; the real declarations live on the types
-// themselves (see [Passed], [Failed]).
+// Package-level shorthands, fully transparent: `Restricted` and `Failed.Restricted` are the same
+// type, not a copy, so each alias inherits its target's companion members automatically. They
+// exist purely for brevity at call sites, see [Passed] and [Failed] for the real declarations.
 typealias Succeeded = Passed.Succeeded
 typealias Pending = Passed.Pending
 typealias Excluded = Passed.Excluded

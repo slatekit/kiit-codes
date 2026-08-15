@@ -10,7 +10,7 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 // =================================================================================================
-// CodesTest — the built-in registry
+// CodesTest: the built-in registry
 // =================================================================================================
 
 class CodesTest {
@@ -31,19 +31,19 @@ class CodesTest {
 
     @Test
     fun forbiddenIsRestricted() {
-        // Access-control outcome, not a business-rule failure — see Codes.kt for the reasoning.
+        // Access-control outcome, not a business-rule failure, see Codes.kt for the reasoning.
         assertTrue(Restricted.FORBIDDEN is Failed.Restricted)
     }
 
     @Test
     fun expiredIsRejected() {
-        // Was valid and timed out — a known business outcome, not malformed input.
+        // Was valid and timed out, a known business outcome, not malformed input.
         assertTrue(Rejected.EXPIRED is Failed.Rejected)
     }
 
     @Test
     fun goneIsRejected() {
-        // Deliberately removed — a known business outcome, not malformed input.
+        // Deliberately removed, a known business outcome, not malformed input.
         assertTrue(Rejected.GONE is Failed.Rejected)
     }
 
@@ -63,7 +63,7 @@ class CodesTest {
 
     @Test
     fun exitedIsSucceededNotInformation() {
-        // Exiting is a real completed operation, not metadata — moved from Information.EXIT.
+        // Exiting is a real completed operation, not metadata, moved from Information.EXIT.
         assertTrue(Succeeded.EXITED.success)
         assertTrue(Succeeded.EXITED is Passed.Succeeded)
     }
@@ -110,62 +110,62 @@ class CodesTest {
 }
 
 // =================================================================================================
-// CodesToHttpTest / CompositeLookupTest — CodeLookup implementations
+// CodesToHttpTest / CompositeLookupTest: CodeLookup implementations
 // =================================================================================================
 
 class CodesToHttpTest {
     private val http = CodesToHttp()
 
     // -------------------------------------------------------------------------
-    // toCode — category defaults
+    // toCode: group defaults
     // -------------------------------------------------------------------------
 
-    @Test fun categoryDefaultSucceeded() {
+    @Test fun groupDefaultSucceeded() {
         assertEquals(200, http.toCode(Succeeded.SUCCESS))
         assertEquals(200, http.toCode(Succeeded.UPDATED))
     }
 
-    @Test fun categoryDefaultPending() {
+    @Test fun groupDefaultPending() {
         assertEquals(202, http.toCode(Pending.PROCESSING))
         assertEquals(202, http.toCode(Pending.QUEUED))
         assertEquals(202, http.toCode(Pending.ACCEPTED))
     }
 
-    @Test fun categoryDefaultExcluded() {
+    @Test fun groupDefaultExcluded() {
         assertEquals(200, http.toCode(Excluded.OMITTED))
         assertEquals(200, http.toCode(Excluded.SKIPPED))
         assertEquals(200, http.toCode(Excluded.DISCARDED))
     }
 
-    @Test fun categoryDefaultInformation() {
+    @Test fun groupDefaultInformation() {
         assertEquals(200, http.toCode(Information.METADATA))
     }
 
-    @Test fun categoryDefaultRestricted() {
+    @Test fun groupDefaultRestricted() {
         assertEquals(401, http.toCode(Restricted.DENIED))
         assertEquals(401, http.toCode(Restricted.UNAUTHENTICATED))
     }
 
-    @Test fun categoryDefaultInvalid() {
+    @Test fun groupDefaultInvalid() {
         assertEquals(400, http.toCode(Invalid.BAD_REQUEST))
         assertEquals(400, http.toCode(Invalid.INVALID_VALUE))
         assertEquals(400, http.toCode(Invalid.OUT_OF_RANGE))
     }
 
-    @Test fun categoryDefaultRejected() {
+    @Test fun groupDefaultRejected() {
         assertEquals(409, http.toCode(Rejected.RULE_VIOLATION))
-        // CONFLICT needs no override — 409 is the category default it would've resolved to anyway.
+        // CONFLICT needs no override, 409 is already the group default it would've resolved to.
         assertEquals(409, http.toCode(Rejected.CONFLICT))
         assertEquals(409, http.toCode(Rejected.PRECONDITION_FAILED))
     }
 
-    @Test fun categoryDefaultUnserved() {
+    @Test fun groupDefaultUnserved() {
         assertEquals(503, http.toCode(Unserved.UNREACHABLE))
         assertEquals(503, http.toCode(Unserved.UNDER_MAINTENANCE))
     }
 
     // -------------------------------------------------------------------------
-    // toCode — per-code overrides
+    // toCode: per-code overrides
     // -------------------------------------------------------------------------
 
     @Test fun overrideCreated() {
@@ -236,27 +236,23 @@ class CodesToHttpTest {
         assertEquals(451, http.toCode(Unserved.LEGAL_BLOCK))
     }
 
-    @Test fun categoryDefaultCoversDegradedAndAborted() {
-        // Neither has a closer HTTP equivalent — deliberately fall through to Unserved's default.
+    @Test fun groupDefaultCoversDegradedAndAborted() {
+        // Neither has a closer HTTP equivalent, deliberately fall through to Unserved's default.
         assertEquals(503, http.toCode(Unserved.DEGRADED))
         assertEquals(503, http.toCode(Unserved.ABORTED))
     }
 
-    /**
-     * A custom, unregistered status still resolves via its category's default rather than a
-     * guessed/literal fallback.
-     */
+    /** A custom, unregistered status still resolves via its group's default, not a guessed fallback. */
     @Test
-    fun toCodeFallsBackToCategoryDefaultForCustomStatus() {
+    fun toCodeFallsBackToGroupDefaultForCustomStatus() {
         val custom = Failed.Rejected("CUSTOM", "Custom error")
-        assertEquals(409, http.toCode(custom)) // Rejected's category default
+        assertEquals(409, http.toCode(custom)) // Rejected's group default
     }
 
     /**
-     * [overrides] is keyed by [Status.id] (origin+name), not full structural equality — a status
-     * sharing NOT_FOUND's identity but a different message still resolves to its override. Before
-     * this fix, [Status] being a data class meant the override map compared every field, including
-     * [Status.message], so this would have silently missed and fallen through to a wrong default.
+     * [overrides] is keyed by [Status.id] (origin+name), not full structural equality. A status
+     * sharing NOT_FOUND's identity but a different message still resolves to its override, since
+     * [Status] being a data class would otherwise compare every field including [Status.message].
      */
     @Test
     fun overrideMatchesByIdentityNotFullStatusEquality() {
@@ -265,7 +261,7 @@ class CodesToHttpTest {
     }
 
     // -------------------------------------------------------------------------
-    // toStatus — reverse lookup, derived from toCode
+    // toStatus: reverse lookup, derived from toCode
     // -------------------------------------------------------------------------
 
     @Test
@@ -277,7 +273,7 @@ class CodesToHttpTest {
 
     @Test
     fun toStatusReturnsNullForUnrecognizedHttpCode() {
-        // No guessed range fallback — an unrecognized code is honestly null, caller decides the default.
+        // No guessed range fallback, an unrecognized code is honestly null, caller decides the default.
         assertNull(http.toStatus(999))
     }
 
@@ -289,12 +285,12 @@ class CodesToHttpTest {
     }
 
     // -------------------------------------------------------------------------
-    // toStatus — deterministic canonical choice for codes shared by multiple statuses
+    // toStatus: deterministic canonical choice for codes shared by multiple statuses
     // -------------------------------------------------------------------------
 
     /**
      * Spells out the lossy round trip directly: converting UPDATED forward and back doesn't
-     * return UPDATED. toStatus(toCode(x)) == x does not generally hold — see toStatus's doc.
+     * return UPDATED. toStatus(toCode(x)) == x does not generally hold, see toStatus's doc.
      */
     @Test
     fun httpRoundTripDoesNotPreserveTheOriginalStatus() {
@@ -322,13 +318,13 @@ class CodesToHttpTest {
         assertSame(Invalid.NOT_FOUND, http.toStatus(404))
     }
 
-    /** EXPIRED and GONE both resolve to 410; GONE wins — its name and message are the literal HTTP 410 concept. */
+    /** EXPIRED and GONE both resolve to 410; GONE wins, its name and message are the literal HTTP 410 concept. */
     @Test
     fun toStatus410ResolvesToGoneNotExpired() {
         assertSame(Rejected.GONE, http.toStatus(410))
     }
 
-    /** Only UNEXPECTED resolves to 500 now that Rejected's default moved to 409 — no tie to break. */
+    /** Only UNEXPECTED resolves to 500 now that Rejected's default moved to 409, no tie to break. */
     @Test
     fun toStatus500ResolvesToUnexpected() {
         assertSame(Unserved.UNEXPECTED, http.toStatus(500))
@@ -340,7 +336,7 @@ class CodesToHttpTest {
         assertSame(Rejected.CONFLICT, http.toStatus(409))
     }
 
-    /** Only UNSUPPORTED resolves to 501 now that UNIMPLEMENTED was removed — no tie to break. */
+    /** Only UNSUPPORTED resolves to 501 now that UNIMPLEMENTED was removed, no tie to break. */
     @Test
     fun toStatus501ResolvesToUnsupported() {
         assertSame(Unserved.UNSUPPORTED, http.toStatus(501))
@@ -348,9 +344,8 @@ class CodesToHttpTest {
 
     /**
      * `INVALID_ENTITY` was removed from the registry, so `422` has no dedicated [Status] mapping
-     * again — a known, accepted regression, not a bug. Anything converting [Invalid.INVALID_VALUE]
-     * to HTTP falls through to its category default, 400, same place it sat before `INVALID_ENTITY`
-     * ever existed.
+     * again. This is a known, accepted regression, not a bug. Anything converting
+     * [Invalid.INVALID_VALUE] to HTTP falls through to its group default, 400, same as before.
      */
     @Test
     fun toStatus422ReturnsNullSinceInvalidEntityWasRemoved() {
@@ -371,7 +366,7 @@ class CodesToHttpTest {
 
     /**
      * The canonical tie-breaking is still derived from this instance's own [CodesToHttp.toCode],
-     * not a fixed table — a custom [overrides] map changes both directions together.
+     * not a fixed table, a custom [overrides] map changes both directions together.
      */
     @Test
     fun toStatusStaysInSyncWithCustomOverridesNotJustDefaults() {
@@ -388,35 +383,35 @@ class CodesToHttpTest {
 class CodesToGrpcTest {
     private val grpc = CodesToGrpc()
 
-    @Test fun categoryDefaultPassedIsOk() {
+    @Test fun groupDefaultPassedIsOk() {
         assertEquals(0, grpc.toCode(Succeeded.SUCCESS))
         assertEquals(0, grpc.toCode(Pending.PROCESSING))
         assertEquals(0, grpc.toCode(Excluded.SKIPPED))
         assertEquals(0, grpc.toCode(Information.METADATA))
     }
 
-    @Test fun categoryDefaultRestrictedIsPermissionDenied() {
+    @Test fun groupDefaultRestrictedIsPermissionDenied() {
         assertEquals(7, grpc.toCode(Restricted.DENIED))
         assertEquals(7, grpc.toCode(Restricted.UNAUTHORIZED))
         assertEquals(7, grpc.toCode(Restricted.FORBIDDEN))
     }
 
-    @Test fun categoryDefaultInvalidIsInvalidArgument() {
+    @Test fun groupDefaultInvalidIsInvalidArgument() {
         assertEquals(3, grpc.toCode(Invalid.BAD_REQUEST))
         assertEquals(3, grpc.toCode(Invalid.MISSING_FIELD))
     }
 
-    @Test fun categoryDefaultRejectedIsFailedPrecondition() {
+    @Test fun groupDefaultRejectedIsFailedPrecondition() {
         assertEquals(9, grpc.toCode(Rejected.RULE_VIOLATION))
         assertEquals(9, grpc.toCode(Rejected.NOT_EXISTS))
         assertEquals(9, grpc.toCode(Rejected.EXPIRED))
         assertEquals(9, grpc.toCode(Rejected.GONE))
     }
 
-    @Test fun categoryDefaultUnservedIsInternal() {
+    @Test fun groupDefaultUnservedIsInternal() {
         // UNSUPPORTED is overridden to 12 (see overrideUnsupported) and no longer falls here.
         assertEquals(13, grpc.toCode(Unserved.UNDER_MAINTENANCE))
-        // No closer gRPC equivalent for either — deliberately fall through to the category default.
+        // No closer gRPC equivalent for either, deliberately fall through to the group default.
         assertEquals(13, grpc.toCode(Unserved.DEGRADED))
         assertEquals(13, grpc.toCode(Unserved.LEGAL_BLOCK))
     }
@@ -466,7 +461,7 @@ class CodesToGrpcTest {
         assertEquals(15, grpc.toCode(Unserved.DATA_LOSS))
     }
 
-    /** Exact match — closes what used to be an honest null gap at gRPC's own ABORTED (10). */
+    /** Exact match, closes what used to be an honest null gap at gRPC's own ABORTED (10). */
     @Test fun overrideAborted() {
         assertEquals(10, grpc.toCode(Unserved.ABORTED))
     }
@@ -484,7 +479,7 @@ class CodesToGrpcTest {
     }
 
     // -------------------------------------------------------------------------
-    // toStatus — deterministic canonical choice for gRPC codes shared by multiple statuses
+    // toStatus: deterministic canonical choice for gRPC codes shared by multiple statuses
     // -------------------------------------------------------------------------
 
     /** Every non-overridden Passed status resolves to 0 (OK); SUCCESS wins. */
@@ -499,7 +494,7 @@ class CodesToGrpcTest {
         assertSame(Invalid.INVALID_VALUE, grpc.toStatus(3))
     }
 
-    /** ALREADY_EXISTS — only CONFLICT resolves to 6, no tie to break. */
+    /** ALREADY_EXISTS: only CONFLICT resolves to 6, no tie to break. */
     @Test
     fun toStatus6ResolvesToConflict() {
         assertSame(Rejected.CONFLICT, grpc.toStatus(6))
@@ -530,7 +525,7 @@ class CodesToGrpcTest {
     }
 
     /**
-     * Only UNSUPPORTED resolves to 12 — it took over gRPC's UNIMPLEMENTED slot now that the two
+     * Only UNSUPPORTED resolves to 12, it took over gRPC's UNIMPLEMENTED slot now that the two
      * built-in concepts merged into one Status code. No tie to break.
      */
     @Test
@@ -585,7 +580,7 @@ class CompositeLookupTest {
     }
 
     /**
-     * [CompositeLookup.toCode] matches by [Status.id], not full [Status] equality — a status
+     * [CompositeLookup.toCode] matches by [Status.id], not full [Status] equality. A status
      * sharing [customCode]'s identity but a different message still resolves to its extension.
      */
     @Test

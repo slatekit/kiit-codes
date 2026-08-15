@@ -40,65 +40,59 @@ interface HasErrors {
  */
 @JsExport
 sealed class Err {
-    abstract val msg: String
+    abstract val message: String
     abstract val cause: Throwable?
     abstract val ref: Any?
 
-    /**
-     * Different implementations for Error.
-     *
-     * Default Error implementation to represent an error with message and optional throwable
-     */
+    /** Default [Err] implementation: a message with an optional cause. */
     data class ErrorInfo
         @JvmOverloads
         constructor(
-            override val msg: String,
+            override val message: String,
             override val cause: Throwable? = null,
             override val ref: Any? = null,
         ) : Err()
 
     /**
-     * Error implementation to represent an error on a specific field
-     * @param field: Name of the field causing the error e.g. "email"
-     * @param value: Value of the field causing the error e.g. "some_invalid_value"
+     * [Err] implementation for an error on a specific field.
+     * @param field: Name of the field causing the error, e.g. "email"
+     * @param value: Value of the field causing the error, e.g. "some_invalid_value"
      */
     data class ErrorField
         @JvmOverloads
         constructor(
             val field: String,
             val value: String,
-            override val msg: String,
+            override val message: String,
             override val cause: Throwable? = null,
             override val ref: Any? = null,
         ) : Err()
 
     /**
-     * Error implementation to store list of errors
-     * @param errors: List of all the errors
+     * [Err] implementation that wraps a list of other errors.
+     * @param errors: The errors being wrapped
      */
     data class ErrorList
         @JvmOverloads
         constructor(
             val errors: List<Err>,
-            override val msg: String,
+            override val message: String,
             override val cause: Throwable? = null,
             override val ref: Any? = null,
         ) : Err()
 
     /**
-     * Provides easy ways to build the Err type from various sources such as strings, exceptions, field errors
+     * Convenience builders for [Err] from common sources: strings, exceptions, field errors.
      */
     companion object {
         @JvmStatic
         @JsStatic
         @JvmOverloads
-        fun of(msg: String, ex: Throwable? = null): Err {
-            return ErrorInfo(msg, ex)
+        fun of(message: String, ex: Throwable? = null): Err {
+            return ErrorInfo(message, ex)
         }
 
-        // @JsName disambiguates from the of(msg, ex) overload above — JS has no function
-        // overloading, and @JsStatic requires a stable, unmangled name, so two same-named
-        // companion members can't both be reachable from JS without one being renamed.
+        // @JsName avoids a JS name clash with the of(message, ex) overload above.
         @JvmStatic
         @JsStatic
         @JsName("ofStatus")
@@ -109,24 +103,22 @@ sealed class Err {
         @JvmStatic
         @JsStatic
         @JvmOverloads
-        fun on(field: String, value: String, msg: String, ex: Throwable? = null): Err {
-            return ErrorField(field, value, msg, ex)
+        fun on(field: String, value: String, message: String, ex: Throwable? = null): Err {
+            return ErrorField(field, value, message, ex)
         }
 
         /**
-         * Builds an [Err] for a [field] with a specific per-occurrence [msg], without a [value].
-         * Use this instead of [on] when the value itself could be sensitive (e.g. a password or
-         * token) and shouldn't be carried on the error.
-         *
-         * `@JsName` disambiguates from the `on(field, value, msg, ex)` overload above — same
-         * reason as `of`/`ofStatus`.
+         * Builds an [Err] for a [field] with a specific per-occurrence [message], without a
+         * [value]. Use this instead of [on] when the value itself could be sensitive (e.g. a
+         * password or token) and shouldn't be carried on the error. `@JsName` avoids a JS name
+         * clash above.
          */
         @JvmStatic
         @JsStatic
         @JvmOverloads
         @JsName("onField")
-        fun on(field: String, msg: String, ex: Throwable? = null): Err {
-            return ErrorField(field, "", msg, ex)
+        fun on(field: String, message: String, ex: Throwable? = null): Err {
+            return ErrorField(field, "", message, ex)
         }
 
         @JvmStatic
@@ -143,8 +135,8 @@ sealed class Err {
 
         @JvmStatic
         @JsStatic
-        fun list(errors: List<String>, msg: String?): ErrorList {
-            return ErrorList(errors.map { ErrorInfo(it) }, msg ?: "Error occurred")
+        fun list(errors: List<String>, message: String?): ErrorList {
+            return ErrorList(errors.map { ErrorInfo(it) }, message ?: "Error occurred")
         }
 
         @JvmStatic

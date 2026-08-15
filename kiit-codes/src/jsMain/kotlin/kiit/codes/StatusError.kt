@@ -8,11 +8,10 @@ import kotlin.js.ExperimentalJsExport
  * JS/TypeScript-idiomatic aliases for the [StatusException] subclasses.
  *
  * JavaScript error types are conventionally named `XxxError`. Each subclass is annotated with
- * `@JsExport` so it appears in the generated `.d.ts`, while [StatusException] remains internal
- * to the Kotlin bundle and is not exported.
- *
- * TypeScript usage — everything nests under the `kiit.codes` namespace in the generated `.d.ts`,
- * so a single `kiit` import covers the whole library:
+ * `@JsExport`, and redeclares `status`/`errors` under those exact names via `@JsName`, since
+ * [StatusException] itself isn't exported and its inherited members wouldn't otherwise appear
+ * in the generated `.d.ts`. Everything nests under the `kiit.codes` namespace, so a single
+ * `kiit` import covers the whole library:
  * ```ts
  * import { kiit } from '@kiit/codes'
  *
@@ -22,14 +21,6 @@ import kotlin.js.ExperimentalJsExport
  *     if (e instanceof kiit.codes.RestrictedError) { console.log(e.status.name) }
  * }
  * ```
- *
- * Each subclass declares its own `status`/`errors` properties (renamed to those exact names for
- * JS via `@JsName`, distinct Kotlin-side names to avoid colliding with the inherited, non-open
- * [StatusException.status]/[StatusException.errors]) rather than relying on the inherited ones as
- * they stand — [StatusException] isn't exported, so its members would otherwise be completely
- * invisible in the generated `.d.ts` for these subtypes (confirmed empirically: even an `override`
- * with a narrower type is silently dropped from the `.d.ts` by the exporter, which assumes
- * overridden members are already described on the — here, invisible — supertype).
  */
 @JsExport
 @JsName("RestrictedError")

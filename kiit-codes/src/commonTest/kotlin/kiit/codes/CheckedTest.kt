@@ -23,7 +23,7 @@ class CheckedTest {
     }
 
     // -------------------------------------------------------------------------
-    // validatePhone — a realistic Checked-returning validator, also exercised via collect below
+    // validatePhone: a realistic Checked-returning validator, also exercised via collect below
     // -------------------------------------------------------------------------
 
     @Test
@@ -39,7 +39,7 @@ class CheckedTest {
         assertTrue(!checked.isValid)
         assertEquals(Invalid.INVALID_VALUE, checked.status)
         assertEquals(1, checked.errors.size)
-        assertEquals("too short", checked.errors.single().msg)
+        assertEquals("too short", checked.errors.single().message)
     }
 
     @Test

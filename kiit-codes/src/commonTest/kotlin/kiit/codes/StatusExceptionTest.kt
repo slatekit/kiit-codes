@@ -39,7 +39,7 @@ class StatusExceptionTest {
     fun defaultErrorsWrapTheStatusSingly() {
         val ex = StatusException.RestrictedException(Restricted.UNAUTHORIZED)
         assertEquals(1, ex.errors.size)
-        assertEquals(Restricted.UNAUTHORIZED.message, ex.errors.single().msg)
+        assertEquals(Restricted.UNAUTHORIZED.message, ex.errors.single().message)
     }
 
     @Test
@@ -70,7 +70,7 @@ class StatusExceptionTest {
             } catch (e: StatusException) {
                 e
             }
-        // Exhaustive `when` with no `else` — fails to compile if a subtype is missing.
+        // Exhaustive `when` with no `else`, fails to compile if a subtype is missing.
         val label =
             when (caught) {
                 is StatusException.RestrictedException -> "restricted"
