@@ -1,4 +1,7 @@
 <div align="center">
+<h1>
+  <img src="./assets/kiit-codes-logo.png" width="42" align="absmiddle" />
+</h1>
 
 # kiit-codes
 
