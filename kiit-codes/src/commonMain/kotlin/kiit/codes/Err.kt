@@ -44,11 +44,7 @@ sealed class Err {
     abstract val cause: Throwable?
     abstract val ref: Any?
 
-    /**
-     * Different implementations for Error.
-     *
-     * Default Error implementation to represent an error with message and optional throwable
-     */
+    /** Default [Err] implementation: a message with an optional cause. */
     data class ErrorInfo
         @JvmOverloads
         constructor(
@@ -58,9 +54,9 @@ sealed class Err {
         ) : Err()
 
     /**
-     * Error implementation to represent an error on a specific field
-     * @param field: Name of the field causing the error e.g. "email"
-     * @param value: Value of the field causing the error e.g. "some_invalid_value"
+     * [Err] implementation for an error on a specific field.
+     * @param field: Name of the field causing the error, e.g. "email"
+     * @param value: Value of the field causing the error, e.g. "some_invalid_value"
      */
     data class ErrorField
         @JvmOverloads
@@ -73,8 +69,8 @@ sealed class Err {
         ) : Err()
 
     /**
-     * Error implementation to store list of errors
-     * @param errors: List of all the errors
+     * [Err] implementation that wraps a list of other errors.
+     * @param errors: The errors being wrapped
      */
     data class ErrorList
         @JvmOverloads
@@ -86,7 +82,7 @@ sealed class Err {
         ) : Err()
 
     /**
-     * Provides easy ways to build the Err type from various sources such as strings, exceptions, field errors
+     * Convenience builders for [Err] from common sources: strings, exceptions, field errors.
      */
     companion object {
         @JvmStatic
@@ -96,9 +92,9 @@ sealed class Err {
             return ErrorInfo(msg, ex)
         }
 
-        // @JsName disambiguates from the of(msg, ex) overload above — JS has no function
-        // overloading, and @JsStatic requires a stable, unmangled name, so two same-named
-        // companion members can't both be reachable from JS without one being renamed.
+        // @JsName disambiguates this from the of(msg, ex) overload above. JS has no function
+        // overloading, and @JsStatic needs a stable, unmangled name, so two same-named companion
+        // members can't both reach JS unless one gets renamed.
         @JvmStatic
         @JsStatic
         @JsName("ofStatus")
@@ -114,12 +110,11 @@ sealed class Err {
         }
 
         /**
-         * Builds an [Err] for a [field] with a specific per-occurrence [msg], without a [value].
-         * Use this instead of [on] when the value itself could be sensitive (e.g. a password or
-         * token) and shouldn't be carried on the error.
-         *
-         * `@JsName` disambiguates from the `on(field, value, msg, ex)` overload above — same
-         * reason as `of`/`ofStatus`.
+         * 1. Builds an [Err] for a [field] with a specific per-occurrence [msg], without a
+         *    [value]. Use this instead of [on] when the value itself could be sensitive
+         *    (e.g. a password or token) and shouldn't be carried on the error.
+         * 2. `@JsName` disambiguates this from the `on(field, value, msg, ex)` overload above, for
+         *    the same reason as the `of`/`ofStatus` pair above.
          */
         @JvmStatic
         @JsStatic
