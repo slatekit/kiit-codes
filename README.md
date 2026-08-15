@@ -207,7 +207,9 @@ when (val status = authorize(userId, requesterId)) {
 
 ## Roadmap
 
-kiit-codes is being extracted and polished as a standalone module of Kiit. Current work is focused on the Kotlin release, documentation, examples, and ecosystem integration.
+kiit-codes has been extracted from kiit framework and polished as a standalone module.
+This has been used in production for over 4+ years to power mobile and server kotlin applications.
+Current work is focused on the Kotlin release, documentation, examples, and ecosystem integration.
 
 | # | Topic | Description |
 |---:|---|---|
