@@ -320,7 +320,7 @@ sealed class Passed : Status {
             val OMITTED =
                 Excluded(
                     "OMITTED",
-                    "The item was left out.",
+                    "The item was excluded from the result.",
                     origin = StatusConstants.KIIT,
                 )
 
