@@ -108,8 +108,8 @@ Codes uses a three-tier model:
 
 The two statuses are:
 
-- **Passed** — `Succeeded`, `Pending`, `Information`, `Excluded`
-- **Failed** — `Unserved`, `Restricted`, `Invalid`, `Rejected`
+- **Passed** — `Succeeded`, `Pending`, `Excluded`, `Information`
+- **Failed** — `Restricted`, `Invalid`, `Rejected`, `Unserved`
 
 Each code provides an `id`, `name`, `group`, `origin`, `message`, and `success` flag. Built-in codes use the `kiit` origin and each group has a default code for cases where more precision is unnecessary.
 
@@ -237,7 +237,7 @@ See [GitHub Issues](https://github.com/slatekit/kiit-codes/issues) for current w
 ## Requirements
 
 - Kotlin Multiplatform
-- JVM, Android, iOS (simulator arm64, x64)
+- JVM, Android, iOS (simulator, iosArm64, x64)
 - No external runtime dependencies
 
 ## Contributing
