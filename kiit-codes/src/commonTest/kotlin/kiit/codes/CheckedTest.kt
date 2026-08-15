@@ -17,7 +17,7 @@ class CheckedTest {
         } else {
             Checked.failure(
                 Invalid.INVALID_VALUE,
-                listOf(Err.on("phone", "too short")),
+                listOf(Err.on("phone", phone, "Too short")),
             )
         }
     }
@@ -39,7 +39,7 @@ class CheckedTest {
         assertTrue(!checked.isValid)
         assertEquals(Invalid.INVALID_VALUE, checked.status)
         assertEquals(1, checked.errors.size)
-        assertEquals("too short", checked.errors.single().message)
+        assertEquals("Too short", checked.errors.single().message)
     }
 
     @Test
