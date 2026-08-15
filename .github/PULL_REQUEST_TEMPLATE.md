@@ -1,23 +1,21 @@
+## Related discussion or issue
+<!-- Link to the Discussion or Issue this PR came out of. PRs without prior discussion may be
+     asked to open one first, see CONTRIBUTING.md. -->
+
 ## Overview
-<!-- General overivew of the PR -->
+<!-- General overview of the PR -->
 
-## Ticket(s) 
-<!-- Link to any tickets -->
-
-## Links(s) 
-<!-- Relevant links -->
+## Links
+<!-- Any other relevant links: related PRs, external specs, changed assets, etc. -->
 
 ## Dependencies
-<!-- Items this depends on -->
+<!-- Anything this depends on: another PR, a specific release, an upstream change -->
 
 ## Design
 <!-- High-level design/changes -->
 
-## Notes
-<!-- Explain any notes-->
-
-## Pending
-<!-- Pending items ? -->
-
 ## Tests
 <!-- Any tests added/changed -->
+
+## Notes
+<!-- Anything else worth calling out -->
