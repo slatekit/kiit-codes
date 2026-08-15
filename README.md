@@ -18,21 +18,21 @@ Part of [Kiit](https://www.kiit.dev) · [Docs](https://www.kiit.dev/codes) · [B
 ![Kiit Codes overview](./assets/kiit-codes-overview.png)
 
 ## Why
+Applications need to communicate a simple idea consistently: **what happened?**
 
-Applications need a consistent way to describe **what happened**.
+In practice, success and failure are often modeled differently across domains, application layers, protocols, and error-handling approaches. This creates several recurring problems:
 
-In practice, outcomes are often spread across exceptions, booleans, domain enums, and transport-specific codes such as HTTP statuses. That makes the same outcome harder to classify consistently across APIs, services, jobs, validation, CLIs, logs, and metrics.
+|  # | Problem            | Description                                                             |
+| -: |--------------------|-------------------------------------------------------------------------|
+|  1 | **Classification** | No shared taxonomy for modeling success and failure.                    |
+|  2 | **Consistency**    | Lack of consistency across application layers and protocols.            |
+|  3 | **Fragmentation**  | Validation, exceptions, statuses, and results use different approaches. |
+|  4 | **Boilerplate**    | Similar error types and handling are rebuilt across projects and teams. |
+|  5 | **Specificity**    | Generic errors often lack precise domain meaning.                       |
 
-**kiit-codes provides one application-level vocabulary for success and failure.**
+**kiit-codes provides a shared application-level model for these concerns.**
 
-It separates three concerns:
-
-- **Classification** — a small, fixed taxonomy gives every outcome a consistent meaning.
-- **Specificity** — built-in and domain-specific codes describe exactly what happened.
-- **Transport** — HTTP, gRPC, and other protocols are mappings at the boundary rather than the application model itself.
-
-The library can be used directly as a `Status`, with validation and collected errors, through typed exceptions, or with the separate `kiit-result` module.
-
+A fixed taxonomy provides consistent classification, extensible codes preserve domain-specific meaning, and protocol mappings keep application outcomes independent from their transport. The same model can then be used across statuses, validation, exceptions, and result types.
 ## Start
 
 **Gradle (Kotlin DSL):**
