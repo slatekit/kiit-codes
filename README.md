@@ -82,7 +82,6 @@ Built-in codes expose stable fields suitable for application logic, logging, API
 
 ```json
 {
-    "id"      : "kiit.CONFLICT",
     "name"    : "CONFLICT",
     "group"   : "Rejected",
     "origin"  : "kiit",
@@ -109,8 +108,8 @@ Codes uses a three-tier model:
 
 The two statuses are:
 
-- **Passed** — `Succeeded`, `Pending`, `Excluded`, `Information`
-- **Failed** — `Restricted`, `Invalid`, `Rejected`, `Unserved`
+- **Passed** — `Succeeded`, `Pending`, `Information`, `Excluded`
+- **Failed** — `Unserved`, `Restricted`, `Invalid`, `Rejected`
 
 Each code provides an `id`, `name`, `group`, `origin`, `message`, and `success` flag. Built-in codes use the `kiit` origin and each group has a default code for cases where more precision is unnecessary.
 
@@ -170,8 +169,8 @@ import kiit.codes.*
 
 val grpc = CodesToGrpc()
 
-grpc.toCode(Restricted.DENIED) // 7
-grpc.toStatus(9)?.name // "PRECONDITION_FAILED"
+grpc.toCode(Restricted.DENIED)   // 7, PERMISSION_DENIED
+grpc.toStatus(6)?.name           // "CONFLICT", ALREADY_EXISTS reversed
 ```
 
 The mapping abstraction is not limited to HTTP and gRPC. `CodeLookup` and `CompositeLookup` can be used to define or extend mappings for other protocols.
@@ -238,7 +237,7 @@ See [GitHub Issues](https://github.com/slatekit/kiit-codes/issues) for current w
 ## Requirements
 
 - Kotlin Multiplatform
-- JVM, Android, JS (IR), iOS (arm64, simulator arm64, x64)
+- JVM, Android, iOS (simulator arm64, x64)
 - No external runtime dependencies
 
 ## Contributing
