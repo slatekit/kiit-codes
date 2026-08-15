@@ -4,7 +4,7 @@
 
 **A Kotlin library for classifying and handling success and failure.**
 
-A small, dependency-free status and error taxonomy for application outcomes — with extensible codes, protocol mappings, validation, typed exceptions, and optional `Result<T, E>` integration.
+A small, dependency-free status and error taxonomy for application outcomes, with extensible codes, protocol mappings, validation, typed exceptions, and optional `Result<T, E>` integration.
 
 [![Maven Central](https://img.shields.io/maven-central/v/dev.kiit/kiit-codes?color=blue)](https://central.sonatype.com/artifact/dev.kiit/kiit-codes)
 [![Build](https://img.shields.io/github/actions/workflow/status/slatekit/kiit-codes/ci.yml?branch=main)](https://github.com/slatekit/kiit-codes/actions/workflows/ci.yml)
@@ -17,7 +17,6 @@ Part of [Kiit](https://www.kiit.dev) · [Docs](https://www.kiit.dev/codes) · [B
 
 ![Kiit Codes overview](./assets/kiit-codes-overview.png)
 
-## 📚 Table of Contents
 ## 📚 Table of Contents
 
 | # | | Topic | Description |
