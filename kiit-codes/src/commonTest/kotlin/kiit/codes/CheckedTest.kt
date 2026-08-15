@@ -17,7 +17,7 @@ class CheckedTest {
         } else {
             Checked.failure(
                 Invalid.INVALID_VALUE,
-                listOf(Err.on("phone", "too short")),
+                listOf(Err.on("phone", phone, "Too short")),
             )
         }
     }
