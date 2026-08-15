@@ -23,21 +23,17 @@ import kotlin.jvm.JvmStatic
  * Built-in registry of standard [Status] codes covering common operation outcomes.
  *
  * A few things worth knowing about how this registry works:
- * 1. Using it is optional, these are just sensible defaults for kiit-result's builder methods.
- *    Custom codes can be created by constructing any [Passed] or [Failed] subtype directly, only
- *    the four categories under each are fixed and closed, see [Status]. Every entry here has
- *    [Status.origin] == [StatusConstants.KIIT].
- * 2. [Codes] itself declares no constants. Each one lives on its own type's companion object
- *    (e.g. [Succeeded.CREATED], [Restricted.DENIED]) so IDE autocomplete stays scoped per
- *    category. This object is just the aggregate list and reverse lookup over those instances,
- *    see [Passed] and [Failed] for where the actual values live.
- * 3. Uniqueness of every entry's [Status.id] is enforced at object init time. A collision fails
- *    loudly the first time [Codes] is touched, instead of silently producing a wrong lookup
- *    later. [Status.id] is scoped to `origin.name`, not `name` alone, so a consumer's own custom
- *    codes can never collide with a built-in one, as long as they set their own [Status.origin].
- * 4. Not `@JsExport`ed directly: plain Kotlin `object`s can't get clean static-style member
- *    access in Kotlin/JS, only a class's companion object can, via `@JsStatic`. [codesAll] and
- *    [codesStatusFor] are thin top-level proxy functions for JS/TS callers instead.
+ * 1. Using it is optional, these are sensible defaults for kiit-result's builder methods. Custom
+ *    codes can be created by constructing any [Passed] or [Failed] subtype directly, only the
+ *    four groups per type are fixed and closed, see [Status].
+ * 2. [Codes] itself declares no constants. Each one lives on its own type's companion object so
+ *    IDE autocomplete stays scoped per group. This object is just the aggregate list and
+ *    reverse lookup, see [Passed] and [Failed] for the actual values.
+ * 3. Uniqueness of every [Status.id] is enforced at object init time, a collision fails loudly
+ *    right away instead of surfacing as a silent wrong lookup later. IDs are scoped to
+ *    `origin.name`, so custom codes never collide with a built-in one.
+ * 4. [codesAll] and [codesStatusFor] are thin proxy functions for JS/TS callers, since plain
+ *    Kotlin `object`s like this one don't export usable static members to JS.
  */
 object Codes {
     /** All built-in codes. Used for reverse lookups, see [CodesToHttp], [CompositeLookup]. */
@@ -88,11 +84,11 @@ fun codesStatusFor(origin: String, name: String): Status? = Codes.statusFor(orig
 /**
  * Bidirectional conversion between a [Status] and a target protocol's status code (e.g. HTTP).
  *
- * 1. Implementations should be exhaustive over [Status]'s categories ([Passed]/[Failed]
- *    subtypes), typically via a `when` with no `else` branch, so a newly added category is
+ * 1. Implementations should be exhaustive over [Status]'s groups ([Passed]/[Failed]
+ *    subtypes), typically via a `when` with no `else` branch, so a newly added group is
  *    caught at compile time.
- * 2. Individual codes within a category don't need an exhaustive mapping. They can be handled
- *    via a small overrides table layered on top of the category default, see [CodesToHttp].
+ * 2. Individual codes within a group don't need an exhaustive mapping. They can be handled
+ *    via a small overrides table layered on top of the group default, see [CodesToHttp].
  */
 @JsExport
 interface CodeLookup {
@@ -111,11 +107,11 @@ interface CodeLookup {
 /**
  * Default [CodeLookup] implementation mapping [Status] to HTTP status codes.
  *
- * Category -> HTTP default:
+ * Group -> HTTP default:
  *   Succeeded / Excluded / Information -> 200      Pending -> 202
  *   Restricted -> 401  Invalid -> 400   Rejected -> 409        Unserved -> 503
  *
- * 1. Individual codes can differ from their category's default via [overrides] (e.g. CREATED ->
+ * 1. Individual codes can differ from their group's default via [overrides] (e.g. CREATED ->
  *    201, NOT_FOUND -> 404). [toStatus] is derived from [toCode] and is lossy, see its own doc.
  * 2. Clients needing additional or custom codes should compose with [CompositeLookup] rather
  *    than subclassing this type directly, see [CompositeLookup] for why.
@@ -170,7 +166,7 @@ open class CodesToHttp
                     Restricted.LOCKED.id to 423,
                     Rejected.EXPIRED.id to 410,
                     Rejected.GONE.id to 410,
-                    // CONFLICT needs no override, 409 is already Rejected's own category default
+                    // CONFLICT needs no override, 409 is already Rejected's own group default
                     Invalid.PAYLOAD_TOO_LARGE.id to 413,
                     // HTTP has no separate "unsupported" code
                     Unserved.UNSUPPORTED.id to 501,
@@ -185,7 +181,7 @@ open class CodesToHttp
 
             /**
              * 1. One canonical winner per HTTP code that more than one built-in [Status] can resolve to
-             *    via [toCode], under [DEFAULT_OVERRIDES] or a category default. See [toStatus].
+             *    via [toCode], under [DEFAULT_OVERRIDES] or a group default. See [toStatus].
              * 2. `422 Unprocessable Entity` has no dedicated [Status] mapping. The code that previously held
              *    it, `INVALID_ENTITY`, was removed from the registry. [toStatus] returns null for 422, and
              *    anything converting [Invalid.INVALID_VALUE] to HTTP falls through to 400.
@@ -196,7 +192,7 @@ open class CodesToHttp
                     Restricted.UNAUTHENTICATED, Restricted.FORBIDDEN,
                     Invalid.INVALID_VALUE, Invalid.NOT_FOUND, Rejected.GONE,
                     // RULE_VIOLATION and PRECONDITION_FAILED also fall through to 409, Rejected's own
-                    // category default. CONFLICT wins since it's the most literal match for the concept.
+                    // group default. CONFLICT wins since it's the most literal match for the concept.
                     Rejected.CONFLICT, Unserved.TIMEOUT, Unserved.RATE_LIMITED,
                     Unserved.UNDER_MAINTENANCE,
                 )
@@ -206,7 +202,7 @@ open class CodesToHttp
 /**
  * [CodeLookup] implementation mapping [Status] to gRPC status codes (0-16).
  *
- * Category -> gRPC default: Passed (all) -> 0 (OK)   Restricted -> 7 (PERMISSION_DENIED)
+ * Group -> gRPC default: Passed (all) -> 0 (OK)   Restricted -> 7 (PERMISSION_DENIED)
  *   Invalid -> 3 (INVALID_ARGUMENT)   Rejected -> 9 (FAILED_PRECONDITION)   Unserved -> 13 (INTERNAL)
  *
  * gRPC's `ABORTED` (10) maps to [Unserved.ABORTED], previously an honest `null` gap, now closed.
@@ -250,7 +246,7 @@ open class CodesToGrpc
                     Invalid.NOT_FOUND.id to 5,
                     Invalid.OUT_OF_RANGE.id to 11,
                     Restricted.DENIED.id to 7,
-                    // ALREADY_EXISTS, was previously falling through to Rejected's category default
+                    // ALREADY_EXISTS, was previously falling through to Rejected's group default
                     Rejected.CONFLICT.id to 6,
                     Rejected.PRECONDITION_FAILED.id to 9,
                     // takes over gRPC's UNIMPLEMENTED slot now that UNIMPLEMENTED and UNSUPPORTED merged
@@ -269,7 +265,7 @@ open class CodesToGrpc
                     // exact match, closes the previously honest null gap at 10
                     Unserved.ABORTED.id to 10,
                     // DEGRADED and LEGAL_BLOCK have no closer gRPC equivalent, so they fall through
-                    // to Unserved's own category default (13, INTERNAL)
+                    // to Unserved's own group default (13, INTERNAL)
                 )
 
             /** One canonical winner per gRPC code with more than one resolving [Status], see [toStatus]. */
@@ -294,10 +290,9 @@ open class CodesToGrpc
  * 1. [extensions] is keyed by the actual [Status] instance, not [Status.id], so [toStatus] can
  *    hand back the specific custom instance for statuses outside the [Codes.all] registry.
  *    There's no other place to recover it from.
- * 2. [toCode]'s forward lookup doesn't rely on [Map]'s built-in `equals`/`hashCode`-based `[]`
- *    access. [Status] is a data class, so that would compare every field including
- *    [Status.message], and a status sharing the same [Status.id] but a different message would
- *    silently miss the override.
+ * 2. [toCode]'s forward lookup avoids [Map]'s built-in `equals`/`hashCode`-based `[]` access,
+ *    since [Status] is a data class that compares every field. A status with the same
+ *    [Status.id] but a different [Status.message] would otherwise miss the override.
  *
  * ```kotlin
  * val MY_DOMAIN_CODE = Failed.Rejected("PAYMENT_DECLINED", "Payment declined")

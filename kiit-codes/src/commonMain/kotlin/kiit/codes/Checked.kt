@@ -56,21 +56,14 @@ class Checked private constructor(val status: Status, override val errors: List<
     }
 }
 
-/**
- * [collect] over varargs instead of a [List]: the JS/TS-friendlier overload. A Kotlin `vararg`
- * exports as a plain native JS `Array` parameter (`collect([a, b, c])`), not the opaque
- * `kotlin.collections.KtList` wrapper the [List] overload below uses. It's a real `Array<Checked>`
- * parameter, not a JS rest/spread parameter, even though `vararg` is the Kotlin-side spelling.
- */
+/** [collect] over varargs, the JS/TS-friendlier shape (see the [List] overload below). */
 @JsExport
 fun collect(vararg checks: Checked): Checked = collect(checks.toList())
 
 /**
- * 1. Collects multiple [checks] into one: passes only if every one of them passed, otherwise
- *    fails with [Failed.Invalid.INVALID_VALUE] and every error from every failing entry pooled
- *    together, in the order the checks were given.
- * 2. `@JsName` disambiguates this from the `vararg` overload above. JS has no function overloading,
- *    so two top-level `@JsExport` functions named `collect` can't both keep that exact name.
+ * Collects multiple [checks] into one: passes only if every one of them passed, otherwise fails
+ * with [Failed.Invalid.INVALID_VALUE] and every error from every failing entry pooled together,
+ * in the order the checks were given. `@JsName` avoids a JS name clash with the vararg overload.
  */
 @JsExport
 @JsName("collectList")

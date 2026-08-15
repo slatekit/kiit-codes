@@ -92,9 +92,7 @@ sealed class Err {
             return ErrorInfo(msg, ex)
         }
 
-        // @JsName disambiguates this from the of(msg, ex) overload above. JS has no function
-        // overloading, and @JsStatic needs a stable, unmangled name, so two same-named companion
-        // members can't both reach JS unless one gets renamed.
+        // @JsName avoids a JS name clash with the of(msg, ex) overload above.
         @JvmStatic
         @JsStatic
         @JsName("ofStatus")
@@ -110,11 +108,9 @@ sealed class Err {
         }
 
         /**
-         * 1. Builds an [Err] for a [field] with a specific per-occurrence [msg], without a
-         *    [value]. Use this instead of [on] when the value itself could be sensitive
-         *    (e.g. a password or token) and shouldn't be carried on the error.
-         * 2. `@JsName` disambiguates this from the `on(field, value, msg, ex)` overload above, for
-         *    the same reason as the `of`/`ofStatus` pair above.
+         * Builds an [Err] for a [field] with a specific per-occurrence [msg], without a [value].
+         * Use this instead of [on] when the value itself could be sensitive (e.g. a password or
+         * token) and shouldn't be carried on the error. `@JsName` avoids a JS name clash above.
          */
         @JvmStatic
         @JsStatic

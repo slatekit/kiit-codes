@@ -12,8 +12,8 @@ import kotlin.jvm.JvmOverloads
  * [RejectedException], [UnservedException]) when a [Failed] status needs to cross a call
  * boundary that can only communicate via exceptions (e.g. from a service layer into a
  * framework that catches [Exception]). [StatusException] itself is sealed and cannot be thrown
- * or caught as a standalone concrete type — catch it to narrow exhaustively over all four
- * subclasses, or catch one subclass directly to only handle that category:
+ * or caught as a standalone concrete type. Catch it to narrow exhaustively over all four
+ * subclasses, or catch one subclass directly to only handle that group:
  *
  * ```kotlin
  * throw StatusException.RestrictedException(Restricted.UNAUTHORIZED)
@@ -39,10 +39,9 @@ import kotlin.jvm.JvmOverloads
  * Each subclass is `open`, so a one-line domain-specific subclass remains possible, e.g.
  * `class RegistrationException(status: Failed.Restricted, ...) : StatusException.RestrictedException(...)`.
  *
- * On iOS, prefer the `RestrictedError`/`InvalidError`/`RejectedError`/`UnservedError` subclasses
- * defined in `iosMain` — each carries an `@ObjCName` annotation so Swift consumers see an
- * idiomatic `XxxError` name. On JS, prefer the equivalents defined in `jsMain`, annotated with
- * `@JsExport` so TypeScript consumers see them in the generated `.d.ts` file.
+ * Prefer the platform-specific equivalents over these base classes directly: `RestrictedError`/
+ * `InvalidError`/`RejectedError`/`UnservedError` in `iosMain` for idiomatic Swift naming via
+ * `@ObjCName`, or the equivalents in `jsMain` for JS/TS.
  */
 sealed class StatusException(
     val checked: Checked,
@@ -51,7 +50,7 @@ sealed class StatusException(
     val status: Status get() = checked.status
     val errors: List<Err> get() = checked.errors
 
-    /** Thrown for a [Failed.Restricted] status — security / access-control failure. */
+    /** Thrown for a [Failed.Restricted] status: a security or access-control failure. */
     open class RestrictedException
         @JvmOverloads
         constructor(
@@ -60,7 +59,7 @@ sealed class StatusException(
             cause: Throwable? = null,
         ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 
-    /** Thrown for a [Failed.Invalid] status — the request as given cannot be satisfied. */
+    /** Thrown for a [Failed.Invalid] status: the request as given cannot be satisfied. */
     open class InvalidException
         @JvmOverloads
         constructor(
@@ -69,7 +68,7 @@ sealed class StatusException(
             cause: Throwable? = null,
         ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 
-    /** Thrown for a [Failed.Rejected] status — a known, expected business-rule failure. */
+    /** Thrown for a [Failed.Rejected] status: a known, expected business-rule failure. */
     open class RejectedException
         @JvmOverloads
         constructor(
@@ -78,7 +77,7 @@ sealed class StatusException(
             cause: Throwable? = null,
         ) : StatusException(Checked.failure(status, errors.ifEmpty { listOf(Err.of(status)) }), cause)
 
-    /** Thrown for a [Failed.Unserved] status — valid & permitted, but can't be serviced right now. */
+    /** Thrown for a [Failed.Unserved] status: valid and permitted, but can't be serviced right now. */
     open class UnservedException
         @JvmOverloads
         constructor(
