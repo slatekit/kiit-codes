@@ -75,6 +75,13 @@ Built-in codes expose stable fields suitable for application logic, logging, API
 
 Codes uses a three-tier model:
 
+
+| Tier   | Name       | Fixed/Open | Purpose                                                                          |
+|--------|------------|------------|----------------------------------------------------------------------------------|
+| Tier 1 | **Status** | Fixed      | Either Passed / Failed. Just represents a binary true/false for success.         |
+| Tier 2 | **Group**  | Fixed      | Logical groups of Passed / Failed. E.g. Restricted, Invalid, Rejected, Unserved. |
+| Tier 3 | **Code**   | Open       | Specific codes under group. You can create your own custom domain codes here.    |
+
 **Status → Group → Code**
 
 `Status` and `Group` are fixed so applications share the same high-level meaning. `Code` is open: Kiit supplies common defaults while applications can add their own domain-specific codes.
@@ -101,6 +108,7 @@ Custom codes use the same group types as Kiit's defaults:
 ```kotlin
 import kiit.codes.Failed
 
+// Example custom code
 val PAYMENT_DECLINED = Failed.Rejected(
     name = "PAYMENT_DECLINED",
     message = "Payment declined",
