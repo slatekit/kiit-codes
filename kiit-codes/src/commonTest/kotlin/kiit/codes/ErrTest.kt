@@ -8,7 +8,7 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 // =================================================================================================
-// ErrTest — the Err builder companion
+// ErrTest: the Err builder companion
 // =================================================================================================
 
 class ErrTest {

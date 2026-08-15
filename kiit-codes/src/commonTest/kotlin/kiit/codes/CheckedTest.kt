@@ -23,7 +23,7 @@ class CheckedTest {
     }
 
     // -------------------------------------------------------------------------
-    // validatePhone — a realistic Checked-returning validator, also exercised via collect below
+    // validatePhone: a realistic Checked-returning validator, also exercised via collect below
     // -------------------------------------------------------------------------
 
     @Test

@@ -8,12 +8,12 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 // =================================================================================================
-// StatusTest — Passed/Failed subtypes, ofStatus companion function
+// StatusTest: Passed/Failed subtypes, ofStatus companion function
 // =================================================================================================
 
 class StatusTest {
     // -------------------------------------------------------------------------
-    // success flag — Passed subtypes (hoisted onto Passed itself; see Passed.success)
+    // success flag: Passed subtypes (hoisted onto Passed itself, see Passed.success)
     // -------------------------------------------------------------------------
 
     @Test fun succeededHasSuccessTrue() {
@@ -33,7 +33,7 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // success flag — Failed subtypes (hoisted onto Failed itself; see Failed.success)
+    // success flag: Failed subtypes (hoisted onto Failed itself, see Failed.success)
     // -------------------------------------------------------------------------
 
     @Test fun restrictedHasSuccessFalse() {
@@ -53,7 +53,7 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // origin — defaults to "custom" for direct construction, overridable at the call site
+    // origin: defaults to "custom" for direct construction, overridable at the call site
     // -------------------------------------------------------------------------
 
     @Test fun originDefaultsToCustom() {
@@ -66,7 +66,7 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // group — the category discriminant, exhaustive over all 8 subtypes
+    // group: the discriminant field, exhaustive over all 8 subtypes
     // -------------------------------------------------------------------------
 
     @Test
@@ -82,7 +82,7 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // groupDescription — runtime-accessible version of each category's meaning
+    // groupDescription: runtime-accessible version of each group's meaning
     // -------------------------------------------------------------------------
 
     @Test
@@ -108,7 +108,7 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // id — "$origin.$name", derived, usable as a map/lookup key
+    // id: "$origin.$name", derived, usable as a map/lookup key
     // -------------------------------------------------------------------------
 
     @Test
@@ -118,7 +118,7 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // ofStatus — selects correct instance based on message / rawStatus nullability
+    // ofStatus: selects correct instance based on message / rawStatus nullability
     // -------------------------------------------------------------------------
 
     @Test
@@ -151,10 +151,10 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // Typealiases (Restricted, Invalid, ...) are fully transparent — the same type as their
+    // Typealiases (Restricted, Invalid, ...) are fully transparent: the same type as their
     // Failed.X/Passed.X target, not a copy. A `when` mixing aliased and fully-qualified branches
-    // must still be treated as exhaustive by the compiler; this is a compile-time check as much
-    // as a runtime one — it wouldn't build if the aliases introduced a distinct type.
+    // must still be exhaustive to the compiler, this is as much a compile-time check as a
+    // runtime one, it wouldn't build if the aliases introduced a distinct type.
     // -------------------------------------------------------------------------
 
     @Test

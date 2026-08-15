@@ -70,7 +70,7 @@ class StatusExceptionTest {
             } catch (e: StatusException) {
                 e
             }
-        // Exhaustive `when` with no `else` — fails to compile if a subtype is missing.
+        // Exhaustive `when` with no `else`, fails to compile if a subtype is missing.
         val label =
             when (caught) {
                 is StatusException.RestrictedException -> "restricted"

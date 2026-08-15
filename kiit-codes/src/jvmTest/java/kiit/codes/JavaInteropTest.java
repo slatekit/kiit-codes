@@ -11,7 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Exercises kiit-codes from plain Java (not Kotlin) — guards the @JvmStatic/@JvmField/
+ * Exercises kiit-codes from plain Java (not Kotlin). Guards the @JvmStatic/@JvmField/
  * @JvmOverloads/@JvmName annotations and the sealed-hierarchy `permits` metadata that make the
  * library usable idiomatically from Java, since nothing else in this repo compiles Java against it.
  */
@@ -54,7 +54,7 @@ public class JavaInteropTest {
 
     @Test
     public void checksFacadeCollectsMultipleChecks() {
-        // @file:JvmName("Checks") on Checked.kt — Java sees kiit.codes.Checks, not CheckedKt
+        // @file:JvmName("Checks") on Checked.kt: Java sees kiit.codes.Checks, not CheckedKt
         Checked ok = Checked.success();
         Checked failing = Checked.failure(Failed.Invalid.BAD_REQUEST, Collections.singletonList(Err.of("bad")));
 
@@ -85,7 +85,7 @@ public class JavaInteropTest {
 
     @Test
     public void statusSealedHierarchySupportsExhaustiveSwitchPatternMatching() {
-        // JDK 21 pattern-matching switch, exhaustive with no `default` — only compiles if Kotlin
+        // JDK 21 pattern-matching switch, exhaustive with no `default`. Only compiles if Kotlin
         // emitted PermittedSubclasses for Status/Passed/Failed (jvmTarget = JVM_21).
         assertEquals("Succeeded", groupOf(Passed.Succeeded.SUCCESS));
         assertEquals("Restricted", groupOf(Failed.Restricted.DENIED));
