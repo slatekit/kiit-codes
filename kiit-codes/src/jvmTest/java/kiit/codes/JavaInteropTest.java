@@ -27,9 +27,9 @@ public class JavaInteropTest {
 
     @Test
     public void errCompanionFunctionsAreStaticWithOverloads() {
-        // @JvmStatic + @JvmOverloads: Err.of("msg"), no explicit null for the trailing Throwable
+        // @JvmStatic + @JvmOverloads: Err.of("message"), no explicit null for the trailing Throwable
         Err err = Err.of("boom");
-        assertEquals("boom", err.getMsg());
+        assertEquals("boom", err.getMessage());
         assertEquals(null, err.getCause());
     }
 

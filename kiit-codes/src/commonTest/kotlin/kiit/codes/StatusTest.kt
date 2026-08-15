@@ -118,7 +118,7 @@ class StatusTest {
     }
 
     // -------------------------------------------------------------------------
-    // ofStatus — selects correct instance based on msg / rawStatus nullability
+    // ofStatus — selects correct instance based on message / rawStatus nullability
     // -------------------------------------------------------------------------
 
     @Test
@@ -128,21 +128,21 @@ class StatusTest {
     }
 
     @Test
-    fun ofStatusReturnsRawStatusWhenMsgIsNull() {
+    fun ofStatusReturnsRawStatusWhenMessageIsNull() {
         val raw = Succeeded.CREATED
         val result = Status.ofStatus(null, raw, Succeeded.SUCCESS)
         assertSame(raw, result)
     }
 
     @Test
-    fun ofStatusReturnsStatusWithUpdatedMsgWhenRawIsNull() {
+    fun ofStatusReturnsStatusWithUpdatedMessageWhenRawIsNull() {
         val result = Status.ofStatus("Custom", null, Succeeded.SUCCESS)
         assertEquals("Custom", result.message)
         assertEquals(Succeeded.SUCCESS.origin, result.origin)
     }
 
     @Test
-    fun ofStatusReturnsRawWithUpdatedMsgWhenBothProvided() {
+    fun ofStatusReturnsRawWithUpdatedMessageWhenBothProvided() {
         val raw = Succeeded.CREATED
         val result = Status.ofStatus("Custom", raw, Succeeded.SUCCESS)
         assertEquals("Custom", result.message)

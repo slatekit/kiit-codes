@@ -25,8 +25,8 @@ check(ok.name == "SUCCESS", "Passed.Succeeded.companion.SUCCESS.name")
 check(denied.name == "DENIED", "Failed.Restricted.companion.DENIED.name")
 
 // Err — companion factory functions, same `.companion` pattern.
-let err = Err.companion.of(msg: "email is required", ex: nil)
-check(err.msg == "email is required", "Err.companion.of(msg:ex:).msg")
+let err = Err.companion.of(message: "email is required", ex: nil)
+check(err.message == "email is required", "Err.companion.of(message:ex:).message")
 
 // CodesToHttp — Kotlin's default-valued constructor does NOT get an automatic zero-arg
 // convenience initializer preserved for Swift (confirmed: `init()` compiles but is marked

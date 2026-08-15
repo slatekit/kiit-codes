@@ -87,15 +87,16 @@ sealed interface Status {
 
     companion object {
         /**
-         * Resolves a status from an optional [msg] override and an optional [rawStatus] override,
-         * falling back to [status] when neither is supplied. [rawStatus], if present, is used as
-         * the base instead of [status]; [msg], if present, is then applied on top of that base.
+         * Resolves a status from an optional [message] override and an optional [rawStatus]
+         * override, falling back to [status] when neither is supplied. [rawStatus], if present,
+         * is used as the base instead of [status]; [message], if present, is then applied on top
+         * of that base.
          */
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
-        fun <T : Status> ofStatus(msg: String?, rawStatus: T?, status: T): T {
+        fun <T : Status> ofStatus(message: String?, rawStatus: T?, status: T): T {
             val base = rawStatus ?: status
-            return if (msg == null) base else withMessage(base, msg) as T
+            return if (message == null) base else withMessage(base, message) as T
         }
 
         /**
@@ -104,16 +105,16 @@ sealed interface Status {
          * to mutate itself. Only [ofStatus] needs this, and only ever to override [message],
          * never [origin].
          */
-        private fun withMessage(status: Status, msg: String): Status =
+        private fun withMessage(status: Status, message: String): Status =
             when (status) {
-                is Passed.Succeeded -> status.copy(message = msg)
-                is Passed.Pending -> status.copy(message = msg)
-                is Passed.Excluded -> status.copy(message = msg)
-                is Passed.Information -> status.copy(message = msg)
-                is Failed.Restricted -> status.copy(message = msg)
-                is Failed.Invalid -> status.copy(message = msg)
-                is Failed.Rejected -> status.copy(message = msg)
-                is Failed.Unserved -> status.copy(message = msg)
+                is Passed.Succeeded -> status.copy(message = message)
+                is Passed.Pending -> status.copy(message = message)
+                is Passed.Excluded -> status.copy(message = message)
+                is Passed.Information -> status.copy(message = message)
+                is Failed.Restricted -> status.copy(message = message)
+                is Failed.Invalid -> status.copy(message = message)
+                is Failed.Rejected -> status.copy(message = message)
+                is Failed.Unserved -> status.copy(message = message)
             }
     }
 }

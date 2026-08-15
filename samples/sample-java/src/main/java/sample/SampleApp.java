@@ -28,9 +28,9 @@ public class SampleApp {
         System.out.println("ok status: " + describe(ok));
         System.out.println("denied status: " + describe(denied));
 
-        // @JvmStatic + @JvmOverloads — Err.of(msg), no explicit null for the trailing Throwable
+        // @JvmStatic + @JvmOverloads — Err.of(message), no explicit null for the trailing Throwable
         Err err = Err.of("email is required");
-        System.out.println("err: " + err.getMsg());
+        System.out.println("err: " + err.getMessage());
 
         // @JvmOverloads on the primary constructor — no-arg CodesToHttp()
         CodesToHttp http = new CodesToHttp();

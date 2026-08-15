@@ -25,7 +25,7 @@ check(denied.name === "DENIED", "Failed.Restricted.DENIED.name")
 
 // Err.of — optional trailing `ex` argument omitted.
 const err = Err.of("email is required")
-check(err.msg === "email is required", "Err.of(msg).msg")
+check(err.message === "email is required", "Err.of(message).message")
 
 // CodesToHttp — no-arg constructor.
 const http = new CodesToHttp()
