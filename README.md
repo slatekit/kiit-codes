@@ -219,7 +219,7 @@ Current work is focused on the Kotlin release, documentation, examples, and ecos
 | 2 | **TypeScript** | Add native TypeScript support with an idiomatic implementation of the same Codes taxonomy and semantics. |
 | 3 | **Taxonomy** | Continue taxonomy review based on real-world usage and community feedback. |
 
-See [GitHub Issues](https://github.com/slatekit/kiit-codes/issues) for current work and discussions.
+See [GitHub Issues](https://github.com/kiitdev/kiit-codes/issues) for current work and discussions.
 
 ## Learn More
 
