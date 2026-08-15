@@ -20,7 +20,7 @@ import kotlin.random.Random
 private val http = CodesToHttp()
 
 fun main() {
-    //test1()
+    test1()
     test2()
     test3()
 }
