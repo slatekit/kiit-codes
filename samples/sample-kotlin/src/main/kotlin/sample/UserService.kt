@@ -30,7 +30,7 @@ class UserService {
 
     fun authorize(id: String, requesterId: String): Status =
         when {
-            !users.containsKey(id) -> Invalid.NOT_FOUND
+            !users.containsKey(id) -> Rejected.NOT_EXISTS
             id != requesterId -> Restricted.UNAUTHORIZED
             else -> Succeeded.SUCCESS
         }
