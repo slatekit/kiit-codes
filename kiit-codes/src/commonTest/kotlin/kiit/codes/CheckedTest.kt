@@ -39,7 +39,7 @@ class CheckedTest {
         assertTrue(!checked.isValid)
         assertEquals(Invalid.INVALID_VALUE, checked.status)
         assertEquals(1, checked.errors.size)
-        assertEquals("too short", checked.errors.single().message)
+        assertEquals("Too short", checked.errors.single().message)
     }
 
     @Test
