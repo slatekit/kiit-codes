@@ -17,6 +17,23 @@ Part of [Kiit](https://www.kiit.dev) · [Docs](https://www.kiit.dev/codes) · [B
 
 ![Kiit Codes overview](./assets/kiit-codes-overview.png)
 
+## 📚 Table of Contents
+## 📚 Table of Contents
+
+| # | | Topic | Description |
+|---:|:---:|---|---|
+| 1 | 💡 | [Why](#why) | Problems Codes is designed to solve |
+| 2 | 🚀 | [Start](#start) | Installation and a quick example |
+| 3 | 🗂️ | [Taxonomy](#taxonomy) | The Status → Group → Code model |
+| 4 | 🧩 | [Extensibility](#extensibility) | Built-in and custom domain codes |
+| 5 | 🔀 | [Protocols](#protocols) | HTTP, gRPC, and custom protocol mappings |
+| 6 | ⚙️ | [Usage](#usage) | Status, validation, exceptions, and Result |
+| 7 | 🗺️ | [Roadmap](#roadmap) | Planned improvements and future work |
+| 8 | 📖 | [Learn More](#learn-more) | Deeper documentation and design topics |
+| 9 | 📋 | [Requirements](#requirements) | Platforms and dependencies |
+| 10 | 🤝 | [Contributing](#contributing) | Build, test, and contribute |
+| 11 | 📄 | [License](#license) | Apache 2.0 license |
+
 ## Why
 Applications need to communicate a simple idea consistently: **what happened?**
 
@@ -25,7 +42,7 @@ In practice, success and failure are often modeled differently across domains, a
 |  # | Problem            | Description                                                             |
 | -: |--------------------|-------------------------------------------------------------------------|
 |  1 | **Classification** | No shared taxonomy for modeling success and failure.                    |
-|  2 | **Consistency**    | Lack of consistency across application layers and protocols.            |
+|  2 | **Consistency**    | Outcomes vary across application layers and protocols.                  |
 |  3 | **Fragmentation**  | Validation, exceptions, statuses, and results use different approaches. |
 |  4 | **Boilerplate**    | Similar error types and handling are rebuilt across projects and teams. |
 |  5 | **Specificity**    | Generic errors often lack precise domain meaning.                       |
@@ -33,6 +50,7 @@ In practice, success and failure are often modeled differently across domains, a
 **kiit-codes provides a shared application-level model for these concerns.**
 
 A fixed taxonomy provides consistent classification, extensible codes preserve domain-specific meaning, and protocol mappings keep application outcomes independent from their transport. The same model can then be used across statuses, validation, exceptions, and result types.
+
 ## Start
 
 **Gradle (Kotlin DSL):**
@@ -75,12 +93,11 @@ Built-in codes expose stable fields suitable for application logic, logging, API
 
 Codes uses a three-tier model:
 
-
-| Tier   | Name       | Fixed/Open | Purpose                                                                          |
-|--------|------------|------------|----------------------------------------------------------------------------------|
-| Tier 1 | **Status** | Fixed      | Either Passed / Failed. Just represents a binary true/false for success.         |
-| Tier 2 | **Group**  | Fixed      | Logical groups of Passed / Failed. E.g. Restricted, Invalid, Rejected, Unserved. |
-| Tier 3 | **Code**   | Open       | Specific codes under group. You can create your own custom domain codes here.    |
+| Tier   | Name       | Fixed/Open | Suggested wording                                                      |
+| ------ | ---------- | ---------- | ---------------------------------------------------------------------- |
+| Tier 1 | **Status** | Fixed      | Classifies an outcome as `Passed` or `Failed`.                         |
+| Tier 2 | **Group**  | Fixed      | Classifies the kind of success or failure.                             |
+| Tier 3 | **Code**   | Open       | Identifies a specific outcome using built-in or domain-specific codes. |
 
 **Status → Group → Code**
 
@@ -186,7 +203,7 @@ when (val status = authorize(userId, requesterId)) {
     is Failed -> log.warn("failed: ${status.name} — ${status.message}")
 }
 ```
-![Kiit Codes protocol mappings](./assets/kiit-codes-usage.png)
+![Kiit Codes usage](./assets/kiit-codes-usage.png)
 
 
 ## Roadmap
