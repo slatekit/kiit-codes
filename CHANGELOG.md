@@ -7,7 +7,7 @@ All notable changes to kiit-codes are documented here. Format follows
 ## [1.0.1] - 2026-08-15
 
 ### Fixed
-- `OMITTED`'s message corrected to stay neutral about cause, no longer implies the item was
+- Excluded Group's `OMITTED`'s message corrected to stay neutral about cause, no longer implies the item was
   actively left out.
 
 ## [1.0.0] - 2026-08-14
