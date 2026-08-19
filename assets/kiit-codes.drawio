@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram name="kiit-codes taxonomy" id="0">
-    <mxGraphModel dx="3567" dy="2216" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="706" pageHeight="860" math="0" shadow="0">
+    <mxGraphModel dx="1387" dy="963" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="706" pageHeight="860" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1104,6 +1104,54 @@
         </mxCell>
         <mxCell id="KEp1C4nC8QL8dAwknRSZ-87" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fecaca;fontColor=#7f1d1d;fontSize=14;strokeColor=none;fontStyle=1;rotation=-90;" value="FAILED" vertex="1">
           <mxGeometry height="28" width="150" x="976.25" y="887" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-81" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="190" width="220" x="2194" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-69" parent="s8FvzFKmOU_Yv2eSso95-81" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="149.15" width="200" x="10" y="32.299999999999955" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-66" edge="1" parent="s8FvzFKmOU_Yv2eSso95-81" style="endArrow=none;html=1;rounded=0;strokeWidth=2;strokeColor=#38BDF8;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="77" y="176.39599999999996" as="sourcePoint" />
+            <mxPoint x="77" y="37.9050000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-67" edge="1" parent="s8FvzFKmOU_Yv2eSso95-81" style="endArrow=none;html=1;rounded=0;strokeWidth=2;strokeColor=#38BDF8;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="144" y="175.84500000000003" as="sourcePoint" />
+            <mxPoint x="144" y="37.9050000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-68" edge="1" parent="s8FvzFKmOU_Yv2eSso95-81" style="endArrow=none;html=1;rounded=0;strokeColor=#38BDF8;strokeWidth=2;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="13.670000000000073" y="106.875" as="sourcePoint" />
+            <mxPoint x="206.67000000000007" y="106.875" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-70" parent="s8FvzFKmOU_Yv2eSso95-81" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#007FFF;fontFamily=Helvetica;fontStyle=1" value="&lt;span style=&quot;color: rgb(255, 255, 255);&quot;&gt;&lt;font style=&quot;font-size: 68px;&quot;&gt;K&lt;/font&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70.77499999999999" width="62" x="14" y="107.82500000000005" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-65" parent="s8FvzFKmOU_Yv2eSso95-81" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=28;fillColor=none;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" value="" vertex="1">
+          <mxGeometry height="166.25" width="220" y="23.75" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-73" connectable="0" parent="s8FvzFKmOU_Yv2eSso95-81" style="group;rounded=1;" value="" vertex="1">
+          <mxGeometry height="29.45" width="91" x="64.5" y="8.549999999999955" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-71" parent="s8FvzFKmOU_Yv2eSso95-73" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#38BDF8;" value="" vertex="1">
+          <mxGeometry height="29.449999999999996" width="91" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-72" parent="s8FvzFKmOU_Yv2eSso95-73" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#007FFF;" value="" vertex="1">
+          <mxGeometry height="11.779999999999998" width="62" x="14.5" y="8.834999999999997" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-74" parent="s8FvzFKmOU_Yv2eSso95-81" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#38BDF8;" value="" vertex="1">
+          <mxGeometry height="11.399999999999999" width="91" x="64.5" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-75" parent="s8FvzFKmOU_Yv2eSso95-81" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#CCCCCC;fillColor=#CCCCCC;" value="" vertex="1">
+          <mxGeometry height="4.55" width="40.5" x="24" y="9.450000000000045" as="geometry" />
+        </mxCell>
+        <mxCell id="s8FvzFKmOU_Yv2eSso95-80" parent="s8FvzFKmOU_Yv2eSso95-81" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#CCCCCC;fillColor=#CCCCCC;" value="" vertex="1">
+          <mxGeometry height="4.55" width="40.5" x="155.5" y="9.450000000000045" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
